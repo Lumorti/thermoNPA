@@ -645,15 +645,9 @@ polynomialMatrix generateFromTopRow(std::vector<polynomial> monomsInTopRow) {
     return matrixToReturn;
 
 }
-// Generate all moment matrices for a given level given a polynomial
-std::vector<polynomialMatrix> generateAllMomentMatrices(polynomial functional, std::vector<polynomial> zeroCons, int level) {
 
-    // First get the list of all monomials used by iterating through the polynomial
-    std::vector<monomial> variables;
-    addSingleMonomials(variables, functional);
-    for (int i=0; i<zeroCons.size(); i++) {
-        addSingleMonomials(variables, zeroCons[i]);
-    }
+// Generate a list of monomials of a certain level
+std::vector<monomial> generateMonomials(std::vector<monomial> variables, int level) {
 
     // Generate all monomials up to the given level
     std::vector<monomial> monomsInTopRow = {};
@@ -762,6 +756,24 @@ std::vector<polynomialMatrix> generateAllMomentMatrices(polynomial functional, s
             }
         }
     }
+
+    // Return the monomials
+    return monomsInTopRow;
+
+}
+
+// Generate all moment matrices for a given level given a polynomial
+std::vector<polynomialMatrix> generateAllMomentMatrices(polynomial functional, std::vector<polynomial> zeroCons, int level) {
+
+    // First get the list of all monomials used by iterating through the polynomial
+    std::vector<monomial> variables;
+    addSingleMonomials(variables, functional);
+    for (int i=0; i<zeroCons.size(); i++) {
+        addSingleMonomials(variables, zeroCons[i]);
+    }
+
+    // Generate all monomials up to the given level
+    std::vector<monomial> monomsInTopRow = generateMonomials(variables, level);
 
     // Create the index array to be used for combinations
     std::vector<int> indices;
@@ -1171,12 +1183,14 @@ int main(int argc, char* argv[]) {
 
     // Define the scenario
     int level = 1;
-    polynomial objective = stringToPolynomial("<A1B1>+<A1B2>+<A2B1>-<A2B2>");
+    int limbladLevel = 1;
+    polynomial objective = stringToPolynomial("<Z1>");
     int testing = 0;
     int numToSample = 1000;
     int verbosity = 1;
     int maxIters = 1000;
     std::string seed = "";
+    polynomial limbladian = stringToPolynomial("<X1A1X1>+<Y1A1Y1>+<A1>");
     std::vector<std::string> extraMonomials;
     std::vector<polynomial> constraintsZero;
     std::vector<polynomial> constraintsPositive;
@@ -1208,23 +1222,24 @@ int main(int argc, char* argv[]) {
                 std::cout << "Not enough arguments for --pauli" << std::endl;
                 return 1;
             }
-            int coeff1 = std::stoi(argv[i+1]);
-            int coeff2 = std::stoi(argv[i+2]);
-            int coeff3 = std::stoi(argv[i+3]);
+            double coeff1 = std::stod(argv[i+1]);
+            double coeff2 = std::stod(argv[i+2]);
+            double coeff3 = std::stod(argv[i+3]);
             if (coeff1 < 0 || coeff2 < 0 || coeff3 < 0) {
                 std::cout << "Coefficients must be non-negative" << std::endl;
                 return 1;
             }
             std::string pauliString = "";
-            pauliString += "+" + std::to_string(coeff1) + "<X1Z1X1>";
-            pauliString += "+" + std::to_string(coeff2) + "<Y1Z1Y1>";
-            pauliString += "+" + std::to_string(coeff1+coeff2) + "<Z1>";
-            constraintsZero.push_back(stringToPolynomial(pauliString));
+            pauliString += "+" + std::to_string(coeff1) + "<X1A1X1>";
+            pauliString += "+" + std::to_string(coeff2) + "<Y1A1Y1>";
+            pauliString += "+" + std::to_string(coeff3) + "<Z1A1Z1>";
+            pauliString += "-" + std::to_string(coeff1+coeff2+coeff3) + "<A1>";
+            limbladian = stringToPolynomial(pauliString);
             i += 3;
 
         // Phase-covariant Limbladian
         } else if (argAsString == "--phase") {
-            objective = stringToPolynomial("TODO");
+            limbladian = stringToPolynomial("TODO");
 
         // Set the seed
         } else if (argAsString == "-S") {
@@ -1241,6 +1256,11 @@ int main(int argc, char* argv[]) {
             verbosity = std::stoi(argv[i+1]);
             i++;
 
+        // If setting the level of the Limbladian
+        } else if (argAsString == "-m") {
+            limbladLevel = std::stoi(argv[i+1]);
+            i++;
+
         // If adding an extra monomial to the top row
         } else if (argAsString == "-e") {
             extraMonomials.push_back(std::string(argv[i+1]));
@@ -1255,17 +1275,19 @@ int main(int argc, char* argv[]) {
             std::cout << "  --objX          Use sigma_X as the objective" << std::endl;
             std::cout << "  --objY          Use sigma_Y as the objective" << std::endl;
             std::cout << "  --objZ          Use sigma_Z as the objective" << std::endl;
-            std::cout << "  --pauli <num> <num> <num>" << std::endl;
+            std::cout << "  --limPauli <num> <num> <num>" << std::endl;
             std::cout << "                  Use the Pauli Limbladian with coeffs" << std::endl;
-            std::cout << "  --phase         Use the Phase-covariant Limbladian" << std::endl;
+            std::cout << "  --limPhase <num> <num> <num>" << std::endl;
+            std::cout << "                  Use the Phase-covariant Limbladian with coeffs" << std::endl;
             std::cout << "  -l <num>        Level of the moment matrix" << std::endl;
+            std::cout << "  -m <num>        Level of the moments to put in the Limbladian" << std::endl;
             std::cout << "  -S <str>        Seed for the random number generator" << std::endl;
             std::cout << "  -v <num>        Verbosity level" << std::endl;
             std::cout << "  -t <num>        Run a section of in-progress code" << std::endl;
             return 0;
 
         // Otherwise we don't know what this is
-        } else {
+        } else if (argAsString != "./run") {
             std::cout << "Unknown argument: " << argAsString << std::endl;
             return 1;
 
@@ -1278,6 +1300,28 @@ int main(int argc, char* argv[]) {
     } else {
         srand(std::stoi(seed));
     }
+
+    // Create the Limbladian applied to many different operators TODO
+    std::vector<monomial> variables = {stringToMonomial("<X1>"), stringToMonomial("<Y1>"), stringToMonomial("<Z1>")};
+    std::vector<monomial> variablesToPut = generateMonomials(variables, limbladLevel);
+    for (int i=0; i<variablesToPut.size(); i++) {
+        polynomial newConstraint = limbladian;
+        std::cout << "Original Limbladian: " << newConstraint << std::endl;
+        std::cout << "Variable to put: " << variablesToPut[i] << std::endl;
+        for (int j=0; j<newConstraint.size(); j++) {
+            for (int k=0; k<newConstraint[j].second.size(); k++) {
+                if (newConstraint[j].second[k].first == 'A') {
+                    newConstraint[j].second[k] = variablesToPut[i][0];
+                    for (int l=1; l<variablesToPut[i].size(); l++) {
+                        newConstraint[j].second.insert(newConstraint[j].second.begin() + k + l, variablesToPut[i][l]);
+                    }
+                }
+            }
+        }
+        std::cout << "New Limbladian: " << newConstraint << std::endl;
+        constraintsZero.push_back(newConstraint);
+    }
+
 
     // Reduce the monomials in the constraints
     for (int i=0; i<constraintsZero.size(); i++) {
