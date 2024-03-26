@@ -438,7 +438,7 @@ void getEigens(polynomialMatrix& momentMatrix, std::vector<monomial>& variables,
 }
 
 // Given a monomial, reduce it to its simplest form
-monomial reduceMonomial(monomial mon_, bool trySwap=true, bool diffLettersCommute=false) {
+std::pair<double, monomial> reduceMonomial(monomial mon_, int verbosity, bool trySwap=true, bool diffLettersCommute=false, bool pauliReductions=true) {
 
     // Sort the monomial as much as we can
     monomial mon = mon_;
@@ -463,6 +463,47 @@ monomial reduceMonomial(monomial mon_, bool trySwap=true, bool diffLettersCommut
         i++;
     }
 
+    // Simplify Pauli strings using the following rules
+    // XY = iZ
+    // XZ = -iY
+    // YZ = iX
+    std::complex<double> imag(0, 1);
+    std::complex<double> coeff(1, 0);
+    if (mon.size() > 2 && mon.size() % 2 != 0) {
+        for (int i=mon.size()-1; i>0; i--) {
+            if (mon[i-1].second == mon[i].second) {
+                if (mon[i-1].first == 'X' && mon[i].first == 'Y') {
+                    coeff *= imag;
+                    mon[i-1] = std::make_pair('Z', mon[i-1].second);
+                    mon.erase(mon.begin()+i);
+                } else if (mon[i-1].first == 'X' && mon[i].first == 'Z') {
+                    coeff *= -imag;
+                    mon[i-1] = std::make_pair('Y', mon[i-1].second);
+                    mon.erase(mon.begin()+i);
+                } else if (mon[i-1].first == 'Y' && mon[i].first == 'Z') {
+                    coeff *= imag;
+                    mon[i-1] = std::make_pair('X', mon[i-1].second);
+                    mon.erase(mon.begin()+i);
+                } else if (mon[i-1].first == 'Y' && mon[i].first == 'X') {
+                    coeff *= -imag;
+                    mon[i-1] = std::make_pair('Z', mon[i-1].second);
+                    mon.erase(mon.begin()+i);
+                } else if (mon[i-1].first == 'Z' && mon[i].first == 'X') {
+                    coeff *= imag;
+                    mon[i-1] = std::make_pair('Y', mon[i-1].second);
+                    mon.erase(mon.begin()+i);
+                } else if (mon[i-1].first == 'Z' && mon[i].first == 'Y') {
+                    coeff *= -imag;
+                    mon[i-1] = std::make_pair('X', mon[i-1].second);
+                    mon.erase(mon.begin()+i);
+                }
+            }
+        }
+        if (std::imag(coeff) != 0) {
+            std::cout << "WARNING - Pauli reduction resulted in imaginary coefficient: " << mon_ << " -> " << mon << std::endl;
+        }
+    }
+
     // Flip it to see if it's smaller
     if (trySwap) {
         monomial monFlipped = mon;
@@ -472,7 +513,29 @@ monomial reduceMonomial(monomial mon_, bool trySwap=true, bool diffLettersCommut
         }
     }
 
-    return mon;
+    // Verbose output
+    if (verbosity >= 2) {
+        std::cout << "Reduced monomial: " << mon_ << " -> " << coeff << " " << mon << std::endl;
+    }
+
+    return {std::real(coeff), mon};
+
+}
+
+// Given a polynomial, reduce each monomial and combine TODO
+polynomial reducePolynomial(polynomial p, int verbosity) {
+
+    // Apply the reduction to each monomial
+    for (int j=0; j<p.size(); j++) {
+        std::pair<double, monomial> reducedMonomial = reduceMonomial(p[j].second, verbosity);
+        p[j].first *= reducedMonomial.first;
+        p[j].second = reducedMonomial.second;
+    }
+
+    // Combine like terms
+    p = simplify(p);
+
+    return p;
 
 }
 
@@ -561,7 +624,7 @@ void addSingleMonomials(std::vector<monomial>& variables, polynomial functional)
 }
 
 // Generate a moment matrix given the top row
-polynomialMatrix generateFromTopRow(std::vector<monomial> monomsInTopRow) {
+polynomialMatrix generateFromTopRow(std::vector<monomial> monomsInTopRow, int verbosity) {
 
     // Generate all combinations of the top row
     polynomialMatrix matrixToReturn = std::vector<std::vector<polynomial>>(monomsInTopRow.size(), std::vector<polynomial>(monomsInTopRow.size()));
@@ -578,11 +641,11 @@ polynomialMatrix generateFromTopRow(std::vector<monomial> monomsInTopRow) {
             }
 
             // Reduce the monomial
-            newMonomial = reduceMonomial(newMonomial);
+            std::pair<double, monomial> monomCoeff = reduceMonomial(newMonomial, verbosity);
 
             // Set the matrix elements
-            matrixToReturn[i][j] = polynomial(1, std::make_pair(1, newMonomial));
-            matrixToReturn[j][i] = polynomial(1, std::make_pair(1, newMonomial));
+            matrixToReturn[i][j] = polynomial(1, std::make_pair(monomCoeff.first, monomCoeff.second));
+            matrixToReturn[j][i] = polynomial(1, std::make_pair(monomCoeff.first, monomCoeff.second));
 
         }
     }
@@ -593,7 +656,7 @@ polynomialMatrix generateFromTopRow(std::vector<monomial> monomsInTopRow) {
 }
 
 // Generate a moment matrix given the top row as polynomials
-polynomialMatrix generateFromTopRow(std::vector<polynomial> monomsInTopRow) {
+polynomialMatrix generateFromTopRow(std::vector<polynomial> monomsInTopRow, int verbosity) {
 
     // Generate all combinations of the top row
     polynomialMatrix matrixToReturn = std::vector<std::vector<polynomial>>(monomsInTopRow.size(), std::vector<polynomial>(monomsInTopRow.size()));
@@ -615,11 +678,12 @@ polynomialMatrix generateFromTopRow(std::vector<polynomial> monomsInTopRow) {
                     }
 
                     // Reduce the monomial
-                    newMonomial = reduceMonomial(newMonomial);
+                    std::pair<double, monomial> monomCoeff = reduceMonomial(newMonomial, verbosity);
+                    newMonomial = monomCoeff.second;
 
                     // Add to the polynomial
                     bool found = false;
-                    double newCoefficient = monomsInTopRow[i][k].first * monomsInTopRow[j][l].first;
+                    double newCoefficient = monomCoeff.first * monomsInTopRow[i][k].first * monomsInTopRow[j][l].first;
                     for (long unsigned int m=0; m<newPolynomial.size(); m++) {
                         if (newPolynomial[m].second == newMonomial) {
                             newPolynomial[m].first += newCoefficient;
@@ -647,16 +711,17 @@ polynomialMatrix generateFromTopRow(std::vector<polynomial> monomsInTopRow) {
 }
 
 // Generate a list of monomials of a certain level
-std::vector<monomial> generateMonomials(std::vector<monomial> variables, int level) {
+std::vector<polynomial> generateMonomials(std::vector<monomial> variables, int level, int verbosity) {
 
     // Generate all monomials up to the given level
-    std::vector<monomial> monomsInTopRow = {};
+    std::vector<polynomial> monomsInTopRow = {};
     if (level >= 1) {
         for (long unsigned int i=0; i<variables.size(); i++) {
             monomial currentMonomial = {variables[i][0]};
-            currentMonomial = reduceMonomial(currentMonomial, false);
-            if (currentMonomial.size() > 0 && std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentMonomial) == monomsInTopRow.end()) {
-                monomsInTopRow.push_back(currentMonomial);
+            std::pair<double, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity, false);
+            polynomial currentPolynomial = {monomCoeff};
+            if (currentPolynomial.size() > 0 && std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
+                monomsInTopRow.push_back(currentPolynomial);
             }
         }
     }
@@ -664,9 +729,10 @@ std::vector<monomial> generateMonomials(std::vector<monomial> variables, int lev
         for (long unsigned int i=0; i<variables.size(); i++) {
             for (long unsigned int j=0; j<variables.size(); j++) {
                 monomial currentMonomial = {variables[i][0], variables[j][0]};
-                currentMonomial = reduceMonomial(currentMonomial, false);
-                if (currentMonomial.size() > 0 && std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentMonomial) == monomsInTopRow.end()) {
-                    monomsInTopRow.push_back(currentMonomial);
+                std::pair<double, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity, false);
+                polynomial currentPolynomial = {monomCoeff};
+                if (currentPolynomial.size() > 0 && std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
+                    monomsInTopRow.push_back(currentPolynomial);
                 }
             }
         }
@@ -676,9 +742,10 @@ std::vector<monomial> generateMonomials(std::vector<monomial> variables, int lev
             for (long unsigned int j=0; j<variables.size(); j++) {
                 for (long unsigned int k=0; k<variables.size(); k++) {
                     monomial currentMonomial = {variables[i][0], variables[j][0], variables[k][0]};
-                    currentMonomial = reduceMonomial(currentMonomial, false);
-                    if (currentMonomial.size() > 0 && std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentMonomial) == monomsInTopRow.end()) {
-                        monomsInTopRow.push_back(currentMonomial);
+                    std::pair<double, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity, false);
+                    polynomial currentPolynomial = {monomCoeff};
+                    if (currentPolynomial.size() > 0 && std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
+                        monomsInTopRow.push_back(currentPolynomial);
                     }
                 }
             }
@@ -690,9 +757,10 @@ std::vector<monomial> generateMonomials(std::vector<monomial> variables, int lev
                 for (long unsigned int k=0; k<variables.size(); k++) {
                     for (long unsigned int l=0; l<variables.size(); l++) {
                         monomial currentMonomial = {variables[i][0], variables[j][0], variables[k][0], variables[l][0]};
-                        currentMonomial = reduceMonomial(currentMonomial, false);
-                        if (currentMonomial.size() > 0 && std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentMonomial) == monomsInTopRow.end()) {
-                            monomsInTopRow.push_back(currentMonomial);
+                        std::pair<double, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity, false);
+                        polynomial currentPolynomial = {monomCoeff};
+                        if (currentPolynomial.size() > 0 && std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
+                            monomsInTopRow.push_back(currentPolynomial);
                         }
                     }
                 }
@@ -706,9 +774,10 @@ std::vector<monomial> generateMonomials(std::vector<monomial> variables, int lev
                     for (long unsigned int l=0; l<variables.size(); l++) {
                         for (long unsigned int m=0; m<variables.size(); m++) {
                             monomial currentMonomial = {variables[i][0], variables[j][0], variables[k][0], variables[l][0], variables[m][0]};
-                            currentMonomial = reduceMonomial(currentMonomial, false);
-                            if (currentMonomial.size() > 0 && std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentMonomial) == monomsInTopRow.end()) {
-                                monomsInTopRow.push_back(currentMonomial);
+                            std::pair<double, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity, false);
+                            polynomial currentPolynomial = {monomCoeff};
+                            if (currentPolynomial.size() > 0 && std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
+                                monomsInTopRow.push_back(currentPolynomial);
                             }
                         }
                     }
@@ -724,9 +793,10 @@ std::vector<monomial> generateMonomials(std::vector<monomial> variables, int lev
                         for (long unsigned int m=0; m<variables.size(); m++) {
                             for (long unsigned int n=0; n<variables.size(); n++) {
                                 monomial currentMonomial = {variables[i][0], variables[j][0], variables[k][0], variables[l][0], variables[m][0], variables[n][0]};
-                                currentMonomial = reduceMonomial(currentMonomial, false);
-                                if (currentMonomial.size() > 0 && std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentMonomial) == monomsInTopRow.end()) {
-                                    monomsInTopRow.push_back(currentMonomial);
+                                std::pair<double, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity, false);
+                                polynomial currentPolynomial = {monomCoeff};
+                                if (currentPolynomial.size() > 0 && std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
+                                    monomsInTopRow.push_back(currentPolynomial);
                                 }
                             }
                         }
@@ -744,9 +814,10 @@ std::vector<monomial> generateMonomials(std::vector<monomial> variables, int lev
                             for (long unsigned int n=0; n<variables.size(); n++) {
                                 for (long unsigned int o=0; o<variables.size(); o++) {
                                     monomial currentMonomial = {variables[i][0], variables[j][0], variables[k][0], variables[l][0], variables[m][0], variables[n][0], variables[o][0]};
-                                    currentMonomial = reduceMonomial(currentMonomial, false);
-                                    if (currentMonomial.size() > 0 && std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentMonomial) == monomsInTopRow.end()) {
-                                        monomsInTopRow.push_back(currentMonomial);
+                                    std::pair<double, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity, false);
+                                    polynomial currentPolynomial = {monomCoeff};
+                                    if (currentPolynomial.size() > 0 && std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
+                                        monomsInTopRow.push_back(currentPolynomial);
                                     }
                                 }
                             }
@@ -763,7 +834,7 @@ std::vector<monomial> generateMonomials(std::vector<monomial> variables, int lev
 }
 
 // Generate all moment matrices for a given level given a polynomial
-std::vector<polynomialMatrix> generateAllMomentMatrices(polynomial functional, std::vector<polynomial> zeroCons, int level) {
+std::vector<polynomialMatrix> generateAllMomentMatrices(polynomial functional, std::vector<polynomial> zeroCons, int level, int verbosity) {
 
     // First get the list of all monomials used by iterating through the polynomial
     std::vector<monomial> variables;
@@ -773,7 +844,7 @@ std::vector<polynomialMatrix> generateAllMomentMatrices(polynomial functional, s
     }
 
     // Generate all monomials up to the given level
-    std::vector<monomial> monomsInTopRow = generateMonomials(variables, level);
+    std::vector<polynomial> monomsInTopRow = generateMonomials(variables, level, verbosity);
 
     // Create the index array to be used for combinations
     std::vector<int> indices;
@@ -786,7 +857,7 @@ std::vector<polynomialMatrix> generateAllMomentMatrices(polynomial functional, s
     combinations = {indices};
 
     // Each moment mat should start with 1
-    monomsInTopRow.insert(monomsInTopRow.begin(), monomial());
+    monomsInTopRow.insert(monomsInTopRow.begin(), stringToPolynomial("1"));
     for (long unsigned int i=0; i<combinations.size(); i++) {
         combinations[i].insert(combinations[i].begin(), 0);
     }
@@ -796,13 +867,13 @@ std::vector<polynomialMatrix> generateAllMomentMatrices(polynomial functional, s
     for (int k=0; k<combinations.size(); k++) {
 
         // Get this top row combination
-        std::vector<monomial> monomsInTopRowComb;
+        std::vector<polynomial> monomsInTopRowComb;
         for (long unsigned int i=0; i<combinations[k].size(); i++) {
             monomsInTopRowComb.push_back(monomsInTopRow[combinations[k][i]]);
         }
 
         // Form that matrix
-        polynomialMatrix newMatrix = generateFromTopRow(monomsInTopRowComb);
+        polynomialMatrix newMatrix = generateFromTopRow(monomsInTopRowComb, verbosity);
         matricesToReturn.push_back(newMatrix);
 
     }
@@ -955,11 +1026,12 @@ double solveMOSEK(polynomial obj, std::vector<polynomialMatrix>& psd, std::vecto
     auto BM = mosek::fusion::Matrix::sparse(constraintsPositive.size(), variables.size(), monty::new_array_ptr<int>(BRows), monty::new_array_ptr<int>(BCols), monty::new_array_ptr<double>(BVals));
 
     // Output the variable list
-    if (verbosity >= 2) {
+    if (verbosity >= 3) {
         std::cout << "Variables:" << std::endl;
         for (int i=0; i<variables.size(); i++) {
             std::cout << i << " " << variables[i] << std::endl;
         }
+        std::cout << std::endl;
     }
 
     // The vectors defining the PSD constraints
@@ -1030,7 +1102,7 @@ double solveMOSEK(polynomial obj, std::vector<polynomialMatrix>& psd, std::vecto
 
     // Create a model
     mosek::fusion::Model::t M = new mosek::fusion::Model(); auto _M = monty::finally([&]() {M->dispose();});
-    if (verbosity >= 2) {
+    if (verbosity >= 3) {
         M->setLogHandler([=](const std::string & msg) {std::cout << msg << std::flush;});
     }
 
@@ -1072,9 +1144,6 @@ double solveMOSEK(polynomial obj, std::vector<polynomialMatrix>& psd, std::vecto
 
     // Output the primal objective value
     double objPrimal = M->primalObjValue();
-    if (verbosity >= 1) {
-        std::cout << "Objective value: " << objPrimal << std::endl;
-    }
 
     // Get all of the variable values
     auto xMLevel = *(xM->level());
@@ -1084,7 +1153,9 @@ double solveMOSEK(polynomial obj, std::vector<polynomialMatrix>& psd, std::vecto
     }
 
     // Check the eigenvalues of each moment matrix
-    if (verbosity >= 1) {
+    if (verbosity >= 2) {
+        std::cout << std::endl;
+        std::cout << "Objective value: " << objPrimal << std::endl;
         for (int i=0; i<psd.size(); i++) {
             std::vector<std::vector<double>> eigenvectors;
             std::vector<double> eigenvalues;
@@ -1190,7 +1261,7 @@ int main(int argc, char* argv[]) {
     int verbosity = 1;
     int maxIters = 1000;
     std::string seed = "";
-    polynomial limbladian = stringToPolynomial("<X1A1X1>+<Y1A1Y1>+<A1>");
+    polynomial limbladian = stringToPolynomial("<X1A1X1>+<Y1A1Y1>-<A1>");
     std::vector<std::string> extraMonomials;
     std::vector<polynomial> constraintsZero;
     std::vector<polynomial> constraintsPositive;
@@ -1303,45 +1374,50 @@ int main(int argc, char* argv[]) {
 
     // Create the Limbladian applied to many different operators TODO
     std::vector<monomial> variables = {stringToMonomial("<X1>"), stringToMonomial("<Y1>"), stringToMonomial("<Z1>")};
-    std::vector<monomial> variablesToPut = generateMonomials(variables, limbladLevel);
+    std::vector<polynomial> variablesToPut = generateMonomials(variables, limbladLevel, verbosity);
+    if (verbosity >= 2) {
+        std::cout << std::endl;
+        std::cout << "Original Limbladian: " << limbladian << std::endl;
+    }
     for (int i=0; i<variablesToPut.size(); i++) {
         polynomial newConstraint = limbladian;
-        std::cout << "Original Limbladian: " << newConstraint << std::endl;
-        std::cout << "Variable to put: " << variablesToPut[i] << std::endl;
+        monomial monomToPut = variablesToPut[i][0].second;
         for (int j=0; j<newConstraint.size(); j++) {
             for (int k=0; k<newConstraint[j].second.size(); k++) {
                 if (newConstraint[j].second[k].first == 'A') {
-                    newConstraint[j].second[k] = variablesToPut[i][0];
-                    for (int l=1; l<variablesToPut[i].size(); l++) {
-                        newConstraint[j].second.insert(newConstraint[j].second.begin() + k + l, variablesToPut[i][l]);
+                    newConstraint[j].second[k] = monomToPut[0];
+                    for (int l=1; l<monomToPut.size(); l++) {
+                        newConstraint[j].second.insert(newConstraint[j].second.begin() + k + l, monomToPut[l]);
                     }
                 }
             }
         }
-        std::cout << "New Limbladian: " << newConstraint << std::endl;
+        if (verbosity >= 2) {
+            std::cout << std::endl;
+            std::cout << "Variable to put: " << variablesToPut[i] << std::endl;
+            std::cout << "New constraint: " << newConstraint << std::endl;
+        }
         constraintsZero.push_back(newConstraint);
     }
 
 
-    // Reduce the monomials in the constraints
+    // Reduce the constraints as much as possible
     for (int i=0; i<constraintsZero.size(); i++) {
-        for (int j=0; j<constraintsZero[i].size(); j++) {
-            constraintsZero[i][j].second = reduceMonomial(constraintsZero[i][j].second);
+        if (verbosity >= 2) {
+            std::cout << std::endl;
+            std::cout << "Reducing constraint: " << constraintsZero[i] << std::endl;
+        }
+        constraintsZero[i] = reducePolynomial(constraintsZero[i], verbosity);
+        if (verbosity >= 2) {
+            std::cout << "Reduced constraint: " << constraintsZero[i] << std::endl;
         }
     }
 
     // Define the moment matrix
-    std::vector<polynomialMatrix> momentMatrices = generateAllMomentMatrices(objective, constraintsZero, level);
-    if (verbosity >= 1) {
-        std::cout << "Generated " << momentMatrices.size() << " moment matrices" << std::endl;
-        int largestMomentMatrix = 0;
-        for (int i=0; i<momentMatrices.size(); i++) {
-            if (momentMatrices[i].size() > largestMomentMatrix) {
-                largestMomentMatrix = momentMatrices[i].size();
-            }
-        }
-        std::cout << "Largest moment matrix has size " << largestMomentMatrix << std::endl;
+    if (verbosity >= 2) {
+        std::cout << std::endl;
     }
+    std::vector<polynomialMatrix> momentMatrices = generateAllMomentMatrices(objective, constraintsZero, level, verbosity);
 
     // If told to add extra to the top row
     if (extraMonomials.size() > 0) {
@@ -1354,11 +1430,28 @@ int main(int argc, char* argv[]) {
             topRow.push_back(extraMonomial);
             std::cout << "Added " << extraMonomial << " to the top row" << std::endl;
         }
-        momentMatrices[0] = generateFromTopRow(topRow);
+        momentMatrices[0] = generateFromTopRow(topRow, verbosity);
+    }
+
+    // See how big the moment matrix is
+    if (verbosity >= 1) {
+        if (verbosity >= 2) {
+            std::cout << std::endl;
+        }
+        std::cout << "Generated " << momentMatrices.size() << " moment matrices" << std::endl;
+        int largestMomentMatrix = 0;
+        for (int i=0; i<momentMatrices.size(); i++) {
+            if (momentMatrices[i].size() > largestMomentMatrix) {
+                largestMomentMatrix = momentMatrices[i].size();
+            }
+        }
+        std::cout << "Largest moment matrix has size " << largestMomentMatrix << std::endl;
     }
 
     // Output the problem
     if (verbosity >= 2) {
+        std::cout << std::endl;
+        std::cout << "----------------------------------------" << std::endl;
         if (objective.size() > 0) {
             std::cout << "Objective: " << std::endl;
             std::cout << objective << std::endl << std::endl;
@@ -1366,17 +1459,18 @@ int main(int argc, char* argv[]) {
         if (momentMatrices.size() > 0) {
             for (int i=0; i<momentMatrices.size(); i++) {
                 std::cout << "Moment matrix " << i << ": " << std::endl;
-                std::cout << momentMatrices[i] << std::endl << std::endl;
+                std::cout << momentMatrices[i] << std::endl;
             }
         }
         if (constraintsZero.size() > 0) {
             std::cout << "Zero constraints: " << std::endl;
-            std::cout << constraintsZero << std::endl << std::endl;
+            std::cout << constraintsZero << std::endl;
         }
         if (constraintsPositive.size() > 0) {
             std::cout << "Positive constraints: " << std::endl;
-            std::cout << constraintsPositive << std::endl << std::endl;
+            std::cout << constraintsPositive << std::endl;
         }
+        std::cout << "----------------------------------------" << std::endl;
     }
 
     // Convert to MOSEK form and solve
@@ -1387,9 +1481,13 @@ int main(int argc, char* argv[]) {
         objective[i].first *= -1;
     }
     double lowerBound = -solveMOSEK(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity, varNames, varVals);
-    std::cout << std::endl;
-    std::cout << "Upper bound: " << upperBound << std::endl;
-    std::cout << "Lower bound: " << lowerBound << std::endl;
+    if (verbosity >= 2) {
+        std::cout << std::endl;
+    }
+    if (verbosity >= 1) {
+        std::cout << "Upper bound: " << upperBound << std::endl;
+        std::cout << "Lower bound: " << lowerBound << std::endl;
+    }
 
     // Exit without errors
     return 0;
