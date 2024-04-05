@@ -9,30 +9,10 @@
 #include <Eigen/Dense>
 
 // Define the type for the polynomials
-typedef std::vector<std::pair<char,int>> monomial;
+typedef std::vector<std::pair<char, int>> monomial;
 typedef std::vector<std::pair<double, monomial>> polynomial;
 typedef std::vector<polynomial> polynomialVector;
 typedef std::vector<std::vector<polynomial>> polynomialMatrix;
-typedef std::vector<double> doubleVector;
-typedef std::vector<std::vector<double>> doubleMatrix;
-
-// Check if a polynomial is constant
-bool polynomialIsConstant(polynomial p) {
-
-    // Check if it's zero
-    if (p.size() == 0 || (p.size() == 1 && p[0].first == 0)) {
-        return true;
-    }
-
-    // Check if it's a constant
-    if (p.size() == 1 && p[0].second.size() == 0) {
-        return true;
-    }
-
-    // Otherwise return false
-    return false;
-
-}
 
 // Convert a constant polynomial to a double
 double polynomialToDouble(polynomial p) {
@@ -361,49 +341,21 @@ polynomial stringToPolynomial(std::string asString) {
 
 }
 
-// Given a polynomial and a variable list, evaluate the polynomial
-double evaluatePolynomial(polynomial& p, std::vector<monomial>& variables, std::vector<double>& varVals) {
-
-    // Replace each variable with its value
-    double toReturn = 0;
-    for (int i=0; i<p.size(); i++) {
-
-        // Find this variable
-        for (int j=0; j<variables.size(); j++) {
-            if (p[i].second == variables[j]) {
-                toReturn += p[i].first*varVals[j];
-                break;
-            }
-        }
-
-    }
-
-    // Return the value
-    return toReturn;
-
-}
-
 // Given a matrix and a variable list, return the matrix with the variables replaced
-Eigen::MatrixXd replaceVariables(polynomialMatrix& momentMatrix, std::vector<monomial>& variables, std::vector<double>& varVals) {
+Eigen::MatrixXd replaceVariables(polynomialMatrix& momentMatrix, const std::vector<monomial>& variables, const std::vector<double>& varVals) {
 
     // Replace each variable with its value
     Eigen::MatrixXd momentMatrixEigen = Eigen::MatrixXd::Zero(momentMatrix.size(), momentMatrix.size());
     for (int i=0; i<momentMatrix.size(); i++) {
         for (int j=0; j<momentMatrix[i].size(); j++) {
             for (int k=0; k<momentMatrix[i][j].size(); k++) {
-
-                // Find this variable
-                bool found = false;
                 for (int l=0; l<variables.size(); l++) {
                     if (momentMatrix[i][j][k].second == variables[l]) {
                         momentMatrixEigen(i, j) += momentMatrix[i][j][k].first*varVals[l];
-                        found = true;
                         break;
                     }
                 }
-
             }
-
         }
     }
     return momentMatrixEigen;
@@ -411,7 +363,7 @@ Eigen::MatrixXd replaceVariables(polynomialMatrix& momentMatrix, std::vector<mon
 }
 
 // Get the eigenvalues and vectors of a matrix after replacement
-void getEigens(polynomialMatrix& momentMatrix, std::vector<monomial>& variables, std::vector<double>& varVals, std::vector<std::vector<double>>& eigenvectors, std::vector<double>& eigenvalues) {
+void getEigens(polynomialMatrix& momentMatrix, const std::vector<monomial>& variables, const std::vector<double>& varVals, std::vector<std::vector<double>>& eigenvectors, std::vector<double>& eigenvalues) {
 
     // Replace each variable with its value
     Eigen::MatrixXd momentMatrixEigen = replaceVariables(momentMatrix, variables, varVals);
@@ -438,7 +390,7 @@ void getEigens(polynomialMatrix& momentMatrix, std::vector<monomial>& variables,
 }
 
 // Given a monomial, reduce it to its simplest form
-std::pair<double, monomial> reduceMonomial(monomial mon_, int verbosity, bool trySwap=true, bool diffLettersCommute=false, bool pauliReductions=true) {
+std::pair<double, monomial> reduceMonomial(const monomial& mon_, int verbosity, bool trySwap=true, bool diffLettersCommute=false, bool pauliReductions=true) {
 
     // Sort the monomial as much as we can
     monomial mon = mon_;
@@ -470,7 +422,7 @@ std::pair<double, monomial> reduceMonomial(monomial mon_, int verbosity, bool tr
     std::complex<double> imag(0, 1);
     std::complex<double> coeff(1, 0);
     if (mon.size() > 2 && mon.size() % 2 != 0) {
-        for (int i=mon.size()-1; i>0; i--) {
+        for (i=mon.size()-1; i>0; i--) {
             if (mon[i-1].second == mon[i].second) {
                 if (mon[i-1].first == 'X' && mon[i].first == 'Y') {
                     coeff *= imag;
@@ -522,7 +474,7 @@ std::pair<double, monomial> reduceMonomial(monomial mon_, int verbosity, bool tr
 
 }
 
-// Given a polynomial, reduce each monomial and combine TODO
+// Given a polynomial, reduce each monomial and combine
 polynomial reducePolynomial(polynomial p, int verbosity) {
 
     // Apply the reduction to each monomial
@@ -537,50 +489,6 @@ polynomial reducePolynomial(polynomial p, int verbosity) {
 
     return p;
 
-}
-
-// Combinations of a vector
-void combo(std::vector<int> &alphabet, int n, std::vector<std::vector<int>> &result, std::vector<int> curr) {
-    if (n == 0) {
-        result.push_back(curr);
-        return;
-    }
-    int largestSoFar = 0;
-    if (curr.size() > 0) {
-        largestSoFar = curr[curr.size()-1];
-    }
-    for (int i=largestSoFar; i<alphabet.size(); i++) {
-        if (alphabet[i] > largestSoFar) {
-            std::vector<int> newCurr = curr;
-            newCurr.push_back(alphabet[i]);
-            combo(alphabet, n - 1, result, newCurr);
-        }
-    }
-    return;
-}
-
-// Sampled combinations of a vector
-void combo(std::vector<int> &alphabet, int n, std::vector<std::vector<int>> &result, int numToSample) {
-    int numFails = 0;
-    while (result.size() < numToSample) {
-        std::vector<int> curr;
-        std::vector<int> alphabetCopy = alphabet;
-        for (int j=0; j<n; j++) {
-            int i = rand() % alphabetCopy.size();
-            curr.push_back(alphabetCopy[i]);
-            alphabetCopy.erase(alphabetCopy.begin()+i);
-        }
-        std::sort(curr.begin(), curr.end());
-        if (std::find(result.begin(), result.end(), curr) == result.end()) {
-            result.push_back(curr);
-        } else {
-            numFails++;
-            if (numFails > numToSample*2) {
-                break;
-            }
-        }
-    }
-    return;
 }
 
 // Add all single order monomials from a functional to a list of variables
@@ -720,7 +628,7 @@ std::vector<polynomial> generateMonomials(std::vector<monomial> variables, int l
             monomial currentMonomial = {variables[i][0]};
             std::pair<double, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity, false);
             polynomial currentPolynomial = {monomCoeff};
-            if (currentPolynomial.size() > 0 && std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
+            if (std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
                 monomsInTopRow.push_back(currentPolynomial);
             }
         }
@@ -731,7 +639,7 @@ std::vector<polynomial> generateMonomials(std::vector<monomial> variables, int l
                 monomial currentMonomial = {variables[i][0], variables[j][0]};
                 std::pair<double, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity, false);
                 polynomial currentPolynomial = {monomCoeff};
-                if (currentPolynomial.size() > 0 && std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
+                if (std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
                     monomsInTopRow.push_back(currentPolynomial);
                 }
             }
@@ -744,7 +652,7 @@ std::vector<polynomial> generateMonomials(std::vector<monomial> variables, int l
                     monomial currentMonomial = {variables[i][0], variables[j][0], variables[k][0]};
                     std::pair<double, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity, false);
                     polynomial currentPolynomial = {monomCoeff};
-                    if (currentPolynomial.size() > 0 && std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
+                    if (std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
                         monomsInTopRow.push_back(currentPolynomial);
                     }
                 }
@@ -759,7 +667,7 @@ std::vector<polynomial> generateMonomials(std::vector<monomial> variables, int l
                         monomial currentMonomial = {variables[i][0], variables[j][0], variables[k][0], variables[l][0]};
                         std::pair<double, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity, false);
                         polynomial currentPolynomial = {monomCoeff};
-                        if (currentPolynomial.size() > 0 && std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
+                        if (std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
                             monomsInTopRow.push_back(currentPolynomial);
                         }
                     }
@@ -776,7 +684,7 @@ std::vector<polynomial> generateMonomials(std::vector<monomial> variables, int l
                             monomial currentMonomial = {variables[i][0], variables[j][0], variables[k][0], variables[l][0], variables[m][0]};
                             std::pair<double, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity, false);
                             polynomial currentPolynomial = {monomCoeff};
-                            if (currentPolynomial.size() > 0 && std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
+                            if (std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
                                 monomsInTopRow.push_back(currentPolynomial);
                             }
                         }
@@ -795,7 +703,7 @@ std::vector<polynomial> generateMonomials(std::vector<monomial> variables, int l
                                 monomial currentMonomial = {variables[i][0], variables[j][0], variables[k][0], variables[l][0], variables[m][0], variables[n][0]};
                                 std::pair<double, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity, false);
                                 polynomial currentPolynomial = {monomCoeff};
-                                if (currentPolynomial.size() > 0 && std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
+                                if (std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
                                     monomsInTopRow.push_back(currentPolynomial);
                                 }
                             }
@@ -816,7 +724,7 @@ std::vector<polynomial> generateMonomials(std::vector<monomial> variables, int l
                                     monomial currentMonomial = {variables[i][0], variables[j][0], variables[k][0], variables[l][0], variables[m][0], variables[n][0], variables[o][0]};
                                     std::pair<double, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity, false);
                                     polynomial currentPolynomial = {monomCoeff};
-                                    if (currentPolynomial.size() > 0 && std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
+                                    if (std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
                                         monomsInTopRow.push_back(currentPolynomial);
                                     }
                                 }
@@ -834,7 +742,7 @@ std::vector<polynomial> generateMonomials(std::vector<monomial> variables, int l
 }
 
 // Generate all moment matrices for a given level given a polynomial
-std::vector<polynomialMatrix> generateAllMomentMatrices(polynomial functional, std::vector<polynomial> zeroCons, int level, int verbosity) {
+std::vector<polynomialMatrix> generateAllMomentMatrices(const polynomial& functional, std::vector<polynomial> zeroCons, int level, int verbosity) {
 
     // First get the list of all monomials used by iterating through the polynomial
     std::vector<monomial> variables;
@@ -1069,9 +977,9 @@ double solveMOSEK(polynomial obj, std::vector<polynomialMatrix>& psd, std::vecto
 
                     // Find this in the variable list
                     monomial toFind = {psd[k][i][j][l].second};
-                    for (int k=0; k<variables.size(); k++) {
-                        if (variables[k] == toFind) {
-                            indicesPSD.push_back(k);
+                    for (int k2=0; k2<variables.size(); k2++) {
+                        if (variables[k2] == toFind) {
+                            indicesPSD.push_back(k2);
                             break;
                         }
                     }
@@ -1217,38 +1125,6 @@ double solveMOSEK(polynomial obj, std::vector<polynomialMatrix>& psd, std::vecto
 
 }
 
-// Given a monomial and an Eigen vector, evaluate the monomial
-double evalCommutingMonom(const double& coeff, const monomial& monom, const Eigen::VectorXd& x, const int& numD) {
-    double term = coeff;
-    if (monom.size() > 0) {
-        for (int j=0; j<monom.size(); j++) {
-            if (monom[j].first == 'D') {
-                term *= x(monom[j].second);
-            } else {
-                term *= x(monom[j].second + numD);
-            }
-        }
-    }
-    return term;
-}
-
-// Given a monomial and an Eigen vector, evaluate the monomial without one of the vars
-double evalCommutingMonomWithout(const double& coeff, const monomial& monom, const Eigen::VectorXd& x, const int& numD, const int& var) {
-    double term = coeff;
-    if (monom.size() > 0) {
-        for (int j=0; j<monom.size(); j++) {
-            if (j != var) {
-                if (monom[j].first == 'D') {
-                    term *= x(monom[j].second);
-                } else {
-                    term *= x(monom[j].second + numD);
-                }
-            }
-        }
-    }
-    return term;
-}
-
 // Generic entry function
 int main(int argc, char* argv[]) {
 
@@ -1256,10 +1132,7 @@ int main(int argc, char* argv[]) {
     int level = 1;
     int limbladLevel = 1;
     polynomial objective = stringToPolynomial("<Z1>");
-    int testing = 0;
-    int numToSample = 1000;
     int verbosity = 1;
-    int maxIters = 1000;
     std::string seed = "";
     polynomial limbladian = stringToPolynomial("<X1A1X1>+<Y1A1Y1>-<A1>");
     std::vector<std::string> extraMonomials;
@@ -1317,11 +1190,6 @@ int main(int argc, char* argv[]) {
             seed = std::string(argv[i+1]);
             i++;
 
-        // If we're testing
-        } else if (argAsString == "-t") {
-            testing = std::stoi(argv[i+1]);
-			i++;
-
         // If setting verbosity
         } else if (argAsString == "-v") {
             verbosity = std::stoi(argv[i+1]);
@@ -1372,7 +1240,7 @@ int main(int argc, char* argv[]) {
         srand(std::stoi(seed));
     }
 
-    // Create the Limbladian applied to many different operators TODO
+    // Create the Limbladian applied to many different operators
     std::vector<monomial> variables = {stringToMonomial("<X1>"), stringToMonomial("<Y1>"), stringToMonomial("<Z1>")};
     std::vector<polynomial> variablesToPut = generateMonomials(variables, limbladLevel, verbosity);
     if (verbosity >= 2) {
@@ -1399,7 +1267,6 @@ int main(int argc, char* argv[]) {
         }
         constraintsZero.push_back(newConstraint);
     }
-
 
     // Reduce the constraints as much as possible
     for (int i=0; i<constraintsZero.size(); i++) {
