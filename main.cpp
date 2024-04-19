@@ -15,6 +15,9 @@ typedef std::vector<std::pair<std::complex<double>, monomial>> polynomial;
 typedef std::vector<polynomial> polynomialVector;
 typedef std::vector<std::vector<polynomial>> polynomialMatrix;
 
+// Useful constants
+const std::complex<double> imag(0, 1);
+
 // Given a polynomial, combine all of the terms of the same monomial
 polynomial simplify(polynomial p) {
 
@@ -415,7 +418,6 @@ std::pair<std::complex<double>, monomial> reduceMonomial(const monomial& mon_, i
     // XY = iZ
     // ZX = iY
     // YZ = iX
-    std::complex<double> imag(0, 1);
     std::complex<double> coeff(1, 0);
     if (std::find(reductionsToIgnore.begin(), reductionsToIgnore.end(), mon.size()) == reductionsToIgnore.end() && pauliReductions) {
         for (i=mon.size()-1; i>0; i--) {
@@ -1241,6 +1243,40 @@ int main(int argc, char* argv[]) {
             double J_ss = (8*g*g*(gamma_h_plus*gamma_c_minus - gamma_h_minus*gamma_c_plus) / chi) * (epsilon_h*Gamma_c + epsilon_c*Gamma_h);
 
             std::cout << "ideal J_ss: " << J_ss << std::endl;
+
+            Eigen::MatrixXcd rho = Eigen::MatrixXcd::Zero(4,4);
+            rho(0,0) = (4*g*g*(gamma_h_plus + gamma_c_plus)*(gamma_h_plus + gamma_c_plus)  + gamma_h_plus*gamma_c_plus*(Gamma*Gamma + 4*delta*delta)) / chi;
+            rho(1,1) = (4*g*g*(gamma_h_minus + gamma_c_minus)*(gamma_h_plus + gamma_c_plus)  + gamma_h_plus*gamma_c_minus*(Gamma*Gamma + 4*delta*delta)) / chi;
+            rho(2,2) = (4*g*g*(gamma_h_minus + gamma_c_minus)*(gamma_h_plus + gamma_c_plus)  + gamma_h_minus*gamma_c_plus*(Gamma*Gamma + 4*delta*delta)) / chi;
+            rho(3,3) = (4*g*g*(gamma_h_minus + gamma_c_minus)*(gamma_h_minus + gamma_c_minus)  + gamma_h_minus*gamma_c_minus*(Gamma*Gamma + 4*delta*delta)) / chi;
+            rho(1,2) = (2*g*(gamma_h_plus*gamma_c_minus - gamma_h_minus*gamma_c_plus)*(imag*Gamma-2*delta)) / chi;
+            rho(2,1) = std::conj(rho(1,2));
+
+            std::cout << "ideal rho: " << std::endl;
+            std::cout << rho << std::endl;
+
+            Eigen::MatrixXcd sigma_z_h = Eigen::MatrixXcd::Zero(4,4);
+            sigma_z_h(0,0) = 1.0;
+            sigma_z_h(1,1) = -1.0;
+            sigma_z_h(2,2) = 1.0;
+            sigma_z_h(3,3) = -1.0;
+
+            Eigen::MatrixXcd sigma_z_c = Eigen::MatrixXcd::Zero(4,4);
+            sigma_z_c(0,0) = 1.0;
+            sigma_z_c(1,1) = -1.0;
+            sigma_z_c(2,2) = 1.0;
+            sigma_z_c(3,3) = -1.0;
+
+            double exp_sigma_z_h = std::real((sigma_z_h*rho).trace());
+            double exp_sigma_z_c = std::real((sigma_z_c*rho).trace());
+            double J_ss_from_rho = 0.5*epsilon_h*(gamma_h_plus-gamma_h_minus) 
+                                 - 0.5*epsilon_c*(gamma_c_plus-gamma_c_minus) 
+                                 + 0.5*epsilon_h*(gamma_h_plus+gamma_h_minus)*exp_sigma_z_h 
+                                 - 0.5*epsilon_c*(gamma_c_plus+gamma_c_minus)*exp_sigma_z_c;
+
+            std::cout << "sigma_z_h: " << exp_sigma_z_h << std::endl;
+            std::cout << "sigma_z_c: " << exp_sigma_z_c << std::endl;
+            std::cout << "J_ss from rho: " << J_ss_from_rho << std::endl;
 
             return 0;
 
