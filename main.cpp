@@ -1306,12 +1306,14 @@ int main(int argc, char* argv[]) {
     for (int i=0; i<variablesToPut.size(); i++) {
         polynomial newConstraint = limbladian;
         monomial monomToPut = variablesToPut[i][0].second;
-        for (int j=0; j<newConstraint.size(); j++) {
-            for (int k=0; k<newConstraint[j].second.size(); k++) {
-                if (newConstraint[j].second[k].first == 'A') {
-                    newConstraint[j].second[k] = monomToPut[0];
-                    for (int l=1; l<monomToPut.size(); l++) {
-                        newConstraint[j].second.insert(newConstraint[j].second.begin() + k + l, monomToPut[l]);
+        if (monomToPut.size() > 0) {
+            for (int j=0; j<newConstraint.size(); j++) {
+                for (int k=0; k<newConstraint[j].second.size(); k++) {
+                    if (newConstraint[j].second[k].first == 'A') {
+                        newConstraint[j].second[k] = monomToPut[0];
+                        for (int l=1; l<monomToPut.size(); l++) {
+                            newConstraint[j].second.insert(newConstraint[j].second.begin() + k + l, monomToPut[l]);
+                        }
                     }
                 }
             }
