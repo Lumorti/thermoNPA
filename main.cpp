@@ -1213,9 +1213,36 @@ int main(int argc, char* argv[]) {
             limbladian = stringToPolynomial(pauliString);
             i += 3;
 
-        // Phase-covariant Limbladian
-        } else if (argAsString == "--phase") {
-            limbladian = stringToPolynomial("TODO");
+        // Two-body Limbladian TODO
+        } else if (argAsString == "--two") {
+
+            // Defining quantities
+            double gamma_c = 1.1e-2;
+            double gamma_h = 1e-3;
+            double g = 1.6e-3;
+            double T_h = 1.0;
+            double T_c = 0.1;
+            double delta = 0.005;
+            double epsilon_h = 1.0;
+
+            // Calculated quantities
+            double epsilon_c = epsilon_h + delta;
+            double n_c = 1.0 / (std::exp(epsilon_c / T_c) - 1.0);
+            double n_h = 1.0 / (std::exp(epsilon_h / T_h) - 1.0);
+            double gamma_h_plus = gamma_h * n_h;
+            double gamma_h_minus = gamma_h * (n_h + 1.0);
+            double gamma_c_plus = gamma_c * n_c;
+            double gamma_c_minus = gamma_c * (n_c + 1.0);
+            double Gamma_h = gamma_h_plus + gamma_h_minus;
+            double Gamma_c = gamma_c_plus + gamma_c_minus;
+            double Gamma = Gamma_h + Gamma_c;
+            double chi = (4*g*g+Gamma_h*Gamma_c)*Gamma*Gamma + 4*delta*delta*Gamma_h*Gamma_c;
+
+            double J_ss = (8*g*g*(gamma_h_plus*gamma_c_minus - gamma_h_minus*gamma_c_plus) / chi) * (epsilon_h*Gamma_c + epsilon_c*Gamma_h);
+
+            std::cout << "ideal J_ss: " << J_ss << std::endl;
+
+            return 0;
 
         // Set the seed
         } else if (argAsString == "-S") {
@@ -1259,10 +1286,10 @@ int main(int argc, char* argv[]) {
             std::cout << "  --objZ          Use sigma_Z as the objective" << std::endl;
             std::cout << "  -2              Don't use second order Pauli reductions" << std::endl;
             std::cout << "  -3              Don't use third order Pauli reductions" << std::endl;
-            std::cout << "  --limPauli <num> <num> <num>" << std::endl;
+            std::cout << "  --pauli <num> <num> <num>" << std::endl;
             std::cout << "                  Use the Pauli Limbladian with coeffs" << std::endl;
-            std::cout << "  --limPhase <num> <num> <num>" << std::endl;
-            std::cout << "                  Use the Phase-covariant Limbladian with coeffs" << std::endl;
+            std::cout << "  --two <num> <num> <num>" << std::endl;
+            std::cout << "                  Use the two-body Limbladian with coeffs" << std::endl;
             std::cout << "  -l <num>        Level of the moment matrix" << std::endl;
             std::cout << "  -m <num>        Level of the moments to put in the Limbladian" << std::endl;
             std::cout << "  -e <monom>      Add an extra monomial to the top row" << std::endl;
