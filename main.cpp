@@ -7,6 +7,7 @@
 
 // Import Eigen
 #include <Eigen/Dense>
+#include <unsupported/Eigen/KroneckerProduct>
 
 // Define the type for the polynomials
 typedef std::vector<std::pair<char, int>> monomial;
@@ -1158,6 +1159,15 @@ double solveMOSEK(polynomial obj, std::vector<polynomialMatrix>& psd, std::vecto
 
 }
 
+// Take the trace of a matrix, assuming it's real
+double tr(Eigen::MatrixXcd A) {
+    std::complex<double> trace = A.trace();
+    if (std::abs(std::imag(trace)) > 1e-5) {
+        std::cout << "WARNING - trace of matrix has non-zero imaginary part" << std::endl;
+    }
+    return std::real(trace);
+}
+
 // Generic entry function
 int main(int argc, char* argv[]) {
 
@@ -1215,7 +1225,7 @@ int main(int argc, char* argv[]) {
             limbladian = stringToPolynomial(pauliString);
             i += 3;
 
-        // Two-body Limbladian TODO
+        // Two-body Limbladian
         } else if (argAsString == "--two") {
 
             // Defining quantities
@@ -1238,46 +1248,106 @@ int main(int argc, char* argv[]) {
             double Gamma_h = gamma_h_plus + gamma_h_minus;
             double Gamma_c = gamma_c_plus + gamma_c_minus;
             double Gamma = Gamma_h + Gamma_c;
-            double chi = (4*g*g+Gamma_h*Gamma_c)*Gamma*Gamma + 4*delta*delta*Gamma_h*Gamma_c;
+            double chi = (4.0*g*g+Gamma_h*Gamma_c)*Gamma*Gamma + 4.0*delta*delta*Gamma_h*Gamma_c;
 
-            double J_ss = (8*g*g*(gamma_h_plus*gamma_c_minus - gamma_h_minus*gamma_c_plus) / chi) * (epsilon_h*Gamma_c + epsilon_c*Gamma_h);
+            double J_ss = (8.0*g*g*(gamma_h_plus*gamma_c_minus - gamma_h_minus*gamma_c_plus) / chi) * (epsilon_h*Gamma_c + epsilon_c*Gamma_h);
 
             std::cout << "ideal J_ss: " << J_ss << std::endl;
 
             Eigen::MatrixXcd rho = Eigen::MatrixXcd::Zero(4,4);
-            rho(0,0) = (4*g*g*(gamma_h_plus + gamma_c_plus)*(gamma_h_plus + gamma_c_plus)  + gamma_h_plus*gamma_c_plus*(Gamma*Gamma + 4*delta*delta)) / chi;
-            rho(1,1) = (4*g*g*(gamma_h_minus + gamma_c_minus)*(gamma_h_plus + gamma_c_plus)  + gamma_h_plus*gamma_c_minus*(Gamma*Gamma + 4*delta*delta)) / chi;
-            rho(2,2) = (4*g*g*(gamma_h_minus + gamma_c_minus)*(gamma_h_plus + gamma_c_plus)  + gamma_h_minus*gamma_c_plus*(Gamma*Gamma + 4*delta*delta)) / chi;
-            rho(3,3) = (4*g*g*(gamma_h_minus + gamma_c_minus)*(gamma_h_minus + gamma_c_minus)  + gamma_h_minus*gamma_c_minus*(Gamma*Gamma + 4*delta*delta)) / chi;
-            rho(1,2) = (2*g*(gamma_h_plus*gamma_c_minus - gamma_h_minus*gamma_c_plus)*(imag*Gamma-2*delta)) / chi;
+            rho(0,0) = (4.0*g*g*(gamma_h_plus + gamma_c_plus)*(gamma_h_plus + gamma_c_plus)  + gamma_h_plus*gamma_c_plus*(Gamma*Gamma + 4.0*delta*delta)) / chi;
+            rho(1,1) = (4.0*g*g*(gamma_h_minus + gamma_c_minus)*(gamma_h_plus + gamma_c_plus)  + gamma_h_plus*gamma_c_minus*(Gamma*Gamma + 4.0*delta*delta)) / chi;
+            rho(2,2) = (4.0*g*g*(gamma_h_minus + gamma_c_minus)*(gamma_h_plus + gamma_c_plus)  + gamma_h_minus*gamma_c_plus*(Gamma*Gamma + 4.0*delta*delta)) / chi;
+            rho(3,3) = (4.0*g*g*(gamma_h_minus + gamma_c_minus)*(gamma_h_minus + gamma_c_minus)  + gamma_h_minus*gamma_c_minus*(Gamma*Gamma + 4.0*delta*delta)) / chi;
+            rho(1,2) = (2.0*g*(gamma_h_plus*gamma_c_minus - gamma_h_minus*gamma_c_plus)*(imag*Gamma-2.0*delta)) / chi;
             rho(2,1) = std::conj(rho(1,2));
 
             std::cout << "ideal rho: " << std::endl;
             std::cout << rho << std::endl;
+            
+            Eigen::MatrixXcd sigma_z = Eigen::MatrixXcd::Zero(2,2);
+            sigma_z(0,0) = 1.0;
+            sigma_z(1,1) = -1.0;
+            Eigen::MatrixXcd sigma_plus = Eigen::MatrixXcd::Zero(2,2);
+            sigma_plus(0,1) = 1.0;
+            Eigen::MatrixXcd sigma_minus = Eigen::MatrixXcd::Zero(2,2);
+            sigma_minus(1,0) = 1.0;
+            Eigen::MatrixXcd eye = Eigen::MatrixXcd::Identity(2,2);
+            Eigen::MatrixXcd eye4 = Eigen::MatrixXcd::Identity(4,4);
+            Eigen::MatrixXcd sigma_h_plus = kroneckerProduct(sigma_plus, eye);
+            Eigen::MatrixXcd sigma_h_minus = kroneckerProduct(sigma_minus, eye);
+            Eigen::MatrixXcd sigma_c_plus = kroneckerProduct(eye, sigma_plus);
+            Eigen::MatrixXcd sigma_c_minus = kroneckerProduct(eye, sigma_minus);
+            Eigen::MatrixXcd sigma_z_h = kroneckerProduct(sigma_z, eye);
+            Eigen::MatrixXcd sigma_z_c = kroneckerProduct(eye, sigma_z);
 
-            Eigen::MatrixXcd sigma_z_h = Eigen::MatrixXcd::Zero(4,4);
-            sigma_z_h(0,0) = 1.0;
-            sigma_z_h(1,1) = -1.0;
-            sigma_z_h(2,2) = 1.0;
-            sigma_z_h(3,3) = -1.0;
+            Eigen::MatrixXcd H_s = epsilon_h*sigma_h_plus*sigma_h_minus 
+                                   + epsilon_c*sigma_c_plus*sigma_c_minus;  
+            Eigen::MatrixXcd term2 = gamma_h_plus*(sigma_h_plus*rho*sigma_h_minus 
+                                                   - 0.5*sigma_h_minus*sigma_h_plus*rho 
+                                                   - 0.5*rho*sigma_h_minus*sigma_h_plus) 
+                                   + gamma_h_minus*(sigma_h_minus*rho*sigma_h_plus 
+                                                   - 0.5*sigma_h_plus*sigma_h_minus*rho 
+                                                   - 0.5*rho*sigma_h_plus*sigma_h_minus);
+            double Q_ss_h_direct = tr(H_s*term2);
+            std::cout << "Q_ss_h_direct: " << Q_ss_h_direct << std::endl;
+            
+            double exp_hmhphmhp = tr(sigma_h_minus*sigma_h_plus*sigma_h_minus*sigma_h_plus*rho);
+            double exp_hphmhphm = tr(sigma_h_plus*sigma_h_minus*sigma_h_plus*sigma_h_minus*rho);
+            double exp_hmhp = tr(sigma_h_minus*sigma_h_plus*rho);
+            double exp_hphm = tr(sigma_h_plus*sigma_h_minus*rho);
+            
+            double Q_ss_h_reduced = epsilon_h*gamma_h_plus*exp_hmhp - epsilon_h*gamma_h_minus*exp_hphm;
+            std::cout << "Q_ss_h_reduced: " << Q_ss_h_reduced << std::endl;
+                
+            double exp_sigma_z_h = tr(sigma_z_h*rho);
+            double exp_sigma_z_c = tr(sigma_z_c*rho);
+            
+            double Q_ss_h = 0.5*epsilon_h*(gamma_h_plus-gamma_h_minus) - 0.5*epsilon_h*(gamma_h_plus+gamma_h_minus)*exp_sigma_z_h;
+            double Q_ss_c = 0.5*epsilon_c*(gamma_c_plus-gamma_c_minus) - 0.5*epsilon_c*(gamma_c_plus+gamma_c_minus)*exp_sigma_z_c;
+            double J_ss_from_rho = Q_ss_h - Q_ss_c;
 
-            Eigen::MatrixXcd sigma_z_c = Eigen::MatrixXcd::Zero(4,4);
-            sigma_z_c(0,0) = 1.0;
-            sigma_z_c(1,1) = -1.0;
-            sigma_z_c(2,2) = 1.0;
-            sigma_z_c(3,3) = -1.0;
-
-            double exp_sigma_z_h = std::real((sigma_z_h*rho).trace());
-            double exp_sigma_z_c = std::real((sigma_z_c*rho).trace());
-            double J_ss_from_rho = 0.5*epsilon_h*(gamma_h_plus-gamma_h_minus) 
-                                 - 0.5*epsilon_c*(gamma_c_plus-gamma_c_minus) 
-                                 + 0.5*epsilon_h*(gamma_h_plus+gamma_h_minus)*exp_sigma_z_h 
-                                 - 0.5*epsilon_c*(gamma_c_plus+gamma_c_minus)*exp_sigma_z_c;
-
-            std::cout << "sigma_z_h: " << exp_sigma_z_h << std::endl;
-            std::cout << "sigma_z_c: " << exp_sigma_z_c << std::endl;
+            std::cout << "Q_ss_h: " << Q_ss_h << std::endl;
+            std::cout << "Q_ss_c: " << Q_ss_c << std::endl;
             std::cout << "J_ss from rho: " << J_ss_from_rho << std::endl;
-
+            
+            Eigen::MatrixXcd A = sigma_z_c;
+            
+            std::complex<double> exp_hphmA = (sigma_h_plus*sigma_h_minus*A*rho).trace();
+            std::complex<double> exp_cpcmA = (sigma_c_plus*sigma_c_minus*A*rho).trace();
+            std::complex<double> exp_hpcmA = (sigma_h_plus*sigma_c_minus*A*rho).trace();
+            std::complex<double> exp_hmcpA = (sigma_h_minus*sigma_c_plus*A*rho).trace();
+            
+            std::complex<double> exp_Ahphm = (A*sigma_h_plus*sigma_h_minus*rho).trace();
+            std::complex<double> exp_Acpcm = (A*sigma_c_plus*sigma_c_minus*rho).trace();
+            std::complex<double> exp_Ahpcm = (A*sigma_h_plus*sigma_c_minus*rho).trace();
+            std::complex<double> exp_Ahmcp = (A*sigma_h_minus*sigma_c_plus*rho).trace();
+            
+            std::complex<double> exp_hpAhm = (sigma_h_plus*A*sigma_h_minus*rho).trace();
+            std::complex<double> exp_hmAhp = (sigma_h_minus*A*sigma_h_plus*rho).trace();
+            std::complex<double> exp_cpAcm = (sigma_c_plus*A*sigma_c_minus*rho).trace();
+            std::complex<double> exp_cmAcp = (sigma_c_minus*A*sigma_c_plus*rho).trace();
+            
+            std::complex<double> exp_hmhpA = (sigma_h_minus*sigma_h_plus*A*rho).trace();
+            //std::complex<double> exp_hphmA = (sigma_h_plus*sigma_h_minus*A*rho).trace();
+            std::complex<double> exp_cmcpA = (sigma_c_minus*sigma_c_plus*A*rho).trace();
+            //std::complex<double> exp_cpcmA = (sigma_c_plus*sigma_c_minus*A*rho).trace();
+            
+            std::complex<double> exp_Ahmhp = (A*sigma_h_minus*sigma_h_plus*rho).trace();
+            //std::complex<double> exp_Ahphm = (A*sigma_h_plus*sigma_h_minus*rho).trace();
+            std::complex<double> exp_Acmcp = (A*sigma_c_minus*sigma_c_plus*rho).trace();
+            //std::complex<double> exp_Acpcm = (A*sigma_c_plus*sigma_c_minus*rho).trace();
+            
+            // TODO
+            std::complex<double> L_A = - imag*epsilon_h*exp_hphmA - imag*epsilon_c*exp_cpcmA 
+                                       - imag*g*exp_hpcmA - imag*g*exp_hmcpA
+                                       + imag*epsilon_h*exp_Ahphm + imag*epsilon_c*exp_Acpcm
+                                       + imag*g*exp_Ahpcm + imag*g*exp_Ahmcp
+                                       + gamma_h_plus*exp_hpAhm - 0.5*gamma_h_plus*exp_hmhpA - 0.5*gamma_h_plus*exp_Ahmhp
+                                       + gamma_h_minus*exp_hmAhp - 0.5*gamma_h_minus*exp_hphmA - 0.5*gamma_h_minus*exp_Ahphm
+                                       + gamma_c_plus*exp_cpAcm - 0.5*gamma_c_plus*exp_cmcpA - 0.5*gamma_c_plus*exp_Acmcp
+                                       + gamma_c_minus*exp_cmAcp - 0.5*gamma_c_minus*exp_cpcmA - 0.5*gamma_c_minus*exp_Acpcm;
+            std::cout << "L_A: " << L_A << std::endl;
             return 0;
 
         // Set the seed
