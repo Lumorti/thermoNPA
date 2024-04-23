@@ -16,6 +16,28 @@ typedef std::vector<std::pair<std::complex<double>, monomial>> polynomial;
 typedef std::vector<polynomial> polynomialVector;
 typedef std::vector<std::vector<polynomial>> polynomialMatrix;
 
+// https://stackoverflow.com/questions/2647858/multiplying-complex-with-constant-in-c
+template <typename T>
+struct identity_t { typedef T type; };
+#define COMPLEX_OPS(OP)                                                 \
+  template <typename _Tp>                                               \
+  std::complex<_Tp>                                                     \
+  operator OP(std::complex<_Tp> lhs, const typename identity_t<_Tp>::type & rhs) \
+  {                                                                     \
+    return lhs OP rhs;                                                  \
+  }                                                                     \
+  template <typename _Tp>                                               \
+  std::complex<_Tp>                                                     \
+  operator OP(const typename identity_t<_Tp>::type & lhs, const std::complex<_Tp> & rhs) \
+  {                                                                     \
+    return lhs OP rhs;                                                  \
+  }
+COMPLEX_OPS(+)
+COMPLEX_OPS(-)
+COMPLEX_OPS(*)
+COMPLEX_OPS(/)
+#undef COMPLEX_OPS
+
 // Useful constants
 const std::complex<double> imag(0, 1);
 
@@ -1268,6 +1290,12 @@ int main(int argc, char* argv[]) {
             Eigen::MatrixXcd sigma_z = Eigen::MatrixXcd::Zero(2,2);
             sigma_z(0,0) = 1.0;
             sigma_z(1,1) = -1.0;
+            Eigen::MatrixXcd sigma_y = Eigen::MatrixXcd::Zero(2,2);
+            sigma_z(0,1) = -imag;
+            sigma_z(1,0) = imag;
+            Eigen::MatrixXcd sigma_x = Eigen::MatrixXcd::Zero(2,2);
+            sigma_z(0,1) = 1;
+            sigma_z(1,0) = 1;
             Eigen::MatrixXcd sigma_plus = Eigen::MatrixXcd::Zero(2,2);
             sigma_plus(0,1) = 1.0;
             Eigen::MatrixXcd sigma_minus = Eigen::MatrixXcd::Zero(2,2);
@@ -1280,6 +1308,12 @@ int main(int argc, char* argv[]) {
             Eigen::MatrixXcd sigma_c_minus = kroneckerProduct(eye, sigma_minus);
             Eigen::MatrixXcd sigma_z_h = kroneckerProduct(sigma_z, eye);
             Eigen::MatrixXcd sigma_z_c = kroneckerProduct(eye, sigma_z);
+            Eigen::MatrixXcd sigma_h_z = sigma_z_h;
+            Eigen::MatrixXcd sigma_c_z = sigma_z_c;
+            Eigen::MatrixXcd sigma_h_y = kroneckerProduct(sigma_y, eye);
+            Eigen::MatrixXcd sigma_c_y = kroneckerProduct(eye, sigma_y);
+            Eigen::MatrixXcd sigma_h_x = kroneckerProduct(sigma_x, eye);
+            Eigen::MatrixXcd sigma_c_x = kroneckerProduct(eye, sigma_x);
 
             Eigen::MatrixXcd H_s = epsilon_h*sigma_h_plus*sigma_h_minus 
                                    + epsilon_c*sigma_c_plus*sigma_c_minus;  
@@ -1317,37 +1351,68 @@ int main(int argc, char* argv[]) {
             std::complex<double> exp_cpcmA = (sigma_c_plus*sigma_c_minus*A*rho).trace();
             std::complex<double> exp_hpcmA = (sigma_h_plus*sigma_c_minus*A*rho).trace();
             std::complex<double> exp_hmcpA = (sigma_h_minus*sigma_c_plus*A*rho).trace();
-            
             std::complex<double> exp_Ahphm = (A*sigma_h_plus*sigma_h_minus*rho).trace();
             std::complex<double> exp_Acpcm = (A*sigma_c_plus*sigma_c_minus*rho).trace();
             std::complex<double> exp_Ahpcm = (A*sigma_h_plus*sigma_c_minus*rho).trace();
             std::complex<double> exp_Ahmcp = (A*sigma_h_minus*sigma_c_plus*rho).trace();
-            
             std::complex<double> exp_hpAhm = (sigma_h_plus*A*sigma_h_minus*rho).trace();
             std::complex<double> exp_hmAhp = (sigma_h_minus*A*sigma_h_plus*rho).trace();
             std::complex<double> exp_cpAcm = (sigma_c_plus*A*sigma_c_minus*rho).trace();
             std::complex<double> exp_cmAcp = (sigma_c_minus*A*sigma_c_plus*rho).trace();
-            
             std::complex<double> exp_hmhpA = (sigma_h_minus*sigma_h_plus*A*rho).trace();
-            //std::complex<double> exp_hphmA = (sigma_h_plus*sigma_h_minus*A*rho).trace();
             std::complex<double> exp_cmcpA = (sigma_c_minus*sigma_c_plus*A*rho).trace();
-            //std::complex<double> exp_cpcmA = (sigma_c_plus*sigma_c_minus*A*rho).trace();
-            
             std::complex<double> exp_Ahmhp = (A*sigma_h_minus*sigma_h_plus*rho).trace();
-            //std::complex<double> exp_Ahphm = (A*sigma_h_plus*sigma_h_minus*rho).trace();
             std::complex<double> exp_Acmcp = (A*sigma_c_minus*sigma_c_plus*rho).trace();
-            //std::complex<double> exp_Acpcm = (A*sigma_c_plus*sigma_c_minus*rho).trace();
             
             // TODO
-            std::complex<double> L_A = - imag*epsilon_h*exp_hphmA - imag*epsilon_c*exp_cpcmA 
-                                       - imag*g*exp_hpcmA - imag*g*exp_hmcpA
-                                       + imag*epsilon_h*exp_Ahphm + imag*epsilon_c*exp_Acpcm
-                                       + imag*g*exp_Ahpcm + imag*g*exp_Ahmcp
-                                       + gamma_h_plus*exp_hpAhm - 0.5*gamma_h_plus*exp_hmhpA - 0.5*gamma_h_plus*exp_Ahmhp
-                                       + gamma_h_minus*exp_hmAhp - 0.5*gamma_h_minus*exp_hphmA - 0.5*gamma_h_minus*exp_Ahphm
-                                       + gamma_c_plus*exp_cpAcm - 0.5*gamma_c_plus*exp_cmcpA - 0.5*gamma_c_plus*exp_Acmcp
-                                       + gamma_c_minus*exp_cmAcp - 0.5*gamma_c_minus*exp_cpcmA - 0.5*gamma_c_minus*exp_Acpcm;
+            std::complex<double> L_A = - imag*epsilon_h*exp_Ahphm - imag*epsilon_c*exp_Acpcm 
+                                       - imag*g*exp_Ahpcm - imag*g*exp_Ahmcp
+                                       + imag*epsilon_h*exp_hphmA + imag*epsilon_c*exp_cpcmA
+                                       + imag*g*exp_hpcmA + imag*g*exp_hmcpA
+                                       + gamma_h_plus*exp_hmAhp - 0.5*gamma_h_plus*exp_Ahmhp - 0.5*gamma_h_plus*exp_hmhpA
+                                       + gamma_h_minus*exp_hpAhm - 0.5*gamma_h_minus*exp_Ahphm - 0.5*gamma_h_minus*exp_hphmA
+                                       + gamma_c_plus*exp_cmAcp - 0.5*gamma_c_plus*exp_Acmcp - 0.5*gamma_c_plus*exp_cmcpA
+                                       + gamma_c_minus*exp_cpAcm - 0.5*gamma_c_minus*exp_Acpcm - 0.5*gamma_c_minus*exp_cpcmA;
             std::cout << "L_A: " << L_A << std::endl;
+            
+            std::complex<double> exp_A = (A*rho).trace();
+            std::complex<double> exp_Ahz = (A*sigma_h_z*rho).trace();
+            std::complex<double> exp_Acz = (A*sigma_c_z*rho).trace();
+            std::complex<double> exp_hzA = (sigma_h_z*A*rho).trace();
+            std::complex<double> exp_czA = (sigma_c_z*A*rho).trace();
+            std::complex<double> exp_Ahxcx = (A*sigma_h_x*sigma_c_x*rho).trace();
+            std::complex<double> exp_Ahycy = (A*sigma_h_y*sigma_c_y*rho).trace();
+            std::complex<double> exp_hxcxA = (sigma_h_x*sigma_c_x*A*rho).trace();
+            std::complex<double> exp_hycyA = (sigma_h_y*sigma_c_y*A*rho).trace();
+            std::complex<double> exp_hxAhx = (sigma_h_x*A*sigma_h_x*rho).trace();
+            std::complex<double> exp_hxAhy = (sigma_h_x*A*sigma_h_y*rho).trace();
+            std::complex<double> exp_hyAhx = (sigma_h_y*A*sigma_h_x*rho).trace();
+            std::complex<double> exp_hyAhy = (sigma_h_y*A*sigma_h_y*rho).trace();
+            std::complex<double> exp_cxAcx = (sigma_c_x*A*sigma_c_x*rho).trace();
+            std::complex<double> exp_cxAcy = (sigma_c_x*A*sigma_c_y*rho).trace();
+            std::complex<double> exp_cyAcx = (sigma_c_y*A*sigma_c_x*rho).trace();
+            std::complex<double> exp_cyAcy = (sigma_c_y*A*sigma_c_y*rho).trace();
+            
+            std::complex<double> L_A_pauli = (-2*gamma_h_plus-2*gamma_h_minus-2*gamma_c_plus-2*gamma_c_minus)*exp_A
+                                           + (-2*imag*epsilon_h-gamma_h_minus+gamma_h_plus)*exp_Ahz
+                                           + (-2*imag*epsilon_c-gamma_c_minus+gamma_c_plus)*exp_Acz 
+                                           + (2*imag*epsilon_h-gamma_h_minus+gamma_h_plus)*exp_hzA
+                                           + (2*imag*epsilon_c-gamma_c_minus+gamma_c_plus)*exp_czA
+                                           + (-2*imag*g)*exp_Ahxcx
+                                           + (-2*imag*g)*exp_Ahycy
+                                           + (2*imag*g)*exp_hxcxA
+                                           + (2*imag*g)*exp_hycyA
+                                           + (gamma_h_plus+gamma_h_minus)*exp_hxAhx
+                                           + (imag*gamma_h_plus-imag*gamma_h_minus)*exp_hxAhy
+                                           + (-imag*gamma_h_plus+imag*gamma_h_minus)*exp_hyAhx
+                                           + (gamma_h_plus+gamma_h_minus)*exp_hyAhy
+                                           + (gamma_c_plus+gamma_c_minus)*exp_cxAcx
+                                           + (imag*gamma_c_plus-imag*gamma_c_minus)*exp_cxAcy
+                                           + (-imag*gamma_c_plus+imag*gamma_c_minus)*exp_cyAcx
+                                           + (gamma_c_plus+gamma_c_minus)*exp_cyAcy;
+                                           
+            std::cout << "L_A_pauli: " << L_A_pauli << std::endl;
+            
             return 0;
 
         // Set the seed
