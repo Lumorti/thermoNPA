@@ -110,20 +110,38 @@ monomial stringToMonomial(std::string asString) {
 
 }
 
+// Pretty print part of monomial
+std::ostream& operator<<(std::ostream& os, const std::pair<char, int>& p) {
+    os << p.first << p.second;
+    return os;
+}
+
 // Pretty print complex numbers
 std::ostream& operator<<(std::ostream& os, const std::complex<double>& c) {
     if (c.imag() == 0) {
-        os << c.real();
+        if (c.real() >= 0) {
+            os << "+" << c.real();
+        } else {
+            os << c.real();
+        }
     } else if (c.real() == 0) {
         if (c.imag() == 1) {
-            os << "i";
+            os << "+i";
         } else if (c.imag() == -1) {
             os << "-i";
         } else {
-            os << c.imag() << "i";
+            if (c.imag() > 0) {
+                os << "+" << c.imag() << "i";
+            } else {
+                os << c.imag() << "i";
+            }
         }
     } else {
-        os << c.real() << "+" << c.imag() << "i";
+        if (c.imag() >= 0) {
+            os << "+(" << c.real() << "+" << c.imag() << "i)";
+        } else {
+            os << "+(" << c.real() << c.imag() << "i)";
+        }
     }
     return os;
 }
@@ -296,6 +314,13 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
 
 }
 
+// Convert a monomial to a string
+std::string monAsString(monomial m) {
+    std::stringstream ss;
+    ss << m;
+    return ss.str();
+}
+
 // Generate a polynomial from a given string (e.g. "2<A1B2>-<A3A1>")
 polynomial stringToPolynomial(std::string asString) {
 
@@ -411,8 +436,27 @@ void getEigens(polynomialMatrix& momentMatrix, const std::vector<monomial>& vari
 
 }
 
+// Compare two parts of monomials, such that "Y1" < "X2", "Y1" < "Y2"
+bool compareReversed(const std::pair<char, int>& a, const std::pair<char, int>& b) {
+    if (a.second == b.second) {
+        return a.first < b.first;
+    } else {
+        return a.second < b.second;
+    }
+}
+
+// Same as above but for full monomials
+bool compareReversed(const monomial& a, const monomial& b) {
+    for (int i=0; i<std::min(a.size(), b.size()); i++) {
+        if (a[i] != b[i]) {
+            return compareReversed(a[i], b[i]);
+        }
+    }
+    return a.size() < b.size();
+}
+
 // Given a monomial, reduce it to its simplest form
-std::pair<std::complex<double>, monomial> reduceMonomial(const monomial& mon_, int verbosity, bool trySwap=true, bool diffLettersCommute=false, bool pauliReductions=true, std::vector<int> reductionsToIgnore={}) {
+std::pair<std::complex<double>, monomial> reduceMonomial(const monomial& mon_, int verbosity, std::string swapType = "numFirst", bool diffLettersCommute=false, bool diffNumbersCommute=true, bool pauliReductions=true, std::vector<int> reductionsToIgnore={}) {
 
     // Sort the monomial as much as we can
     monomial mon = mon_;
@@ -421,6 +465,66 @@ std::pair<std::complex<double>, monomial> reduceMonomial(const monomial& mon_, i
             for (int j=0; j<int(mon.size())-1; j++) {
                 if (mon[j].first != mon[j+1].first && mon[j] > mon[j+1]) {
                     std::swap(mon[j], mon[j+1]);
+                }
+            }
+        }
+    }
+    if (diffNumbersCommute) {
+        for (int i=0; i<mon.size(); i++) {
+            for (int j=0; j<int(mon.size())-1; j++) {
+                if (mon[j].second != mon[j+1].second && !compareReversed(mon[j], mon[j+1])) {
+                    std::swap(mon[j], mon[j+1]);
+                }
+            }
+        }
+    }
+
+    // Simplify Pauli strings using the following rules (plus conjugates):
+    // XY = iZ
+    // ZX = iY
+    // YZ = iX
+    std::complex<double> coeff(1, 0);
+    if (pauliReductions) {
+        if (std::find(reductionsToIgnore.begin(), reductionsToIgnore.end(), mon.size()) == reductionsToIgnore.end() && pauliReductions) {
+            for (int i=mon.size()-1; i>0; i--) {
+                if (mon[i-1].second == mon[i].second) {
+                    if (mon[i-1].first == 'X' && mon[i].first == 'Y') {
+                        coeff *= imag;
+                        mon[i-1] = std::make_pair('Z', mon[i-1].second);
+                        mon.erase(mon.begin()+i);
+                    } else if (mon[i-1].first == 'X' && mon[i].first == 'Z') {
+                        coeff *= -imag;
+                        mon[i-1] = std::make_pair('Y', mon[i-1].second);
+                        mon.erase(mon.begin()+i);
+                    } else if (mon[i-1].first == 'Y' && mon[i].first == 'Z') {
+                        coeff *= imag;
+                        mon[i-1] = std::make_pair('X', mon[i-1].second);
+                        mon.erase(mon.begin()+i);
+                    } else if (mon[i-1].first == 'Y' && mon[i].first == 'X') {
+                        coeff *= -imag;
+                        mon[i-1] = std::make_pair('Z', mon[i-1].second);
+                        mon.erase(mon.begin()+i);
+                    } else if (mon[i-1].first == 'Z' && mon[i].first == 'X') {
+                        coeff *= imag;
+                        mon[i-1] = std::make_pair('Y', mon[i-1].second);
+                        mon.erase(mon.begin()+i);
+                    } else if (mon[i-1].first == 'Z' && mon[i].first == 'Y') {
+                        coeff *= -imag;
+                        mon[i-1] = std::make_pair('X', mon[i-1].second);
+                        mon.erase(mon.begin()+i);
+                    } else if (mon[i-1].first == 'X' && mon[i].first == 'X') {
+                        mon.erase(mon.begin()+i);
+                        mon.erase(mon.begin()+i-1);
+                        i--;
+                    } else if (mon[i-1].first == 'Y' && mon[i].first == 'Y') {
+                        mon.erase(mon.begin()+i);
+                        mon.erase(mon.begin()+i-1);
+                        i--;
+                    } else if (mon[i-1].first == 'Z' && mon[i].first == 'Z') {
+                        mon.erase(mon.begin()+i);
+                        mon.erase(mon.begin()+i-1);
+                        i--;
+                    }
                 }
             }
         }
@@ -437,48 +541,17 @@ std::pair<std::complex<double>, monomial> reduceMonomial(const monomial& mon_, i
         i++;
     }
 
-    // Simplify Pauli strings using the following rules (plus conjugates):
-    // XY = iZ
-    // ZX = iY
-    // YZ = iX
-    std::complex<double> coeff(1, 0);
-    if (std::find(reductionsToIgnore.begin(), reductionsToIgnore.end(), mon.size()) == reductionsToIgnore.end() && pauliReductions) {
-        for (i=mon.size()-1; i>0; i--) {
-            if (mon[i-1].second == mon[i].second) {
-                if (mon[i-1].first == 'X' && mon[i].first == 'Y') {
-                    coeff *= imag;
-                    mon[i-1] = std::make_pair('Z', mon[i-1].second);
-                    mon.erase(mon.begin()+i);
-                } else if (mon[i-1].first == 'X' && mon[i].first == 'Z') {
-                    coeff *= -imag;
-                    mon[i-1] = std::make_pair('Y', mon[i-1].second);
-                    mon.erase(mon.begin()+i);
-                } else if (mon[i-1].first == 'Y' && mon[i].first == 'Z') {
-                    coeff *= imag;
-                    mon[i-1] = std::make_pair('X', mon[i-1].second);
-                    mon.erase(mon.begin()+i);
-                } else if (mon[i-1].first == 'Y' && mon[i].first == 'X') {
-                    coeff *= -imag;
-                    mon[i-1] = std::make_pair('Z', mon[i-1].second);
-                    mon.erase(mon.begin()+i);
-                } else if (mon[i-1].first == 'Z' && mon[i].first == 'X') {
-                    coeff *= imag;
-                    mon[i-1] = std::make_pair('Y', mon[i-1].second);
-                    mon.erase(mon.begin()+i);
-                } else if (mon[i-1].first == 'Z' && mon[i].first == 'Y') {
-                    coeff *= -imag;
-                    mon[i-1] = std::make_pair('X', mon[i-1].second);
-                    mon.erase(mon.begin()+i);
-                }
-            }
-        }
-    }
-
     // Flip it to see if it's smaller
-    if (trySwap) {
+    if (swapType == "letFirst") {
         monomial monFlipped = mon;
         std::reverse(monFlipped.begin(), monFlipped.end());
         if (monFlipped < mon) {
+            mon = monFlipped;
+        }
+    } else if (swapType == "numFirst") {
+        monomial monFlipped = mon;
+        std::reverse(monFlipped.begin(), monFlipped.end());
+        if (compareReversed(monFlipped, mon)) {
             mon = monFlipped;
         }
     }
@@ -493,11 +566,11 @@ std::pair<std::complex<double>, monomial> reduceMonomial(const monomial& mon_, i
 }
 
 // Given a polynomial, reduce each monomial and combine
-polynomial reducePolynomial(polynomial p, int verbosity, bool trySwap=true, bool diffLettersCommute=false, bool pauliReductions=true, std::vector<int> reductionsToIgnore={}) {
+polynomial reducePolynomial(polynomial p, int verbosity) {
 
     // Apply the reduction to each monomial
     for (int j=0; j<p.size(); j++) {
-        std::pair<std::complex<double>, monomial> reducedMonomial = reduceMonomial(p[j].second, verbosity, trySwap, diffLettersCommute, pauliReductions, reductionsToIgnore);
+        std::pair<std::complex<double>, monomial> reducedMonomial = reduceMonomial(p[j].second, verbosity);
         p[j].first *= reducedMonomial.first;
         p[j].second = reducedMonomial.second;
     }
@@ -650,7 +723,7 @@ std::vector<polynomial> generateMonomials(std::vector<monomial> variables, int l
     if (level >= 1) {
         for (long unsigned int i=0; i<variables.size(); i++) {
             monomial currentMonomial = {variables[i][0]};
-            std::pair<std::complex<double>, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity, false);
+            std::pair<std::complex<double>, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity);
             polynomial currentPolynomial = {monomCoeff};
             if (std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
                 monomsInTopRow.push_back(currentPolynomial);
@@ -661,7 +734,7 @@ std::vector<polynomial> generateMonomials(std::vector<monomial> variables, int l
         for (long unsigned int i=0; i<variables.size(); i++) {
             for (long unsigned int j=0; j<variables.size(); j++) {
                 monomial currentMonomial = {variables[i][0], variables[j][0]};
-                std::pair<std::complex<double>, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity, false);
+                std::pair<std::complex<double>, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity);
                 polynomial currentPolynomial = {monomCoeff};
                 if (std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
                     monomsInTopRow.push_back(currentPolynomial);
@@ -674,7 +747,7 @@ std::vector<polynomial> generateMonomials(std::vector<monomial> variables, int l
             for (long unsigned int j=0; j<variables.size(); j++) {
                 for (long unsigned int k=0; k<variables.size(); k++) {
                     monomial currentMonomial = {variables[i][0], variables[j][0], variables[k][0]};
-                    std::pair<std::complex<double>, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity, false);
+                    std::pair<std::complex<double>, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity);
                     polynomial currentPolynomial = {monomCoeff};
                     if (std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
                         monomsInTopRow.push_back(currentPolynomial);
@@ -689,7 +762,7 @@ std::vector<polynomial> generateMonomials(std::vector<monomial> variables, int l
                 for (long unsigned int k=0; k<variables.size(); k++) {
                     for (long unsigned int l=0; l<variables.size(); l++) {
                         monomial currentMonomial = {variables[i][0], variables[j][0], variables[k][0], variables[l][0]};
-                        std::pair<std::complex<double>, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity, false);
+                        std::pair<std::complex<double>, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity);
                         polynomial currentPolynomial = {monomCoeff};
                         if (std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
                             monomsInTopRow.push_back(currentPolynomial);
@@ -706,7 +779,7 @@ std::vector<polynomial> generateMonomials(std::vector<monomial> variables, int l
                     for (long unsigned int l=0; l<variables.size(); l++) {
                         for (long unsigned int m=0; m<variables.size(); m++) {
                             monomial currentMonomial = {variables[i][0], variables[j][0], variables[k][0], variables[l][0], variables[m][0]};
-                            std::pair<std::complex<double>, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity, false);
+                            std::pair<std::complex<double>, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity);
                             polynomial currentPolynomial = {monomCoeff};
                             if (std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
                                 monomsInTopRow.push_back(currentPolynomial);
@@ -725,7 +798,7 @@ std::vector<polynomial> generateMonomials(std::vector<monomial> variables, int l
                         for (long unsigned int m=0; m<variables.size(); m++) {
                             for (long unsigned int n=0; n<variables.size(); n++) {
                                 monomial currentMonomial = {variables[i][0], variables[j][0], variables[k][0], variables[l][0], variables[m][0], variables[n][0]};
-                                std::pair<std::complex<double>, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity, false);
+                                std::pair<std::complex<double>, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity);
                                 polynomial currentPolynomial = {monomCoeff};
                                 if (std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
                                     monomsInTopRow.push_back(currentPolynomial);
@@ -746,7 +819,7 @@ std::vector<polynomial> generateMonomials(std::vector<monomial> variables, int l
                             for (long unsigned int n=0; n<variables.size(); n++) {
                                 for (long unsigned int o=0; o<variables.size(); o++) {
                                     monomial currentMonomial = {variables[i][0], variables[j][0], variables[k][0], variables[l][0], variables[m][0], variables[n][0], variables[o][0]};
-                                    std::pair<std::complex<double>, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity, false);
+                                    std::pair<std::complex<double>, monomial> monomCoeff = reduceMonomial(currentMonomial, verbosity);
                                     polynomial currentPolynomial = {monomCoeff};
                                     if (std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
                                         monomsInTopRow.push_back(currentPolynomial);
@@ -959,11 +1032,11 @@ double solveMOSEK(polynomial obj, std::vector<polynomialMatrix>& psd, std::vecto
 
             // c_r*x_i + c_i*x_r = 0
             ARows.push_back(2*i+1);
-            ACols.push_back(realLoc);
-            AVals.push_back(std::imag(constraintsZero[i][j].first));
-            ARows.push_back(2*i+1);
             ACols.push_back(imagLoc);
             AVals.push_back(std::real(constraintsZero[i][j].first));
+            ARows.push_back(2*i+1);
+            ACols.push_back(realLoc);
+            AVals.push_back(std::imag(constraintsZero[i][j].first));
 
         }
     }
@@ -1048,13 +1121,13 @@ double solveMOSEK(polynomial obj, std::vector<polynomialMatrix>& psd, std::vecto
 
         // Construct the dense matrix for debugging
         if (verbosity >= 3) {
-            std::cout << "Indices: " << indicesPSD << std::endl;
-            std::cout << "Coeffs: " << coeffsPSD << std::endl;
             Eigen::MatrixXi indMat = Eigen::MatrixXi::Zero(fullMatSize, fullMatSize);
+            Eigen::MatrixXd coeffMat = Eigen::MatrixXd::Zero(fullMatSize, fullMatSize);
             int nextX = 0;
             int nextY = 0;
             for (int i=0; i<sVecSize; i++) {
                 indMat(nextX, nextY) = indicesPSD[i];
+                coeffMat(nextX, nextY) = coeffsPSD[i];
                 nextY++;
                 if (nextY == fullMatSize) {
                     nextX++;
@@ -1063,6 +1136,8 @@ double solveMOSEK(polynomial obj, std::vector<polynomialMatrix>& psd, std::vecto
             }
             std::cout << "Indices matrix: " << std::endl;
             std::cout << indMat << std::endl;
+            std::cout << "Coeffs matrix: " << std::endl;
+            std::cout << coeffMat << std::endl;
         }
 
         // Convert to MOSEK form
@@ -1083,7 +1158,7 @@ double solveMOSEK(polynomial obj, std::vector<polynomialMatrix>& psd, std::vecto
     }
 
     // Create the main variable vector
-    mosek::fusion::Variable::t xM = M->variable(variables.size());
+    mosek::fusion::Variable::t xM = M->variable(variables.size(), mosek::fusion::Domain::inRange(-1.0, 1.0));
 
     // The objective function
     M->objective(mosek::fusion::ObjectiveSense::Maximize, mosek::fusion::Expr::dot(cM, xM));
@@ -1150,7 +1225,7 @@ double solveMOSEK(polynomial obj, std::vector<polynomialMatrix>& psd, std::vecto
     // If superverbose, output all monomials
     if (verbosity >= 3) {
         std::cout << "Solution: " << std::endl;
-        for (int i=0; i<variables.size(); i++) {
+        for (int i=0; i<variables.size(); i+=2) {
             std::cout << variables[i] << ": " << variableValues[i] << std::endl;
         }
         std::cout << "There are " << variables.size() << " variables." << std::endl;
@@ -1167,7 +1242,7 @@ double solveMOSEK(polynomial obj, std::vector<polynomialMatrix>& psd, std::vecto
         std::vector<monomial> variablesInObj = {};
         addVariables(variablesInObj, obj);
         for (int i=0; i<variablesInObj.size(); i++) {
-            for (int j=0; j<variables.size(); j++) {
+            for (int j=0; j<variables.size(); j+=2) {
                 if (variablesInObj[i] == variables[j]) {
                     std::cout << variablesInObj[i] << ": " << variableValues[j] << std::endl;
                     break;
@@ -1196,8 +1271,10 @@ int main(int argc, char* argv[]) {
     // Define the scenario
     int level = 1;
     int limbladLevel = 1;
+    int numQubits = 1;
     polynomial objective = stringToPolynomial("<Z1>");
     int verbosity = 1;
+    std::complex<double> knownIdeal = 0.0;
     std::string seed = "";
     polynomial limbladian = stringToPolynomial("<X1A1X1>+<Y1A1Y1>-<A1>");
     std::vector<std::string> extraMonomials;
@@ -1209,8 +1286,8 @@ int main(int argc, char* argv[]) {
     for (int i=1; i<argc; i++) {
         std::string argAsString = std::string(argv[i]);
 
-        // Set the level
-        if (argAsString == "-l") {
+        // Set the level of the moment matrix
+        if (argAsString == "-m") {
             level = std::stoi(argv[i+1]);
             i++;
 
@@ -1248,7 +1325,7 @@ int main(int argc, char* argv[]) {
             i += 3;
 
         // Two-body Limbladian
-        } else if (argAsString == "--two") {
+        } else if (argAsString == "--two" || argAsString == "--twov") {
 
             // Defining quantities
             double gamma_c = 1.1e-2;
@@ -1258,6 +1335,13 @@ int main(int argc, char* argv[]) {
             double T_c = 0.1;
             double delta = 0.005;
             double epsilon_h = 1.0;
+
+            // If the arg is --twov, we have values
+            if (argAsString == "--twov") {
+                T_h = std::stod(argv[i+1]);
+                delta = std::stod(argv[i+2]);
+                i += 2;
+            }
 
             // Calculated quantities
             double epsilon_c = epsilon_h + delta;
@@ -1272,9 +1356,8 @@ int main(int argc, char* argv[]) {
             double Gamma = Gamma_h + Gamma_c;
             double chi = (4.0*g*g+Gamma_h*Gamma_c)*Gamma*Gamma + 4.0*delta*delta*Gamma_h*Gamma_c;
 
-            double J_ss = (8.0*g*g*(gamma_h_plus*gamma_c_minus - gamma_h_minus*gamma_c_plus) / chi) * (epsilon_h*Gamma_c + epsilon_c*Gamma_h);
-
-            std::cout << "ideal J_ss: " << J_ss << std::endl;
+            //double J_ss = (8.0*g*g*(gamma_h_plus*gamma_c_minus - gamma_h_minus*gamma_c_plus) / chi) * (epsilon_h*Gamma_c + epsilon_c*Gamma_h);
+            //std::cout << "ideal J_ss: " << J_ss << std::endl;
 
             Eigen::MatrixXcd rho = Eigen::MatrixXcd::Zero(4,4);
             rho(0,0) = (4.0*g*g*(gamma_h_plus + gamma_c_plus)*(gamma_h_plus + gamma_c_plus)  + gamma_h_plus*gamma_c_plus*(Gamma*Gamma + 4.0*delta*delta)) / chi;
@@ -1284,18 +1367,18 @@ int main(int argc, char* argv[]) {
             rho(1,2) = (2.0*g*(gamma_h_plus*gamma_c_minus - gamma_h_minus*gamma_c_plus)*(imag*Gamma-2.0*delta)) / chi;
             rho(2,1) = std::conj(rho(1,2));
 
-            std::cout << "ideal rho: " << std::endl;
-            std::cout << rho << std::endl;
+            //std::cout << "ideal rho: " << std::endl;
+            //std::cout << rho << std::endl;
             
             Eigen::MatrixXcd sigma_z = Eigen::MatrixXcd::Zero(2,2);
             sigma_z(0,0) = 1.0;
             sigma_z(1,1) = -1.0;
             Eigen::MatrixXcd sigma_y = Eigen::MatrixXcd::Zero(2,2);
-            sigma_z(0,1) = -imag;
-            sigma_z(1,0) = imag;
+            sigma_y(0,1) = -imag;
+            sigma_y(1,0) = imag;
             Eigen::MatrixXcd sigma_x = Eigen::MatrixXcd::Zero(2,2);
-            sigma_z(0,1) = 1;
-            sigma_z(1,0) = 1;
+            sigma_x(0,1) = 1;
+            sigma_x(1,0) = 1;
             Eigen::MatrixXcd sigma_plus = Eigen::MatrixXcd::Zero(2,2);
             sigma_plus(0,1) = 1.0;
             Eigen::MatrixXcd sigma_minus = Eigen::MatrixXcd::Zero(2,2);
@@ -1324,7 +1407,6 @@ int main(int argc, char* argv[]) {
                                                    - 0.5*sigma_h_plus*sigma_h_minus*rho 
                                                    - 0.5*rho*sigma_h_plus*sigma_h_minus);
             double Q_ss_h_direct = tr(H_s*term2);
-            std::cout << "Q_ss_h_direct: " << Q_ss_h_direct << std::endl;
             
             double exp_hmhphmhp = tr(sigma_h_minus*sigma_h_plus*sigma_h_minus*sigma_h_plus*rho);
             double exp_hphmhphm = tr(sigma_h_plus*sigma_h_minus*sigma_h_plus*sigma_h_minus*rho);
@@ -1332,7 +1414,6 @@ int main(int argc, char* argv[]) {
             double exp_hphm = tr(sigma_h_plus*sigma_h_minus*rho);
             
             double Q_ss_h_reduced = epsilon_h*gamma_h_plus*exp_hmhp - epsilon_h*gamma_h_minus*exp_hphm;
-            std::cout << "Q_ss_h_reduced: " << Q_ss_h_reduced << std::endl;
                 
             double exp_sigma_z_h = tr(sigma_z_h*rho);
             double exp_sigma_z_c = tr(sigma_z_c*rho);
@@ -1341,80 +1422,184 @@ int main(int argc, char* argv[]) {
             double Q_ss_c = 0.5*epsilon_c*(gamma_c_plus-gamma_c_minus) - 0.5*epsilon_c*(gamma_c_plus+gamma_c_minus)*exp_sigma_z_c;
             double J_ss_from_rho = Q_ss_h - Q_ss_c;
 
-            std::cout << "Q_ss_h: " << Q_ss_h << std::endl;
-            std::cout << "Q_ss_c: " << Q_ss_c << std::endl;
-            std::cout << "J_ss from rho: " << J_ss_from_rho << std::endl;
+            //std::cout << "J_ss from rho: " << J_ss_from_rho << std::endl;
             
-            Eigen::MatrixXcd A = sigma_z_c;
+            //Eigen::MatrixXcd A = sigma_z_c;
             
-            std::complex<double> exp_hphmA = (sigma_h_plus*sigma_h_minus*A*rho).trace();
-            std::complex<double> exp_cpcmA = (sigma_c_plus*sigma_c_minus*A*rho).trace();
-            std::complex<double> exp_hpcmA = (sigma_h_plus*sigma_c_minus*A*rho).trace();
-            std::complex<double> exp_hmcpA = (sigma_h_minus*sigma_c_plus*A*rho).trace();
-            std::complex<double> exp_Ahphm = (A*sigma_h_plus*sigma_h_minus*rho).trace();
-            std::complex<double> exp_Acpcm = (A*sigma_c_plus*sigma_c_minus*rho).trace();
-            std::complex<double> exp_Ahpcm = (A*sigma_h_plus*sigma_c_minus*rho).trace();
-            std::complex<double> exp_Ahmcp = (A*sigma_h_minus*sigma_c_plus*rho).trace();
-            std::complex<double> exp_hpAhm = (sigma_h_plus*A*sigma_h_minus*rho).trace();
-            std::complex<double> exp_hmAhp = (sigma_h_minus*A*sigma_h_plus*rho).trace();
-            std::complex<double> exp_cpAcm = (sigma_c_plus*A*sigma_c_minus*rho).trace();
-            std::complex<double> exp_cmAcp = (sigma_c_minus*A*sigma_c_plus*rho).trace();
-            std::complex<double> exp_hmhpA = (sigma_h_minus*sigma_h_plus*A*rho).trace();
-            std::complex<double> exp_cmcpA = (sigma_c_minus*sigma_c_plus*A*rho).trace();
-            std::complex<double> exp_Ahmhp = (A*sigma_h_minus*sigma_h_plus*rho).trace();
-            std::complex<double> exp_Acmcp = (A*sigma_c_minus*sigma_c_plus*rho).trace();
+            //std::complex<double> exp_hphmA = (sigma_h_plus*sigma_h_minus*A*rho).trace();
+            //std::complex<double> exp_cpcmA = (sigma_c_plus*sigma_c_minus*A*rho).trace();
+            //std::complex<double> exp_hpcmA = (sigma_h_plus*sigma_c_minus*A*rho).trace();
+            //std::complex<double> exp_hmcpA = (sigma_h_minus*sigma_c_plus*A*rho).trace();
+            //std::complex<double> exp_Ahphm = (A*sigma_h_plus*sigma_h_minus*rho).trace();
+            //std::complex<double> exp_Acpcm = (A*sigma_c_plus*sigma_c_minus*rho).trace();
+            //std::complex<double> exp_Ahpcm = (A*sigma_h_plus*sigma_c_minus*rho).trace();
+            //std::complex<double> exp_Ahmcp = (A*sigma_h_minus*sigma_c_plus*rho).trace();
+            //std::complex<double> exp_hpAhm = (sigma_h_plus*A*sigma_h_minus*rho).trace();
+            //std::complex<double> exp_hmAhp = (sigma_h_minus*A*sigma_h_plus*rho).trace();
+            //std::complex<double> exp_cpAcm = (sigma_c_plus*A*sigma_c_minus*rho).trace();
+            //std::complex<double> exp_cmAcp = (sigma_c_minus*A*sigma_c_plus*rho).trace();
+            //std::complex<double> exp_hmhpA = (sigma_h_minus*sigma_h_plus*A*rho).trace();
+            //std::complex<double> exp_cmcpA = (sigma_c_minus*sigma_c_plus*A*rho).trace();
+            //std::complex<double> exp_Ahmhp = (A*sigma_h_minus*sigma_h_plus*rho).trace();
+            //std::complex<double> exp_Acmcp = (A*sigma_c_minus*sigma_c_plus*rho).trace();
             
-            // TODO
-            std::complex<double> L_A = - imag*epsilon_h*exp_Ahphm - imag*epsilon_c*exp_Acpcm 
-                                       - imag*g*exp_Ahpcm - imag*g*exp_Ahmcp
-                                       + imag*epsilon_h*exp_hphmA + imag*epsilon_c*exp_cpcmA
-                                       + imag*g*exp_hpcmA + imag*g*exp_hmcpA
-                                       + gamma_h_plus*exp_hmAhp - 0.5*gamma_h_plus*exp_Ahmhp - 0.5*gamma_h_plus*exp_hmhpA
-                                       + gamma_h_minus*exp_hpAhm - 0.5*gamma_h_minus*exp_Ahphm - 0.5*gamma_h_minus*exp_hphmA
-                                       + gamma_c_plus*exp_cmAcp - 0.5*gamma_c_plus*exp_Acmcp - 0.5*gamma_c_plus*exp_cmcpA
-                                       + gamma_c_minus*exp_cpAcm - 0.5*gamma_c_minus*exp_Acpcm - 0.5*gamma_c_minus*exp_cpcmA;
-            std::cout << "L_A: " << L_A << std::endl;
-            
-            std::complex<double> exp_A = (A*rho).trace();
-            std::complex<double> exp_Ahz = (A*sigma_h_z*rho).trace();
-            std::complex<double> exp_Acz = (A*sigma_c_z*rho).trace();
-            std::complex<double> exp_hzA = (sigma_h_z*A*rho).trace();
-            std::complex<double> exp_czA = (sigma_c_z*A*rho).trace();
-            std::complex<double> exp_Ahxcx = (A*sigma_h_x*sigma_c_x*rho).trace();
-            std::complex<double> exp_Ahycy = (A*sigma_h_y*sigma_c_y*rho).trace();
-            std::complex<double> exp_hxcxA = (sigma_h_x*sigma_c_x*A*rho).trace();
-            std::complex<double> exp_hycyA = (sigma_h_y*sigma_c_y*A*rho).trace();
-            std::complex<double> exp_hxAhx = (sigma_h_x*A*sigma_h_x*rho).trace();
-            std::complex<double> exp_hxAhy = (sigma_h_x*A*sigma_h_y*rho).trace();
-            std::complex<double> exp_hyAhx = (sigma_h_y*A*sigma_h_x*rho).trace();
-            std::complex<double> exp_hyAhy = (sigma_h_y*A*sigma_h_y*rho).trace();
-            std::complex<double> exp_cxAcx = (sigma_c_x*A*sigma_c_x*rho).trace();
-            std::complex<double> exp_cxAcy = (sigma_c_x*A*sigma_c_y*rho).trace();
-            std::complex<double> exp_cyAcx = (sigma_c_y*A*sigma_c_x*rho).trace();
-            std::complex<double> exp_cyAcy = (sigma_c_y*A*sigma_c_y*rho).trace();
-            
-            std::complex<double> L_A_pauli = (-2*gamma_h_plus-2*gamma_h_minus-2*gamma_c_plus-2*gamma_c_minus)*exp_A
-                                           + (-2*imag*epsilon_h-gamma_h_minus+gamma_h_plus)*exp_Ahz
-                                           + (-2*imag*epsilon_c-gamma_c_minus+gamma_c_plus)*exp_Acz 
-                                           + (2*imag*epsilon_h-gamma_h_minus+gamma_h_plus)*exp_hzA
-                                           + (2*imag*epsilon_c-gamma_c_minus+gamma_c_plus)*exp_czA
-                                           + (-2*imag*g)*exp_Ahxcx
-                                           + (-2*imag*g)*exp_Ahycy
-                                           + (2*imag*g)*exp_hxcxA
-                                           + (2*imag*g)*exp_hycyA
-                                           + (gamma_h_plus+gamma_h_minus)*exp_hxAhx
-                                           + (imag*gamma_h_plus-imag*gamma_h_minus)*exp_hxAhy
-                                           + (-imag*gamma_h_plus+imag*gamma_h_minus)*exp_hyAhx
-                                           + (gamma_h_plus+gamma_h_minus)*exp_hyAhy
-                                           + (gamma_c_plus+gamma_c_minus)*exp_cxAcx
-                                           + (imag*gamma_c_plus-imag*gamma_c_minus)*exp_cxAcy
-                                           + (-imag*gamma_c_plus+imag*gamma_c_minus)*exp_cyAcx
-                                           + (gamma_c_plus+gamma_c_minus)*exp_cyAcy;
-                                           
-            std::cout << "L_A_pauli: " << L_A_pauli << std::endl;
-            
-            return 0;
+            //std::complex<double> L_A = - imag*epsilon_h*exp_Ahphm - imag*epsilon_c*exp_Acpcm 
+                                       //- imag*g*exp_Ahpcm - imag*g*exp_Ahmcp
+                                       //+ imag*epsilon_h*exp_hphmA + imag*epsilon_c*exp_cpcmA
+                                       //+ imag*g*exp_hpcmA + imag*g*exp_hmcpA
+                                       //+ gamma_h_plus*exp_hmAhp - 0.5*gamma_h_plus*exp_Ahmhp - 0.5*gamma_h_plus*exp_hmhpA
+                                       //+ gamma_h_minus*exp_hpAhm - 0.5*gamma_h_minus*exp_Ahphm - 0.5*gamma_h_minus*exp_hphmA
+                                       //+ gamma_c_plus*exp_cmAcp - 0.5*gamma_c_plus*exp_Acmcp - 0.5*gamma_c_plus*exp_cmcpA
+                                       //+ gamma_c_minus*exp_cpAcm - 0.5*gamma_c_minus*exp_Acpcm - 0.5*gamma_c_minus*exp_cpcmA;
+            //std::cout << "L_A: " << L_A << std::endl;
 
+            //Eigen::MatrixXcd hphmA = sigma_h_plus*sigma_h_minus*A;
+            //Eigen::MatrixXcd cpcmA = sigma_c_plus*sigma_c_minus*A;
+            //Eigen::MatrixXcd hpcmA = sigma_h_plus*sigma_c_minus*A;
+            //Eigen::MatrixXcd hmcpA = sigma_h_minus*sigma_c_plus*A;
+            //Eigen::MatrixXcd Ahphm = A*sigma_h_plus*sigma_h_minus;
+            //Eigen::MatrixXcd Acpcm = A*sigma_c_plus*sigma_c_minus;
+            //Eigen::MatrixXcd Ahpcm = A*sigma_h_plus*sigma_c_minus;
+            //Eigen::MatrixXcd Ahmcp = A*sigma_h_minus*sigma_c_plus;
+            //Eigen::MatrixXcd hpAhm = sigma_h_plus*A*sigma_h_minus;
+            //Eigen::MatrixXcd hmAhp = sigma_h_minus*A*sigma_h_plus;
+            //Eigen::MatrixXcd cpAcm = sigma_c_plus*A*sigma_c_minus;
+            //Eigen::MatrixXcd cmAcp = sigma_c_minus*A*sigma_c_plus;
+            //Eigen::MatrixXcd hmhpA = sigma_h_minus*sigma_h_plus*A;
+            //Eigen::MatrixXcd cmcpA = sigma_c_minus*sigma_c_plus*A;
+            //Eigen::MatrixXcd Ahmhp = A*sigma_h_minus*sigma_h_plus;
+            //Eigen::MatrixXcd Acmcp = A*sigma_c_minus*sigma_c_plus;
+            
+            //Eigen::MatrixXcd LMat = - imag*epsilon_h*Ahphm - imag*epsilon_c*Acpcm 
+                                       //- imag*g*Ahpcm - imag*g*Ahmcp
+                                       //+ imag*epsilon_h*hphmA + imag*epsilon_c*cpcmA
+                                       //+ imag*g*hpcmA + imag*g*hmcpA
+                                       //+ gamma_h_plus*hmAhp - 0.5*gamma_h_plus*Ahmhp - 0.5*gamma_h_plus*hmhpA
+                                       //+ gamma_h_minus*hpAhm - 0.5*gamma_h_minus*Ahphm - 0.5*gamma_h_minus*hphmA
+                                       //+ gamma_c_plus*cmAcp - 0.5*gamma_c_plus*Acmcp - 0.5*gamma_c_plus*cmcpA
+                                       //+ gamma_c_minus*cpAcm - 0.5*gamma_c_minus*Acpcm - 0.5*gamma_c_minus*cpcmA;
+            
+            //std::complex<double> exp_A = (A*rho).trace();
+            //std::complex<double> exp_Ahz = (A*sigma_h_z*rho).trace();
+            //std::complex<double> exp_Acz = (A*sigma_c_z*rho).trace();
+            //std::complex<double> exp_hzA = (sigma_h_z*A*rho).trace();
+            //std::complex<double> exp_czA = (sigma_c_z*A*rho).trace();
+            //std::complex<double> exp_Ahxcx = (A*sigma_h_x*sigma_c_x*rho).trace();
+            //std::complex<double> exp_Ahycy = (A*sigma_h_y*sigma_c_y*rho).trace();
+            //std::complex<double> exp_hxcxA = (sigma_h_x*sigma_c_x*A*rho).trace();
+            //std::complex<double> exp_hycyA = (sigma_h_y*sigma_c_y*A*rho).trace();
+            //std::complex<double> exp_hxAhx = (sigma_h_x*A*sigma_h_x*rho).trace();
+            //std::complex<double> exp_hxAhy = (sigma_h_x*A*sigma_h_y*rho).trace();
+            //std::complex<double> exp_hyAhx = (sigma_h_y*A*sigma_h_x*rho).trace();
+            //std::complex<double> exp_hyAhy = (sigma_h_y*A*sigma_h_y*rho).trace();
+            //std::complex<double> exp_cxAcx = (sigma_c_x*A*sigma_c_x*rho).trace();
+            //std::complex<double> exp_cxAcy = (sigma_c_x*A*sigma_c_y*rho).trace();
+            //std::complex<double> exp_cyAcx = (sigma_c_y*A*sigma_c_x*rho).trace();
+            //std::complex<double> exp_cyAcy = (sigma_c_y*A*sigma_c_y*rho).trace();
+            
+            //Eigen::MatrixXcd Ahz = A*sigma_h_z;
+            //Eigen::MatrixXcd Acz = A*sigma_c_z;
+            //Eigen::MatrixXcd hzA = sigma_h_z*A;
+            //Eigen::MatrixXcd czA = sigma_c_z*A;
+            //Eigen::MatrixXcd Ahxcx = A*sigma_h_x*sigma_c_x;
+            //Eigen::MatrixXcd Ahycy = A*sigma_h_y*sigma_c_y;
+            //Eigen::MatrixXcd hxcxA = sigma_h_x*sigma_c_x*A;
+            //Eigen::MatrixXcd hycyA = sigma_h_y*sigma_c_y*A;
+            //Eigen::MatrixXcd hxAhx = sigma_h_x*A*sigma_h_x;
+            //Eigen::MatrixXcd hxAhy = sigma_h_x*A*sigma_h_y;
+            //Eigen::MatrixXcd hyAhx = sigma_h_y*A*sigma_h_x;
+            //Eigen::MatrixXcd hyAhy = sigma_h_y*A*sigma_h_y;
+            //Eigen::MatrixXcd cxAcx = sigma_c_x*A*sigma_c_x;
+            //Eigen::MatrixXcd cxAcy = sigma_c_x*A*sigma_c_y;
+            //Eigen::MatrixXcd cyAcx = sigma_c_y*A*sigma_c_x;
+            //Eigen::MatrixXcd cyAcy = sigma_c_y*A*sigma_c_y;
+            
+            //std::complex<double> L_A_pauli = (-2*gamma_h_plus-2*gamma_h_minus-2*gamma_c_plus-2*gamma_c_minus)*exp_A
+                                           //+ (-2*imag*epsilon_h-gamma_h_minus+gamma_h_plus)*exp_Ahz
+                                           //+ (-2*imag*epsilon_c-gamma_c_minus+gamma_c_plus)*exp_Acz 
+                                           //+ (2*imag*epsilon_h-gamma_h_minus+gamma_h_plus)*exp_hzA
+                                           //+ (2*imag*epsilon_c-gamma_c_minus+gamma_c_plus)*exp_czA
+                                           //+ (-2*imag*g)*exp_Ahxcx
+                                           //+ (-2*imag*g)*exp_Ahycy
+                                           //+ (2*imag*g)*exp_hxcxA
+                                           //+ (2*imag*g)*exp_hycyA
+                                           //+ (gamma_h_plus+gamma_h_minus)*exp_hxAhx
+                                           //+ (imag*gamma_h_plus-imag*gamma_h_minus)*exp_hxAhy
+                                           //+ (-imag*gamma_h_plus+imag*gamma_h_minus)*exp_hyAhx
+                                           //+ (gamma_h_plus+gamma_h_minus)*exp_hyAhy
+                                           //+ (gamma_c_plus+gamma_c_minus)*exp_cxAcx
+                                           //+ (imag*gamma_c_plus-imag*gamma_c_minus)*exp_cxAcy
+                                           //+ (-imag*gamma_c_plus+imag*gamma_c_minus)*exp_cyAcx
+                                           //+ (gamma_c_plus+gamma_c_minus)*exp_cyAcy;
+                                           
+            //Eigen::MatrixXcd LMat_pauli = (-2*gamma_h_plus-2*gamma_h_minus-2*gamma_c_plus-2*gamma_c_minus)*A
+                                           //+ (-2*imag*epsilon_h-gamma_h_minus+gamma_h_plus)*Ahz
+                                           //+ (-2*imag*epsilon_c-gamma_c_minus+gamma_c_plus)*Acz 
+                                           //+ (2*imag*epsilon_h-gamma_h_minus+gamma_h_plus)*hzA
+                                           //+ (2*imag*epsilon_c-gamma_c_minus+gamma_c_plus)*czA
+                                           //+ (-2*imag*g)*Ahxcx
+                                           //+ (-2*imag*g)*Ahycy
+                                           //+ (2*imag*g)*hxcxA
+                                           //+ (2*imag*g)*hycyA
+                                           //+ (gamma_h_plus+gamma_h_minus)*hxAhx
+                                           //+ (imag*gamma_h_plus-imag*gamma_h_minus)*hxAhy
+                                           //+ (-imag*gamma_h_plus+imag*gamma_h_minus)*hyAhx
+                                           //+ (gamma_h_plus+gamma_h_minus)*hyAhy
+                                           //+ (gamma_c_plus+gamma_c_minus)*cxAcx
+                                           //+ (imag*gamma_c_plus-imag*gamma_c_minus)*cxAcy
+                                           //+ (-imag*gamma_c_plus+imag*gamma_c_minus)*cyAcx
+                                           //+ (gamma_c_plus+gamma_c_minus)*cyAcy;
+
+            //std::cout << "L_A_pauli: " << L_A_pauli << std::endl;
+
+            // Other system settings
+            numQubits = 2;
+            knownIdeal = J_ss_from_rho;
+
+            // Construct the objective as a polynomial with plus/minus mats TODO
+            objective = {};
+            objective.push_back({epsilon_h*gamma_h_plus,      stringToMonomial("<M1P1M1P1>")});
+            objective.push_back({-0.5*epsilon_h*gamma_h_plus, stringToMonomial("<P1M1M1P1>")});
+            objective.push_back({-0.5*epsilon_h*gamma_h_plus, stringToMonomial("<M1P1P1M1>")});
+            objective.push_back({epsilon_h*gamma_h_minus,      stringToMonomial("<P1P1M1M1>")});
+            objective.push_back({-0.5*epsilon_h*gamma_h_minus, stringToMonomial("<P1M1P1M1>")});
+            objective.push_back({-0.5*epsilon_h*gamma_h_minus, stringToMonomial("<P1M1P1M1>")});
+            objective.push_back({epsilon_c*gamma_h_plus,      stringToMonomial("<M1P2M2P1>")});
+            objective.push_back({-0.5*epsilon_c*gamma_h_plus, stringToMonomial("<P2M2M1P1>")});
+            objective.push_back({-0.5*epsilon_c*gamma_h_plus, stringToMonomial("<M1P1P2M2>")});
+            objective.push_back({epsilon_c*gamma_h_minus,      stringToMonomial("<P1P2M2M1>")});
+            objective.push_back({-0.5*epsilon_c*gamma_h_minus, stringToMonomial("<P2M2P1M1>")});
+            objective.push_back({-0.5*epsilon_c*gamma_h_minus, stringToMonomial("<P1M1P2M2>")});
+            objective = removePlusMinus(objective);
+            std::cout << objective << std::endl;
+            
+            // Construct the objective as a polynomial
+            objective = {};
+            objective.push_back({0.5*epsilon_h*(gamma_h_plus-gamma_h_minus)-0.5*epsilon_c*(gamma_c_plus-gamma_c_minus), stringToMonomial("")});
+            objective.push_back({-0.5*epsilon_h*(gamma_h_plus+gamma_h_minus), stringToMonomial("<Z1>")});
+            objective.push_back({0.5*epsilon_c*(gamma_c_plus+gamma_c_minus), stringToMonomial("<Z2>")});
+            std::cout << objective << std::endl;
+                        
+            // Construct the Limbadlian as a polynomial
+            limbladian = {};
+            limbladian.push_back({(-2*gamma_h_plus-2*gamma_h_minus-2*gamma_c_plus-2*gamma_c_minus), stringToMonomial("<A1>")});
+            limbladian.push_back({(-2*imag*epsilon_h-gamma_h_minus+gamma_h_plus), stringToMonomial("<A1Z1>")});
+            limbladian.push_back({(-2*imag*epsilon_c-gamma_c_minus+gamma_c_plus), stringToMonomial("<A1Z2>")});
+            limbladian.push_back({(2*imag*epsilon_h-gamma_h_minus+gamma_h_plus), stringToMonomial("<Z1A1>")});
+            limbladian.push_back({(2*imag*epsilon_c-gamma_c_minus+gamma_c_plus), stringToMonomial("<Z2A1>")});
+            limbladian.push_back({(-2*imag*g), stringToMonomial("<A1X1X2>")});
+            limbladian.push_back({(-2*imag*g), stringToMonomial("<A1Y1Y2>")});
+            limbladian.push_back({(2*imag*g), stringToMonomial("<X1X2A1>")});
+            limbladian.push_back({(2*imag*g), stringToMonomial("<Y1Y2A1>")});
+            limbladian.push_back({(gamma_h_plus+gamma_h_minus), stringToMonomial("<X1A1X1>")});
+            limbladian.push_back({(imag*gamma_h_plus-imag*gamma_h_minus), stringToMonomial("<X1A1Y1>")});
+            limbladian.push_back({(-imag*gamma_h_plus+imag*gamma_h_minus), stringToMonomial("<Y1A1X1>")});
+            limbladian.push_back({(gamma_h_plus+gamma_h_minus), stringToMonomial("<Y1A1Y1>")});
+            limbladian.push_back({(gamma_c_plus+gamma_c_minus), stringToMonomial("<X2A1X2>")});
+            limbladian.push_back({(imag*gamma_c_plus-imag*gamma_c_minus), stringToMonomial("<X2A1Y2>")});
+            limbladian.push_back({(-imag*gamma_c_plus+imag*gamma_c_minus), stringToMonomial("<Y2A1X2>")});
+            limbladian.push_back({(gamma_c_plus+gamma_c_minus), stringToMonomial("<Y2A1Y2>")});
+                                           
         // Set the seed
         } else if (argAsString == "-S") {
             seed = std::string(argv[i+1]);
@@ -1432,7 +1617,7 @@ int main(int argc, char* argv[]) {
             i++;
 
         // If setting the level of the Limbladian
-        } else if (argAsString == "-m") {
+        } else if (argAsString == "-l") {
             limbladLevel = std::stoi(argv[i+1]);
             i++;
 
@@ -1461,8 +1646,8 @@ int main(int argc, char* argv[]) {
             std::cout << "                  Use the Pauli Limbladian with coeffs" << std::endl;
             std::cout << "  --two <num> <num> <num>" << std::endl;
             std::cout << "                  Use the two-body Limbladian with coeffs" << std::endl;
-            std::cout << "  -l <num>        Level of the moment matrix" << std::endl;
-            std::cout << "  -m <num>        Level of the moments to put in the Limbladian" << std::endl;
+            std::cout << "  -m <num>        Level of the moment matrix" << std::endl;
+            std::cout << "  -l <num>        Level of the moments to put in the Limbladian" << std::endl;
             std::cout << "  -e <monom>      Add an extra monomial to the top row" << std::endl;
             std::cout << "  -E <monom>      Add an extra monomial to the list of Limbladian replacements" << std::endl;
             std::cout << "  -S <str>        Seed for the random number generator" << std::endl;
@@ -1486,8 +1671,12 @@ int main(int argc, char* argv[]) {
     }
 
     // Create the Limbladian applied to many different operators
-    // TODO seg fault on level 2
-    std::vector<monomial> variables = {stringToMonomial("<X1>"), stringToMonomial("<Y1>"), stringToMonomial("<Z1>")};
+    std::vector<monomial> variables = {};
+    for (int i=0; i<numQubits; i++) {
+        variables.push_back(stringToMonomial("<X" + std::to_string(i+1) + ">"));
+        variables.push_back(stringToMonomial("<Y" + std::to_string(i+1) + ">"));
+        variables.push_back(stringToMonomial("<Z" + std::to_string(i+1) + ">"));
+    }
     std::vector<polynomial> variablesToPut = generateMonomials(variables, limbladLevel, verbosity);
     for (int i=0; i<extraMonomialsLim.size(); i++) {
         variablesToPut.push_back(stringToPolynomial(extraMonomialsLim[i]));
@@ -1516,7 +1705,7 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
-        if (verbosity >= 2) {
+        if (verbosity >= 3) {
             std::cout << std::endl;
             std::cout << "Variable to put: " << variablesToPut[i] << std::endl;
             std::cout << "New constraint: " << newConstraint << std::endl;
@@ -1530,7 +1719,7 @@ int main(int argc, char* argv[]) {
             std::cout << std::endl;
             std::cout << "Reducing constraint: " << constraintsZero[i] << std::endl;
         }
-        constraintsZero[i] = reducePolynomial(constraintsZero[i], verbosity, true, false, true, reductionsToIgnore);
+        constraintsZero[i] = reducePolynomial(constraintsZero[i], verbosity);
         if (verbosity >= 2) {
             std::cout << "Reduced constraint: " << constraintsZero[i] << std::endl;
         }
@@ -1611,8 +1800,11 @@ int main(int argc, char* argv[]) {
         std::cout << std::endl;
     }
     if (verbosity >= 1) {
-        std::cout << "Upper bound: " << upperBound << std::endl;
-        std::cout << "Lower bound: " << lowerBound << std::endl;
+        std::cout << "Known ideal: " << knownIdeal << std::endl;
+        std::cout << "Upper bound: " << upperBound << " (" << 100*(upperBound-knownIdeal)/knownIdeal << "%)" << std::endl;
+        std::cout << "Lower bound: " << lowerBound << " (" << 100*(lowerBound-knownIdeal)/knownIdeal << "%)" << std::endl;
+        std::cout << "Difference: " << upperBound - lowerBound << std::endl;
+        std::cout << "Error: " << 100*(upperBound-lowerBound)/knownIdeal << "%" << std::endl;
     }
 
     // Exit without errors
