@@ -33,7 +33,7 @@ COMPLEX_OPS(/)
 
 // Useful constants
 const std::complex<double> imag(0, 1);
-const double zeroTol = 1e-10;
+const double zeroTol = 1e-13;
 
 // Pretty print part of monomial
 std::ostream& operator<<(std::ostream& os, const std::pair<char, int>& p) {
@@ -71,37 +71,6 @@ std::ostream& operator<<(std::ostream& os, const std::complex<double>& c) {
     return os;
 }
  
-// Given a polynomial, combine all of the terms of the same monomial
-//polynomial simplify(polynomial p) {
-
-    //// Create the return polynomial
-    //polynomial toReturn;
-
-    //// Iterate through the polynomial
-    //for (size_t i=0; i<p.size(); i++) {
-
-        //// Check if this monomial is already in the return polynomial
-        //bool found = false;
-        //for (size_t j=0; j<toReturn.size(); j++) {
-            //if (toReturn[j].second == p[i].second) {
-                //toReturn[j].first += p[i].first;
-                //found = true;
-                //break;
-            //}
-        //}
-
-        //// If not, add it
-        //if (!found) {
-            //toReturn.push_back(p[i]);
-        //}
-
-    //}
-
-    //// Return the simplified polynomial
-    //return toReturn;
-
-//}
-
 // Non-commuting monomial class
 class Mon {
 public:
@@ -236,7 +205,7 @@ public:
     }
 
     // Given a monomial, reduce it to its simplest form
-    std::pair<std::complex<double>, Mon> reduce(std::string swapType = "numFirst", bool diffLettersCommute=false, bool diffNumbersCommute=true, bool pauliReductions=true, std::vector<int> reductionsToIgnore={}) {
+    std::pair<std::complex<double>, Mon> reduce(std::string swapType = "none", bool diffLettersCommute=false, bool diffNumbersCommute=true, bool pauliReductions=true, std::vector<int> reductionsToIgnore={}) {
 
         // Sort the monomial as much as we can
         Mon mon = *this;
@@ -252,7 +221,7 @@ public:
         if (diffNumbersCommute) {
             for (int i=0; i<mon.size(); i++) {
                 for (int j=0; j<int(mon.size())-1; j++) {
-                    if (mon[j].second != mon[j+1].second && !compareReversed(mon[j], mon[j+1])) {
+                    if (mon[j].second != mon[j+1].second && !compareReversed(mon[j], mon[j+1]) && mon[j].second > 0 && mon[j+1].second > 0) {
                         std::swap(mon[j], mon[j+1]);
                     }
                 }
@@ -387,6 +356,11 @@ public:
         polynomial = {{coeff, Mon()}};
     }
 
+    // If initialized from just a monomial
+    Poly(Mon mon) {
+        polynomial = {{1, mon}};
+    }
+
     // If initialized from a vector
     Poly (std::vector<std::pair<std::complex<double>, Mon>> polynomial) {
         polynomial = polynomial;
@@ -514,6 +488,14 @@ public:
         return toReturn;
     }
 
+    // When subtracting in-place
+    Poly& operator-=(const Poly& other) {
+        for (size_t i=0; i<other.polynomial.size(); i++) {
+            polynomial.push_back(std::make_pair(-other.polynomial[i].first, other.polynomial[i].second));
+        }
+        return *this;
+    }
+
     // When multiplying two polynomials
     Poly operator*(const Poly& other) {
         Poly toReturn;
@@ -525,6 +507,47 @@ public:
             }
         }
         return toReturn;
+    }
+
+    // When multiplying by a constant
+    Poly operator*(const std::complex<double>& other) {
+        Poly toReturn;
+        for (size_t i=0; i<polynomial.size(); i++) {
+            toReturn.polynomial.push_back(std::make_pair(polynomial[i].first * other, polynomial[i].second));
+        }
+        return toReturn;
+    }
+
+    // When multiplying by a constant in-place
+    Poly& operator*=(const std::complex<double>& other) {
+        for (size_t i=0; i<polynomial.size(); i++) {
+            polynomial[i].first *= other;
+        }
+        return *this;
+    }
+
+    // When dividing by a constant
+    Poly operator/(const std::complex<double>& other) {
+        Poly toReturn;
+        for (size_t i=0; i<polynomial.size(); i++) {
+            toReturn.polynomial.push_back(std::make_pair(polynomial[i].first / other, polynomial[i].second));
+        }
+        return toReturn;
+    }
+
+    // When dividing by a constant in-place
+    Poly& operator/=(const std::complex<double>& other) {
+        for (size_t i=0; i<polynomial.size(); i++) {
+            polynomial[i].first /= other;
+        }
+        return *this;
+    }
+
+    // Sort the terms by monomial
+    void sort() {
+        std::sort(polynomial.begin(), polynomial.end(), [](const std::pair<std::complex<double>, Mon>& a, const std::pair<std::complex<double>, Mon>& b) {
+            return a.second < b.second;
+        });
     }
 
     // Size of the polynomial
@@ -652,7 +675,7 @@ public:
 
     }
 
-    // Replace a monomial by a polynomial TODO
+    // Replace a monomial by a polynomial
     void replace(Mon mon, Poly replacement) {
 
         // Iterate through the polynomial
@@ -667,7 +690,7 @@ public:
                 Poly toMultiply(polynomial[i].second[j]);
                 if (polynomial[i].second[j] == mon[0]) {
                     toMultiply = replacement;
-                } else if (polynomial[i].second[j].first == mon[0].first && mon[0].second == -1) {
+                } else if (polynomial[i].second[j].first == mon[0].first && mon[0].second == 0) {
                     toMultiply = replacement;
                     for (int k=0; k<toMultiply.size(); k++) {
                         for (int l=0; l<toMultiply[k].second.size(); l++) {
@@ -679,6 +702,7 @@ public:
                 // Perform the multiplication and reduce
                 newTerm = newTerm * toMultiply;
                 newTerm.reduce();
+
 
             }
 
@@ -700,12 +724,12 @@ public:
         return toReturn;
     }
 
-    // Reduce a polynomial using plus/minus operators to Paulis TODO
+    // Reduce a polynomial using plus/minus operators to Paulis
     void convertToPaulis() {
-        Poly toReplaceP = Poly(0.5, "<X-1>") + Poly(0.5*imag, "<Y-1>");
-        Poly toReplaceM = Poly(0.5, "<X-1>") + Poly(-0.5*imag, "<Y-1>");
-        replace(Mon('P', -1), toReplaceP);
-        replace(Mon('M', -1), toReplaceM);
+        Poly toReplaceP = Poly(0.5, "<X0>") + Poly(0.5*imag,  "<Y0>");
+        Poly toReplaceM = Poly(0.5, "<X0>") + Poly(-0.5*imag, "<Y0>");
+        replace(Mon("<P0>"), toReplaceP);
+        replace(Mon("<M0>"), toReplaceM);
         simplify();
         reduce();
     }
@@ -718,113 +742,6 @@ public:
     }
 
 };
-
-// Generate a monomial from a given string (e.g. "<A1B2>")
-//monomial stringToMonomial(std::string asString) {
-
-    //// If the string is empty, return an empty monomial
-    //if (asString == "" || asString.find("<") == std::string::npos) {
-        //return monomial();
-    //}
-
-    //// Iterate through the string
-    //monomial toReturn;
-    //char currentVariable = ' ';
-    //std::string currentIndex;
-    //for (size_t i=0; i<asString.size(); i++) {
-
-        //// Check if this char is an integer
-        //if (asString[i] >= '0' && asString[i] <= '9') {
-            //currentIndex += asString[i];
-
-        //// Otherwise it's a variable
-        //} else if (asString[i] >= 'A' && asString[i] <= 'Z') {
-            //currentIndex += asString[i];
-            //if (currentVariable != ' ') {
-                //toReturn.push_back(std::make_pair(currentVariable, std::stoi(currentIndex)));
-            //}
-            //currentVariable = asString[i];
-            //currentIndex = "";
-        //}
-
-    //}
-
-    //// Add the last variable
-    //toReturn.push_back(std::make_pair(currentVariable, std::stoi(currentIndex)));
-
-    //// Return the monomial
-    //return toReturn;
-
-//}
-
-       
-// When printing a monomial, print it as a string
-//std::ostream& operator<<(std::ostream& os, const monomial& m) {
-
-    //// Iterate through the monomial
-    //if (m.size() > 0) {
-        //os << "<";
-        //for (size_t i=0; i<m.size(); i++) {
-            //os << m[i].first << m[i].second;
-        //}
-        //os << ">";
-    //} else {
-        //os << "1";
-    //}
-
-    //// Return the stream
-    //return os;
-
-//}
-
-// When printing a polynomial, print it as a string
-//std::ostream& operator<<(std::ostream& os, const polynomial& p) {
-
-    //// Check if it's zero
-    //if (p.size() == 0 || (p.size() == 1 && p[0].first == std::complex<double>(0,0))) {
-        //os << "0";
-        //return os;
-    //}
-
-    //// Iterate through the polynomial
-    //for (size_t i=0; i<p.size(); i++) {
-        //double realPart = p[i].first.real();
-        //double imagPart = p[i].first.imag();
-        //if (imagPart == 0) {
-            //if (realPart == std::complex<double>(-1, 0)) {
-                //os << "-" << p[i].second;
-            //} else if (realPart == std::complex<double>(1, 0)) {
-                //if (i == 0) {
-                    //os << p[i].second;
-                //} else {
-                    //os << "+" << p[i].second;
-                //}
-            //} else if (p[i].second.size() == 0 && realPart > 0) {
-                //if (i == 0) {
-                    //os << realPart;
-                //} else {
-                    //os << "+" << realPart;
-                //}
-            //} else if (p[i].second.size() == 0 && realPart < 0) {
-                //os << realPart;
-            //} else if (realPart > 0) {
-                //if (i == 0) {
-                    //os << realPart << p[i].second;
-                //} else {
-                    //os << "+" << realPart << p[i].second;
-                //}
-            //} else if (realPart != 0) {
-                //os << realPart << p[i].second;
-            //}
-        //} else {
-            //os << p[i].first << p[i].second;
-        //}
-    //}
-
-    //// Return the stream
-    //return os;
-
-//}
 
 // When printing a polynomial matrix, print it as a string
 std::ostream& operator<<(std::ostream& os, const std::vector<std::vector<Poly>>& m) {
@@ -926,69 +843,6 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
 
 }
 
-// Generate a polynomial from a given string (e.g. "2<A1B2>-<A3A1>")
-//polynomial stringToPolynomial(std::string asString) {
-
-    //// Remove all spaces and *
-    //std::string newString = "";
-    //for (size_t i=0; i<asString.size(); i++) {
-        //if (asString[i] != ' ' && asString[i] != '*') {
-            //newString += asString[i];
-        //}
-    //}
-    //asString = newString;
-
-    //// Iterate through the string
-    //polynomial toReturn;
-    //std::string currentCoefficient;
-    //std::string currentMonomial;
-    //for (size_t i=0; i<asString.size(); i++) {
-
-        //// If finished a monomial
-        //if (i > 0 && (asString[i] == '>' || ((asString[i] == '+' || asString[i] == '-') && asString[i-1] != '>'))) {
-
-            //// Ensure the coefficient is convertable
-            //if (currentCoefficient == "" || currentCoefficient == "+") {
-                //currentCoefficient = "1";
-            //} else if (currentCoefficient == "-") {
-                //currentCoefficient = "-1";
-            //}
-
-            //// Add the term
-            //if (asString[i] == '>') {
-                //currentMonomial += asString[i];
-            //}
-            //toReturn.push_back(std::make_pair(std::stod(currentCoefficient), stringToMonomial(currentMonomial)));
-            //currentMonomial = "";
-            //currentCoefficient = "";
-
-            //// The plus and the minus are for the next term
-            //if (asString[i] == '+' || asString[i] == '-') {
-                //currentCoefficient += asString[i];
-            //}
-
-        //// If starting or continuing a monomial
-        //} else if (asString[i] == '<' || currentMonomial.size() > 0) {
-            //currentMonomial += asString[i];
-
-        //// Otherwise it's for the coefficient
-        //} else if (asString[i] != ' ') {
-            //currentCoefficient += asString[i];
-
-        //}
-
-    //}
-
-    //// If there's a coefficient left over, add it
-    //if (currentCoefficient != "") {
-        //toReturn.push_back(std::make_pair(std::stod(currentCoefficient), stringToMonomial(currentMonomial)));
-    //}
-
-    //// Return the polynomial
-    //return toReturn;
-
-//}
-
 // Given a matrix and a variable list, return the matrix with the variables replaced
 Eigen::MatrixXcd replaceVariables(std::vector<std::vector<Poly>>& momentMatrix, const std::vector<Mon>& variables, const std::vector<std::complex<double>>& varVals) {
 
@@ -1040,225 +894,6 @@ void getEigens(std::vector<std::vector<Poly>>& momentMatrix, const std::vector<M
     }
 
 }
-
-// Compare two parts of monomials, such that "Y1" < "X2", "Y1" < "Y2"
-//bool compareReversed(const std::pair<char, int>& a, const std::pair<char, int>& b) {
-    //if (a.second == b.second) {
-        //return a.first < b.first;
-    //} else {
-        //return a.second < b.second;
-    //}
-//}
-
-// Same as above but for full monomials
-//bool compareReversed(const monomial& a, const monomial& b) {
-    //for (int i=0; i<std::min(a.size(), b.size()); i++) {
-        //if (a[i] != b[i]) {
-            //return compareReversed(a[i], b[i]);
-        //}
-    //}
-    //return a.size() < b.size();
-//}
-
-// Given a monomial, reduce it to its simplest form
-//std::pair<std::complex<double>, monomial> reduceMonomial(const monomial& mon_, int verbosity, std::string swapType = "numFirst", bool diffLettersCommute=false, bool diffNumbersCommute=true, bool pauliReductions=true, std::vector<int> reductionsToIgnore={}) {
-
-    //// Sort the monomial as much as we can
-    //monomial mon = mon_;
-    //if (diffLettersCommute) {
-        //for (int i=0; i<mon.size(); i++) {
-            //for (int j=0; j<int(mon.size())-1; j++) {
-                //if (mon[j].first != mon[j+1].first && mon[j] > mon[j+1]) {
-                    //std::swap(mon[j], mon[j+1]);
-                //}
-            //}
-        //}
-    //}
-    //if (diffNumbersCommute) {
-        //for (int i=0; i<mon.size(); i++) {
-            //for (int j=0; j<int(mon.size())-1; j++) {
-                //if (mon[j].second != mon[j+1].second && !compareReversed(mon[j], mon[j+1])) {
-                    //std::swap(mon[j], mon[j+1]);
-                //}
-            //}
-        //}
-    //}
-
-    //// Simplify Pauli strings using the following rules (plus conjugates):
-    //// XY = iZ
-    //// ZX = iY
-    //// YZ = iX
-    //std::complex<double> coeff(1, 0);
-    //if (pauliReductions) {
-        //if (std::find(reductionsToIgnore.begin(), reductionsToIgnore.end(), mon.size()) == reductionsToIgnore.end() && pauliReductions) {
-            //for (int i=mon.size()-1; i>0; i--) {
-                //if (mon[i-1].second == mon[i].second) {
-                    //if (mon[i-1].first == 'X' && mon[i].first == 'Y') {
-                        //coeff *= imag;
-                        //mon[i-1] = std::make_pair('Z', mon[i-1].second);
-                        //mon.erase(mon.begin()+i);
-                    //} else if (mon[i-1].first == 'X' && mon[i].first == 'Z') {
-                        //coeff *= -imag;
-                        //mon[i-1] = std::make_pair('Y', mon[i-1].second);
-                        //mon.erase(mon.begin()+i);
-                    //} else if (mon[i-1].first == 'Y' && mon[i].first == 'Z') {
-                        //coeff *= imag;
-                        //mon[i-1] = std::make_pair('X', mon[i-1].second);
-                        //mon.erase(mon.begin()+i);
-                    //} else if (mon[i-1].first == 'Y' && mon[i].first == 'X') {
-                        //coeff *= -imag;
-                        //mon[i-1] = std::make_pair('Z', mon[i-1].second);
-                        //mon.erase(mon.begin()+i);
-                    //} else if (mon[i-1].first == 'Z' && mon[i].first == 'X') {
-                        //coeff *= imag;
-                        //mon[i-1] = std::make_pair('Y', mon[i-1].second);
-                        //mon.erase(mon.begin()+i);
-                    //} else if (mon[i-1].first == 'Z' && mon[i].first == 'Y') {
-                        //coeff *= -imag;
-                        //mon[i-1] = std::make_pair('X', mon[i-1].second);
-                        //mon.erase(mon.begin()+i);
-                    //} else if (mon[i-1].first == 'X' && mon[i].first == 'X') {
-                        //mon.erase(mon.begin()+i);
-                        //mon.erase(mon.begin()+i-1);
-                        //i--;
-                    //} else if (mon[i-1].first == 'Y' && mon[i].first == 'Y') {
-                        //mon.erase(mon.begin()+i);
-                        //mon.erase(mon.begin()+i-1);
-                        //i--;
-                    //} else if (mon[i-1].first == 'Z' && mon[i].first == 'Z') {
-                        //mon.erase(mon.begin()+i);
-                        //mon.erase(mon.begin()+i-1);
-                        //i--;
-                    //}
-                //}
-            //}
-        //}
-    //}
-
-    //// <A1A1> = <1>
-    //int i = 0;
-    //while (i < int(mon.size())-1) {
-        //if (mon[i] == mon[i+1]) {
-            //mon.erase(mon.begin()+i+1);
-            //mon.erase(mon.begin()+i);
-            //i = -1;
-        //}
-        //i++;
-    //}
-
-    //// Flip it to see if it's smaller
-    //if (swapType == "letFirst") {
-        //monomial monFlipped = mon;
-        //std::reverse(monFlipped.begin(), monFlipped.end());
-        //if (monFlipped < mon) {
-            //mon = monFlipped;
-        //}
-    //} else if (swapType == "numFirst") {
-        //monomial monFlipped = mon;
-        //std::reverse(monFlipped.begin(), monFlipped.end());
-        //if (compareReversed(monFlipped, mon)) {
-            //mon = monFlipped;
-        //}
-    //}
-
-    //// Verbose output
-    //if (verbosity >= 3) {
-        //std::cout << "Reduced monomial: " << mon_ << " -> " << coeff << " " << mon << std::endl;
-    //}
-
-    //return {coeff, mon};
-
-//}
-
-// Given a polynomial, reduce each monomial and combine
-//polynomial reducePolynomial(polynomial p, int verbosity) {
-
-    //// Apply the reduction to each monomial
-    //for (int j=0; j<p.size(); j++) {
-        //std::pair<std::complex<double>, monomial> reducedMonomial = reduceMonomial(p[j].second, verbosity);
-        //p[j].first *= reducedMonomial.first;
-        //p[j].second = reducedMonomial.second;
-    //}
-
-    //// Combine like terms
-    //p = simplify(p);
-
-    //return p;
-
-//}
-
-// Reduce a polynomial using plus/minus operators to Paulis TODO
-//polynomial removePlusMinus(polynomial p, int verbosity) {
-
-    //std::cout << "recieved polynomial: " << p << std::endl;
-
-    //// Iterate through the polynomial
-    //polynomial pNew;
-    //for (int i=0; i<p.size(); i++) {
-        
-        //std::cout << "current term: " << p[i].first << " " << p[i].second << std::endl;
-        //polynomial newTerm = {{p[i].first, monomial()}};
-
-        //for (int j=0; j<p[i].second.size(); j++) {
-
-            //polynomial toMultiply = {{1, monomial({p[i].second[j]})}};
-
-            //// P -> (X + iY) / 2
-            //if (p[i].second[j].first == 'P') {
-                //monomial monX = monomial({{'X', p[i].second[j].second}});
-                //monomial monY = monomial({{'Y', p[i].second[j].second}});
-                //toMultiply = {{0.5, monX}, 
-                              //{0.5*imag, monY}};
-
-            //// M -> (X - iY) / 2
-            //} else if (p[i].second[j].first == 'M') {
-                //monomial monX = monomial({{'X', p[i].second[j].second}});
-                //monomial monY = monomial({{'Y', p[i].second[j].second}});
-                //toMultiply = {{0.5, monX}, 
-                              //{-0.5*imag, monY}};
-
-            //}
-
-            //std::cout << "    toMultiply: " << toMultiply << std::endl;
-            //std::cout << "    newTerm: " << newTerm << std::endl;
-
-            //// Perform the multiplication
-            //polynomial newTermCopy = {};
-            //for (int k=0; k<toMultiply.size(); k++) {
-                //for (int l=0; l<newTerm.size(); l++) {
-                    //newTermCopy.push_back(newTerm[l]);
-                    //int newInd = newTermCopy.size()-1;
-                    //newTermCopy[newInd].first *= toMultiply[k].first;
-                    //newTermCopy[newInd].second.insert(newTermCopy[newInd].second.end(), toMultiply[k].second.begin(), toMultiply[k].second.end());
-                //}
-            //}
-
-            //std::cout << "    after multiply: " << newTermCopy << std::endl;
-            //newTerm = reducePolynomial(newTermCopy, verbosity);
-            //std::cout << "    after simplify: " << newTerm << std::endl;
-
-        //}
-
-        //std::cout << "result: " << newTerm << std::endl;
-
-        //// Add this term to the polynomial
-        //for (int j=0; j<newTerm.size(); j++) {
-            //pNew.push_back(newTerm[j]);
-        //}
-
-    //}
-
-    //// Simplify the polynomial
-    //std::cout << "before simplify: " << pNew << std::endl;
-    //pNew = simplify(pNew);
-    //std::cout << "after simplify: " << pNew << std::endl;
-    //pNew = reducePolynomial(pNew, verbosity);
-    //std::cout << "after reduce: " << pNew << std::endl;
-
-    //// Return the new polynomial
-    //return pNew;
-
-//}
 
 // Add all single order monomials from a functional to a list of variables
 void addSingleMonomials(std::vector<Mon>& variables, Poly functional) {
@@ -1361,17 +996,6 @@ std::vector<std::vector<Poly>> generateFromTopRow(std::vector<Poly> monomsInTopR
                     // Add to the polynomial
                     std::complex<double> newCoefficient = monomCoeff.first * monomsInTopRow[i][k].first * std::conj(monomsInTopRow[j][l].first);
                     newPolynomial += Poly(monomCoeff.first, newMonomial);
-                    //bool found = false;
-                    //for (long unsigned int m=0; m<newPolynomial.size(); m++) {
-                        //if (newPolynomial[m].second == newMonomial) {
-                            //newPolynomial[m].first += newCoefficient;
-                            //found = true;
-                            //break;
-                        //}
-                    //}
-                    //if (!found) {
-                        //newPolynomial.push_back(std::make_pair(newCoefficient, newMonomial));
-                    //}
 
                 }
             }
@@ -1397,7 +1021,7 @@ std::vector<Poly> generateMonomials(std::vector<Mon> variables, int level, int v
         for (long unsigned int i=0; i<variables.size(); i++) {
             Mon currentMonomial = variables[i];
             std::pair<std::complex<double>, Mon> monomCoeff = currentMonomial.reduce();
-            Poly currentPolynomial(monomCoeff);
+            Poly currentPolynomial(monomCoeff.second);
             if (std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
                 monomsInTopRow.push_back(currentPolynomial);
             }
@@ -1408,7 +1032,7 @@ std::vector<Poly> generateMonomials(std::vector<Mon> variables, int level, int v
             for (long unsigned int j=0; j<variables.size(); j++) {
                 Mon currentMonomial = variables[i] * variables[j];
                 std::pair<std::complex<double>, Mon> monomCoeff = currentMonomial.reduce();
-                Poly currentPolynomial(monomCoeff);
+                Poly currentPolynomial(monomCoeff.second);
                 if (std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
                     monomsInTopRow.push_back(currentPolynomial);
                 }
@@ -1421,7 +1045,7 @@ std::vector<Poly> generateMonomials(std::vector<Mon> variables, int level, int v
                 for (long unsigned int k=0; k<variables.size(); k++) {
                     Mon currentMonomial = variables[i] * variables[j] * variables[k];
                     std::pair<std::complex<double>, Mon> monomCoeff = currentMonomial.reduce();
-                    Poly currentPolynomial(monomCoeff);
+                    Poly currentPolynomial(monomCoeff.second);
                     if (std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
                         monomsInTopRow.push_back(currentPolynomial);
                     }
@@ -1436,7 +1060,7 @@ std::vector<Poly> generateMonomials(std::vector<Mon> variables, int level, int v
                     for (long unsigned int l=0; l<variables.size(); l++) {
                         Mon currentMonomial = variables[i] * variables[j] * variables[k] * variables[l];
                         std::pair<std::complex<double>, Mon> monomCoeff = currentMonomial.reduce();
-                        Poly currentPolynomial(monomCoeff);
+                        Poly currentPolynomial(monomCoeff.second);
                         if (std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
                             monomsInTopRow.push_back(currentPolynomial);
                         }
@@ -1453,7 +1077,7 @@ std::vector<Poly> generateMonomials(std::vector<Mon> variables, int level, int v
                         for (long unsigned int m=0; m<variables.size(); m++) {
                             Mon currentMonomial = variables[i] * variables[j] * variables[k] * variables[l] * variables[m];
                             std::pair<std::complex<double>, Mon> monomCoeff = currentMonomial.reduce();
-                            Poly currentPolynomial(monomCoeff);
+                            Poly currentPolynomial(monomCoeff.second);
                             if (std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
                                 monomsInTopRow.push_back(currentPolynomial);
                             }
@@ -1472,7 +1096,7 @@ std::vector<Poly> generateMonomials(std::vector<Mon> variables, int level, int v
                             for (long unsigned int n=0; n<variables.size(); n++) {
                                 Mon currentMonomial = variables[i] * variables[j] * variables[k] * variables[l] * variables[m] * variables[n];
                                 std::pair<std::complex<double>, Mon> monomCoeff = currentMonomial.reduce();
-                                Poly currentPolynomial(monomCoeff);
+                                Poly currentPolynomial(monomCoeff.second);
                                 if (std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
                                     monomsInTopRow.push_back(currentPolynomial);
                                 }
@@ -1493,7 +1117,7 @@ std::vector<Poly> generateMonomials(std::vector<Mon> variables, int level, int v
                                 for (long unsigned int o=0; o<variables.size(); o++) {
                                     Mon currentMonomial = variables[i] * variables[j] * variables[k] * variables[l] * variables[m] * variables[n] * variables[o];
                                     std::pair<std::complex<double>, Mon> monomCoeff = currentMonomial.reduce();
-                                    Poly currentPolynomial(monomCoeff);
+                                    Poly currentPolynomial(monomCoeff.second);
                                     if (std::find(monomsInTopRow.begin(), monomsInTopRow.end(), currentPolynomial) == monomsInTopRow.end()) {
                                         monomsInTopRow.push_back(currentPolynomial);
                                     }
@@ -1503,6 +1127,14 @@ std::vector<Poly> generateMonomials(std::vector<Mon> variables, int level, int v
                     }
                 }
             }
+        }
+    }
+
+    // Remove the 1 if there is
+    for (long unsigned int i=0; i<monomsInTopRow.size(); i++) {
+        if (monomsInTopRow[i].size() == 1 && monomsInTopRow[i][0].second == Mon()) {
+            monomsInTopRow.erase(monomsInTopRow.begin()+i);
+            break;
         }
     }
 
@@ -1949,7 +1581,7 @@ int main(int argc, char* argv[]) {
     int verbosity = 1;
     std::complex<double> knownIdeal = 0.0;
     std::string seed = "";
-    Poly limbladian("<X1A1X1>+<Y1A1Y1>-<A1>");
+    Poly limbladian("<X1A0X1>+<Y1A0Y1>-<A0>");
     std::vector<std::string> extraMonomials;
     std::vector<std::string> extraMonomialsLim;
     std::vector<Poly> constraintsZero;
@@ -1990,10 +1622,10 @@ int main(int argc, char* argv[]) {
                 return 1;
             }
             std::string pauliString = "";
-            pauliString += "+" + std::to_string(coeff1) + "<X1A1X1>";
-            pauliString += "+" + std::to_string(coeff2) + "<Y1A1Y1>";
-            pauliString += "+" + std::to_string(coeff3) + "<Z1A1Z1>";
-            pauliString += "-" + std::to_string(coeff1+coeff2+coeff3) + "<A1>";
+            pauliString += "+" + std::to_string(coeff1) + "<X1A0X1>";
+            pauliString += "+" + std::to_string(coeff2) + "<Y1A0Y1>";
+            pauliString += "+" + std::to_string(coeff3) + "<Z1A0Z1>";
+            pauliString += "-" + std::to_string(coeff1+coeff2+coeff3) + "<A0>";
             limbladian = Poly(pauliString);
             i += 3;
 
@@ -2229,22 +1861,8 @@ int main(int argc, char* argv[]) {
             numQubits = 2;
             knownIdeal = J_ss_from_rho;
 
-            // Construct the objective as a polynomial with plus/minus mats TODO
+            // Construct the objective as a polynomial with plus/minus mats
             objective = Poly();
-
-            // Q_ss hot
-            //objective.push_back({epsilon_h*gamma_h_plus,       Mon("<M1P1M1P1>")});
-            //objective.push_back({-0.5*epsilon_h*gamma_h_plus,  Mon("<P1M1M1P1>")});
-            //objective.push_back({-0.5*epsilon_h*gamma_h_plus,  Mon("<M1P1P1M1>")});
-            //objective.push_back({epsilon_h*gamma_h_minus,      Mon("<P1P1M1M1>")});
-            //objective.push_back({-0.5*epsilon_h*gamma_h_minus, Mon("<P1M1P1M1>")});
-            //objective.push_back({-0.5*epsilon_h*gamma_h_minus, Mon("<P1M1P1M1>")});
-            //objective.push_back({epsilon_c*gamma_h_plus,       Mon("<M1P2M2P1>")});
-            //objective.push_back({-0.5*epsilon_c*gamma_h_plus,  Mon("<P2M2M1P1>")});
-            //objective.push_back({-0.5*epsilon_c*gamma_h_plus,  Mon("<M1P1P2M2>")});
-            //objective.push_back({epsilon_c*gamma_h_minus,      Mon("<P1P2M2M1>")});
-            //objective.push_back({-0.5*epsilon_c*gamma_h_minus, Mon("<P2M2P1M1>")});
-            //objective.push_back({-0.5*epsilon_c*gamma_h_minus, Mon("<P1M1P2M2>")});
             objective += Poly(epsilon_h*gamma_h_plus,       "<M1P1M1P1>");
             objective += Poly(-0.5*epsilon_h*gamma_h_plus,  "<P1M1M1P1>");
             objective += Poly(-0.5*epsilon_h*gamma_h_plus,  "<M1P1P1M1>");
@@ -2257,20 +1875,6 @@ int main(int argc, char* argv[]) {
             objective += Poly(epsilon_c*gamma_h_minus,      "<P1P2M2M1>");
             objective += Poly(-0.5*epsilon_c*gamma_h_minus, "<P2M2P1M1>");
             objective += Poly(-0.5*epsilon_c*gamma_h_minus, "<P1M1P2M2>");
-
-            // Q_ss cold
-            //objective.push_back({-epsilon_h*gamma_c_plus,       stringToMonomial("<M2P1M1P2>")});
-            //objective.push_back({0.5*epsilon_h*gamma_c_plus,  stringToMonomial("<P1M1M2P2>")});
-            //objective.push_back({0.5*epsilon_h*gamma_c_plus,  stringToMonomial("<M2P2P1M1>")});
-            //objective.push_back({-epsilon_h*gamma_c_minus,      stringToMonomial("<P2P1M1M2>")});
-            //objective.push_back({0.5*epsilon_h*gamma_c_minus, stringToMonomial("<P1M1P2M2>")});
-            //objective.push_back({0.5*epsilon_h*gamma_c_minus, stringToMonomial("<P2M2P1M1>")});
-            //objective.push_back({-epsilon_c*gamma_c_plus,       stringToMonomial("<M2P2M2P2>")});
-            //objective.push_back({0.5*epsilon_c*gamma_c_plus,  stringToMonomial("<P2M2M2P2>")});
-            //objective.push_back({0.5*epsilon_c*gamma_c_plus,  stringToMonomial("<M2P2P2M2>")});
-            //objective.push_back({-epsilon_c*gamma_c_minus,      stringToMonomial("<P2P2M2M2>")});
-            //objective.push_back({0.5*epsilon_c*gamma_c_minus, stringToMonomial("<P2M2P2M2>")});
-            //objective.push_back({0.5*epsilon_c*gamma_c_minus, stringToMonomial("<P2M2P2M2>")});
             objective += Poly(-epsilon_h*gamma_c_plus,       "<M2P1M1P2>");
             objective += Poly(0.5*epsilon_h*gamma_c_plus,  "<P1M1M2P2>");
             objective += Poly(0.5*epsilon_h*gamma_c_plus,  "<M2P2P1M1>");
@@ -2283,60 +1887,33 @@ int main(int argc, char* argv[]) {
             objective += Poly(-epsilon_c*gamma_c_minus,      "<P2P2M2M2>");
             objective += Poly(0.5*epsilon_c*gamma_c_minus, "<P2M2P2M2>");
             objective += Poly(0.5*epsilon_c*gamma_c_minus, "<P2M2P2M2>");
-
-            // Simplify the objective
             objective.convertToPaulis();
-            std::cout << "From plus minus:" << std::endl;
-            std::cout << objective << std::endl;
             
-            // Construct the objective as a polynomial
-            objective = Poly();
-            //objective.push_back({0.5*epsilon_h*(gamma_h_plus-gamma_h_minus)-0.5*epsilon_c*(gamma_c_plus-gamma_c_minus), stringToMonomial("")});
-            //objective.push_back({-0.5*epsilon_h*(gamma_h_plus+gamma_h_minus), stringToMonomial("<Z1>")});
-            //objective.push_back({0.5*epsilon_c*(gamma_c_plus+gamma_c_minus), stringToMonomial("<Z2>")});
-            objective += Poly(0.5*epsilon_h*(gamma_h_plus-gamma_h_minus)-0.5*epsilon_c*(gamma_c_plus-gamma_c_minus), "");
-            objective += Poly(-0.5*epsilon_h*(gamma_h_plus+gamma_h_minus), "<Z1>");
-            objective += Poly(0.5*epsilon_c*(gamma_c_plus+gamma_c_minus), "<Z2>");
-            std::cout << "From paulis:" << std::endl;
-            std::cout << objective << std::endl;
-                        
-            // Construct the Limbadlian as a polynomial
+            // Construct the Limbadlian as a polynomial from plus/minus
             limbladian = Poly();
-            //limbladian.push_back({(-2*gamma_h_plus-2*gamma_h_minus-2*gamma_c_plus-2*gamma_c_minus), stringToMonomial("<A1>")});
-            //limbladian.push_back({(-2*imag*epsilon_h-gamma_h_minus+gamma_h_plus), stringToMonomial("<A1Z1>")});
-            //limbladian.push_back({(-2*imag*epsilon_c-gamma_c_minus+gamma_c_plus), stringToMonomial("<A1Z2>")});
-            //limbladian.push_back({(2*imag*epsilon_h-gamma_h_minus+gamma_h_plus), stringToMonomial("<Z1A1>")});
-            //limbladian.push_back({(2*imag*epsilon_c-gamma_c_minus+gamma_c_plus), stringToMonomial("<Z2A1>")});
-            //limbladian.push_back({(-2*imag*g), stringToMonomial("<A1X1X2>")});
-            //limbladian.push_back({(-2*imag*g), stringToMonomial("<A1Y1Y2>")});
-            //limbladian.push_back({(2*imag*g), stringToMonomial("<X1X2A1>")});
-            //limbladian.push_back({(2*imag*g), stringToMonomial("<Y1Y2A1>")});
-            //limbladian.push_back({(gamma_h_plus+gamma_h_minus), stringToMonomial("<X1A1X1>")});
-            //limbladian.push_back({(imag*gamma_h_plus-imag*gamma_h_minus), stringToMonomial("<X1A1Y1>")});
-            //limbladian.push_back({(-imag*gamma_h_plus+imag*gamma_h_minus), stringToMonomial("<Y1A1X1>")});
-            //limbladian.push_back({(gamma_h_plus+gamma_h_minus), stringToMonomial("<Y1A1Y1>")});
-            //limbladian.push_back({(gamma_c_plus+gamma_c_minus), stringToMonomial("<X2A1X2>")});
-            //limbladian.push_back({(imag*gamma_c_plus-imag*gamma_c_minus), stringToMonomial("<X2A1Y2>")});
-            //limbladian.push_back({(-imag*gamma_c_plus+imag*gamma_c_minus), stringToMonomial("<Y2A1X2>")});
-            //limbladian.push_back({(gamma_c_plus+gamma_c_minus), stringToMonomial("<Y2A1Y2>")});
-            limbladian += Poly(-2*gamma_h_plus-2*gamma_h_minus-2*gamma_c_plus-2*gamma_c_minus, "<A1>");
-            limbladian += Poly(-2*imag*epsilon_h-gamma_h_minus+gamma_h_plus, "<A1Z1>");
-            limbladian += Poly(-2*imag*epsilon_c-gamma_c_minus+gamma_c_plus, "<A1Z2>");
-            limbladian += Poly(2*imag*epsilon_h-gamma_h_minus+gamma_h_plus, "<Z1A1>");
-            limbladian += Poly(2*imag*epsilon_c-gamma_c_minus+gamma_c_plus, "<Z2A1>");
-            limbladian += Poly(-2*imag*g, "<A1X1X2>");
-            limbladian += Poly(-2*imag*g, "<A1Y1Y2>");
-            limbladian += Poly(2*imag*g, "<X1X2A1>");
-            limbladian += Poly(2*imag*g, "<Y1Y2A1>");
-            limbladian += Poly(gamma_h_plus+gamma_h_minus, "<X1A1X1>");
-            limbladian += Poly(imag*gamma_h_plus-imag*gamma_h_minus, "<X1A1Y1>");
-            limbladian += Poly(-imag*gamma_h_plus+imag*gamma_h_minus, "<Y1A1X1>");
-            limbladian += Poly(gamma_h_plus+gamma_h_minus, "<Y1A1Y1>");
-            limbladian += Poly(gamma_c_plus+gamma_c_minus, "<X2A1X2>");
-            limbladian += Poly(imag*gamma_c_plus-imag*gamma_c_minus, "<X2A1Y2>");
-            limbladian += Poly(-imag*gamma_c_plus+imag*gamma_c_minus, "<Y2A1X2>");
-            limbladian += Poly(gamma_c_plus+gamma_c_minus, "<Y2A1Y2>");
-                                           
+            limbladian += Poly(-epsilon_h*imag, "<A0P1M1>");
+            limbladian += Poly(-epsilon_c*imag, "<A0P2M2>");
+            limbladian += Poly(-g*imag, "<A0P1M2>");
+            limbladian += Poly(-g*imag, "<A0M1P2>");
+            limbladian += Poly(epsilon_h*imag, "<P1M1A0>");
+            limbladian += Poly(epsilon_c*imag, "<P2M2A0>");
+            limbladian += Poly(g*imag, "<P1M2A0>");
+            limbladian += Poly(g*imag, "<M1P2A0>");
+            limbladian += Poly(gamma_h_plus, "<M1A0P1>");
+            limbladian += Poly(-0.5*gamma_h_plus, "<A0M1P1>");
+            limbladian += Poly(-0.5*gamma_h_plus, "<M1P1A0>");
+            limbladian += Poly(gamma_h_minus, "<P1A0M1>");
+            limbladian += Poly(-0.5*gamma_h_minus, "<A0P1M1>");
+            limbladian += Poly(-0.5*gamma_h_minus, "<P1M1A0>");
+            limbladian += Poly(gamma_c_plus, "<M2A0P2>");
+            limbladian += Poly(-0.5*gamma_c_plus, "<A0M2P2>");
+            limbladian += Poly(-0.5*gamma_c_plus, "<M2P2A0>");
+            limbladian += Poly(gamma_c_minus, "<P2A0M2>");
+            limbladian += Poly(-0.5*gamma_c_minus, "<A0P2M2>");
+            limbladian += Poly(-0.5*gamma_c_minus, "<P2M2A0>");
+            limbladian.convertToPaulis();
+            limbladian.sort();
+
         // Set the seed
         } else if (argAsString == "-S") {
             seed = std::string(argv[i+1]);
@@ -2428,21 +2005,9 @@ int main(int argc, char* argv[]) {
         std::cout << "Original Limbladian: " << limbladian << std::endl;
     }
     for (int i=0; i<variablesToPut.size(); i++) {
-        Mon oldMon("<A1>");
+        Mon oldMon("<A0>");
         Poly newPoly(variablesToPut[i]);
         Poly newConstraint = limbladian.replaced(oldMon, newPoly);
-        //if (monomToPut.size() > 0) {
-            //for (int j=0; j<newConstraint.size(); j++) {
-                //for (int k=0; k<newConstraint[j].second.size(); k++) {
-                    //if (newConstraint[j].second[k].first == 'A') {
-                        //newConstraint[j].second[k] = monomToPut[0];
-                        //for (int l=1; l<monomToPut.size(); l++) {
-                            //newConstraint[j].second.insert(newConstraint[j].second.begin() + k + l, monomToPut[l]);
-                        //}
-                    //}
-                //}
-            //}
-        //}
         if (verbosity >= 3) {
             std::cout << std::endl;
             std::cout << "Variable to put: " << newPoly << std::endl;
@@ -2453,20 +2018,17 @@ int main(int argc, char* argv[]) {
 
     // Reduce the constraints as much as possible
     for (int i=0; i<constraintsZero.size(); i++) {
-        if (verbosity >= 2) {
+        if (verbosity >= 3) {
             std::cout << std::endl;
             std::cout << "Reducing constraint: " << constraintsZero[i] << std::endl;
         }
         constraintsZero[i].reduce();
-        if (verbosity >= 2) {
+        if (verbosity >= 3) {
             std::cout << "Reduced constraint: " << constraintsZero[i] << std::endl;
         }
     }
 
     // Define the moment matrix
-    if (verbosity >= 2) {
-        std::cout << std::endl;
-    }
     std::vector<std::vector<std::vector<Poly>>> momentMatrices = generateAllMomentMatrices(objective, constraintsZero, level, verbosity, reductionsToIgnore);
 
     // If told to add extra to the top row
@@ -2475,7 +2037,6 @@ int main(int argc, char* argv[]) {
         for (int i=0; i<extraMonomials.size(); i++) {
             Poly extraMonomial(extraMonomials[i]);
             for (int j=0; j<extraMonomial.size(); j++) {
-                //std::reverse(extraMonomial[j].second.begin(), extraMonomial[j].second.end());
                 extraMonomial[j].second.reverse();
             }
             topRow.push_back(extraMonomial);
@@ -2486,17 +2047,12 @@ int main(int argc, char* argv[]) {
 
     // See how big the moment matrix is
     if (verbosity >= 1) {
-        if (verbosity >= 2) {
-            std::cout << std::endl;
-        }
-        std::cout << "Generated " << momentMatrices.size() << " moment matrices" << std::endl;
         int largestMomentMatrix = 0;
         for (int i=0; i<momentMatrices.size(); i++) {
             if (momentMatrices[i].size() > largestMomentMatrix) {
                 largestMomentMatrix = momentMatrices[i].size();
             }
         }
-        std::cout << "Largest moment matrix has size " << largestMomentMatrix << std::endl;
     }
 
     // Output the problem
@@ -2512,7 +2068,7 @@ int main(int argc, char* argv[]) {
         }
         if (momentMatrices.size() > 0) {
             for (int i=0; i<momentMatrices.size(); i++) {
-                std::cout << "Moment matrix " << i << ": " << std::endl;
+                std::cout << "Moment matrix " << i  << " (" << momentMatrices[i].size() << "x" << momentMatrices[i].size() << "): " << std::endl;
                 if (momentMatrices[i].size() < 10 || verbosity >= 3) {
                     std::cout << momentMatrices[i] << std::endl;
                 } else {
@@ -2521,7 +2077,7 @@ int main(int argc, char* argv[]) {
             }
         }
         if (constraintsZero.size() > 0) {
-            std::cout << "Zero constraints: " << std::endl;
+            std::cout << "Zero constraints (" << constraintsZero.size() << "): " << std::endl;
             std::cout << constraintsZero << std::endl;
         }
         std::cout << "----------------------------------------" << std::endl;
