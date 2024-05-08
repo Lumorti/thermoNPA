@@ -1888,6 +1888,96 @@ int main(int argc, char* argv[]) {
             objective += Poly(0.5*epsilon_c*gamma_c_minus, "<P2M2P2M2>");
             objective += Poly(0.5*epsilon_c*gamma_c_minus, "<P2M2P2M2>");
             objective.convertToPaulis();
+            objective.sort();
+            
+            // Construct the Limbadlian as a polynomial from plus/minus
+            limbladian = Poly();
+            limbladian += Poly(-epsilon_h*imag, "<A0P1M1>");
+            limbladian += Poly(-epsilon_c*imag, "<A0P2M2>");
+            limbladian += Poly(-g*imag, "<A0P1M2>");
+            limbladian += Poly(-g*imag, "<A0M1P2>");
+            limbladian += Poly(epsilon_h*imag, "<P1M1A0>");
+            limbladian += Poly(epsilon_c*imag, "<P2M2A0>");
+            limbladian += Poly(g*imag, "<P1M2A0>");
+            limbladian += Poly(g*imag, "<M1P2A0>");
+            limbladian += Poly(gamma_h_plus, "<M1A0P1>");
+            limbladian += Poly(-0.5*gamma_h_plus, "<A0M1P1>");
+            limbladian += Poly(-0.5*gamma_h_plus, "<M1P1A0>");
+            limbladian += Poly(gamma_h_minus, "<P1A0M1>");
+            limbladian += Poly(-0.5*gamma_h_minus, "<A0P1M1>");
+            limbladian += Poly(-0.5*gamma_h_minus, "<P1M1A0>");
+            limbladian += Poly(gamma_c_plus, "<M2A0P2>");
+            limbladian += Poly(-0.5*gamma_c_plus, "<A0M2P2>");
+            limbladian += Poly(-0.5*gamma_c_plus, "<M2P2A0>");
+            limbladian += Poly(gamma_c_minus, "<P2A0M2>");
+            limbladian += Poly(-0.5*gamma_c_minus, "<A0P2M2>");
+            limbladian += Poly(-0.5*gamma_c_minus, "<P2M2A0>");
+            limbladian.convertToPaulis();
+            limbladian.sort();
+
+        // Many-body Limbladian TODO
+        } else if (argAsString == "--many" || argAsString == "--manyv") {
+
+            // Defining quantities
+            double gamma_c = 1.1e-2;
+            double gamma_h = 1e-3;
+            double g = 1.6e-3;
+            double T_h = 1.0;
+            double T_c = 0.1;
+            double delta = 0.005;
+            double epsilon_h = 1.0;
+
+            // Regardless we have an
+            numQubits = std::stoi(argv[i+1]);
+            i++;
+
+            // If the arg has a "v", we have values
+            if (argAsString == "--manyv") {
+                T_h = std::stod(argv[i+1]);
+                delta = std::stod(argv[i+2]);
+                i += 2;
+            }
+
+            // Calculated quantities
+            double epsilon_c = epsilon_h + delta;
+            double n_c = 1.0 / (std::exp(epsilon_c / T_c) - 1.0);
+            double n_h = 1.0 / (std::exp(epsilon_h / T_h) - 1.0);
+            double gamma_h_plus = gamma_h * n_h;
+            double gamma_h_minus = gamma_h * (n_h + 1.0);
+            double gamma_c_plus = gamma_c * n_c;
+            double gamma_c_minus = gamma_c * (n_c + 1.0);
+            double Gamma_h = gamma_h_plus + gamma_h_minus;
+            double Gamma_c = gamma_c_plus + gamma_c_minus;
+            double Gamma = Gamma_h + Gamma_c;
+
+            // Construct the objective as a polynomial with plus/minus mats
+            objective = Poly();
+            objective += Poly(epsilon_h*gamma_h_plus,       "<M1P1M1P1>");
+            objective += Poly(-0.5*epsilon_h*gamma_h_plus,  "<P1M1M1P1>");
+            objective += Poly(-0.5*epsilon_h*gamma_h_plus,  "<M1P1P1M1>");
+            objective += Poly(epsilon_h*gamma_h_minus,      "<P1P1M1M1>");
+            objective += Poly(-0.5*epsilon_h*gamma_h_minus, "<P1M1P1M1>");
+            objective += Poly(-0.5*epsilon_h*gamma_h_minus, "<P1M1P1M1>");
+            objective += Poly(epsilon_c*gamma_h_plus,       "<M1P2M2P1>");
+            objective += Poly(-0.5*epsilon_c*gamma_h_plus,  "<P2M2M1P1>");
+            objective += Poly(-0.5*epsilon_c*gamma_h_plus,  "<M1P1P2M2>");
+            objective += Poly(epsilon_c*gamma_h_minus,      "<P1P2M2M1>");
+            objective += Poly(-0.5*epsilon_c*gamma_h_minus, "<P2M2P1M1>");
+            objective += Poly(-0.5*epsilon_c*gamma_h_minus, "<P1M1P2M2>");
+            objective += Poly(-epsilon_h*gamma_c_plus,       "<M2P1M1P2>");
+            objective += Poly(0.5*epsilon_h*gamma_c_plus,  "<P1M1M2P2>");
+            objective += Poly(0.5*epsilon_h*gamma_c_plus,  "<M2P2P1M1>");
+            objective += Poly(-epsilon_h*gamma_c_minus,      "<P2P1M1M2>");
+            objective += Poly(0.5*epsilon_h*gamma_c_minus, "<P1M1P2M2>");
+            objective += Poly(0.5*epsilon_h*gamma_c_minus, "<P2M2P1M1>");
+            objective += Poly(-epsilon_c*gamma_c_plus,       "<M2P2M2P2>");
+            objective += Poly(0.5*epsilon_c*gamma_c_plus,  "<P2M2M2P2>");
+            objective += Poly(0.5*epsilon_c*gamma_c_plus,  "<M2P2P2M2>");
+            objective += Poly(-epsilon_c*gamma_c_minus,      "<P2P2M2M2>");
+            objective += Poly(0.5*epsilon_c*gamma_c_minus, "<P2M2P2M2>");
+            objective += Poly(0.5*epsilon_c*gamma_c_minus, "<P2M2P2M2>");
+            objective.convertToPaulis();
+            objective.sort();
             
             // Construct the Limbadlian as a polynomial from plus/minus
             limbladian = Poly();
@@ -1958,8 +2048,12 @@ int main(int argc, char* argv[]) {
             std::cout << "  -3              Don't use third order Pauli reductions" << std::endl;
             std::cout << "  --pauli <num> <num> <num>" << std::endl;
             std::cout << "                  Use the Pauli Limbladian with coeffs" << std::endl;
-            std::cout << "  --two <num> <num> <num>" << std::endl;
+            std::cout << "  --two" << std::endl;
+            std::cout << "  --twov <num> <num>" << std::endl;
             std::cout << "                  Use the two-body Limbladian with coeffs" << std::endl;
+            std::cout << "  --many <num>" << std::endl;
+            std::cout << "  --manyv <num> <num> <num>" << std::endl;
+            std::cout << "                  Use the many-body Limbladian with coeffs" << std::endl;
             std::cout << "  -m <num>        Level of the moment matrix" << std::endl;
             std::cout << "  -l <num>        Level of the moments to put in the Limbladian" << std::endl;
             std::cout << "  -e <monom>      Add an extra monomial to the top row" << std::endl;
