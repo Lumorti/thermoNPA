@@ -1580,6 +1580,7 @@ int main(int argc, char* argv[]) {
     Poly objective("<Z1>");
     int verbosity = 1;
     std::complex<double> knownIdeal = 0.0;
+    bool idealIsKnown = false;
     std::string seed = "";
     Poly limbladian("<X1A0X1>+<Y1A0Y1>-<A0>");
     std::vector<std::string> extraMonomials;
@@ -1860,6 +1861,7 @@ int main(int argc, char* argv[]) {
             // Other system settings
             numQubits = 2;
             knownIdeal = J_ss_from_rho;
+            idealIsKnown = true;
 
             // Construct the objective as a polynomial with plus/minus mats
             objective = Poly();
@@ -1940,67 +1942,49 @@ int main(int argc, char* argv[]) {
 
             // Calculated quantities
             double epsilon_c = epsilon_h + delta;
+            double epsilon_other = (epsilon_h + epsilon_c) / 2.0;
+            std::vector<double> epsilons(numQubits, epsilon_other);
+            epsilons[0] = epsilon_h;
+            epsilons[numQubits-1] = epsilon_c;
             double n_c = 1.0 / (std::exp(epsilon_c / T_c) - 1.0);
             double n_h = 1.0 / (std::exp(epsilon_h / T_h) - 1.0);
             double gamma_h_plus = gamma_h * n_h;
             double gamma_h_minus = gamma_h * (n_h + 1.0);
             double gamma_c_plus = gamma_c * n_c;
             double gamma_c_minus = gamma_c * (n_c + 1.0);
-            double Gamma_h = gamma_h_plus + gamma_h_minus;
-            double Gamma_c = gamma_c_plus + gamma_c_minus;
-            double Gamma = Gamma_h + Gamma_c;
+            std::vector<double> gamma_plus(numQubits, 0);
+            gamma_plus[0] = gamma_h_plus;
+            gamma_plus[numQubits-1] = gamma_c_plus;
+            std::vector<double> gamma_minus(numQubits, 0);
+            gamma_minus[0] = gamma_h_minus;
+            gamma_minus[numQubits-1] = gamma_c_minus;
 
             // Construct the objective as a polynomial with plus/minus mats
             objective = Poly();
-            objective += Poly(epsilon_h*gamma_h_plus,       "<M1P1M1P1>");
-            objective += Poly(-0.5*epsilon_h*gamma_h_plus,  "<P1M1M1P1>");
-            objective += Poly(-0.5*epsilon_h*gamma_h_plus,  "<M1P1P1M1>");
-            objective += Poly(epsilon_h*gamma_h_minus,      "<P1P1M1M1>");
-            objective += Poly(-0.5*epsilon_h*gamma_h_minus, "<P1M1P1M1>");
-            objective += Poly(-0.5*epsilon_h*gamma_h_minus, "<P1M1P1M1>");
-            objective += Poly(epsilon_c*gamma_h_plus,       "<M1P2M2P1>");
-            objective += Poly(-0.5*epsilon_c*gamma_h_plus,  "<P2M2M1P1>");
-            objective += Poly(-0.5*epsilon_c*gamma_h_plus,  "<M1P1P2M2>");
-            objective += Poly(epsilon_c*gamma_h_minus,      "<P1P2M2M1>");
-            objective += Poly(-0.5*epsilon_c*gamma_h_minus, "<P2M2P1M1>");
-            objective += Poly(-0.5*epsilon_c*gamma_h_minus, "<P1M1P2M2>");
-            objective += Poly(-epsilon_h*gamma_c_plus,       "<M2P1M1P2>");
-            objective += Poly(0.5*epsilon_h*gamma_c_plus,  "<P1M1M2P2>");
-            objective += Poly(0.5*epsilon_h*gamma_c_plus,  "<M2P2P1M1>");
-            objective += Poly(-epsilon_h*gamma_c_minus,      "<P2P1M1M2>");
-            objective += Poly(0.5*epsilon_h*gamma_c_minus, "<P1M1P2M2>");
-            objective += Poly(0.5*epsilon_h*gamma_c_minus, "<P2M2P1M1>");
-            objective += Poly(-epsilon_c*gamma_c_plus,       "<M2P2M2P2>");
-            objective += Poly(0.5*epsilon_c*gamma_c_plus,  "<P2M2M2P2>");
-            objective += Poly(0.5*epsilon_c*gamma_c_plus,  "<M2P2P2M2>");
-            objective += Poly(-epsilon_c*gamma_c_minus,      "<P2P2M2M2>");
-            objective += Poly(0.5*epsilon_c*gamma_c_minus, "<P2M2P2M2>");
-            objective += Poly(0.5*epsilon_c*gamma_c_minus, "<P2M2P2M2>");
-            objective.convertToPaulis();
-            objective.sort();
+            for (int i=1; i<=numQubits; i++) {
+                objective += Poly(1.0/numQubits, "<Z" + std::to_string(i) + ">");
+            }
             
-            // Construct the Limbadlian as a polynomial from plus/minus
+            // Construct the Limbadlian as a polynomial from plus/minus TODO
             limbladian = Poly();
-            limbladian += Poly(-epsilon_h*imag, "<A0P1M1>");
-            limbladian += Poly(-epsilon_c*imag, "<A0P2M2>");
-            limbladian += Poly(-g*imag, "<A0P1M2>");
-            limbladian += Poly(-g*imag, "<A0M1P2>");
-            limbladian += Poly(epsilon_h*imag, "<P1M1A0>");
-            limbladian += Poly(epsilon_c*imag, "<P2M2A0>");
-            limbladian += Poly(g*imag, "<P1M2A0>");
-            limbladian += Poly(g*imag, "<M1P2A0>");
-            limbladian += Poly(gamma_h_plus, "<M1A0P1>");
-            limbladian += Poly(-0.5*gamma_h_plus, "<A0M1P1>");
-            limbladian += Poly(-0.5*gamma_h_plus, "<M1P1A0>");
-            limbladian += Poly(gamma_h_minus, "<P1A0M1>");
-            limbladian += Poly(-0.5*gamma_h_minus, "<A0P1M1>");
-            limbladian += Poly(-0.5*gamma_h_minus, "<P1M1A0>");
-            limbladian += Poly(gamma_c_plus, "<M2A0P2>");
-            limbladian += Poly(-0.5*gamma_c_plus, "<A0M2P2>");
-            limbladian += Poly(-0.5*gamma_c_plus, "<M2P2A0>");
-            limbladian += Poly(gamma_c_minus, "<P2A0M2>");
-            limbladian += Poly(-0.5*gamma_c_minus, "<A0P2M2>");
-            limbladian += Poly(-0.5*gamma_c_minus, "<P2M2A0>");
+            for (int i=1; i<=numQubits; i++) {
+                limbladian += Poly(-imag*epsilons[i-1], "<A0P" + std::to_string(i) + "M" + std::to_string(i) + ">");
+                limbladian += Poly(imag*epsilons[i-1], "<P" + std::to_string(i) + "M" + std::to_string(i) + "A0>");
+            }
+            for (int i=1; i<=numQubits-1; i++) {
+                limbladian += Poly(-imag*g, "<A0P" + std::to_string(i) + "M" + std::to_string(i+1) + ">");
+                limbladian += Poly(-imag*g, "<A0M" + std::to_string(i) + "P" + std::to_string(i+1) + ">");
+                limbladian += Poly(imag*g, "<P" + std::to_string(i) + "M" + std::to_string(i+1) + "A0>");
+                limbladian += Poly(imag*g, "<M" + std::to_string(i) + "P" + std::to_string(i+1) + "A0>");
+            }
+            for (int i : {1, numQubits}) {
+                limbladian += Poly(gamma_plus[i-1], "<M" + std::to_string(i) + "A0P" + std::to_string(i) + ">");
+                limbladian += Poly(-0.5*gamma_plus[i-1], "<A0M" + std::to_string(i) + "P" + std::to_string(i) + ">");
+                limbladian += Poly(-0.5*gamma_plus[i-1], "<M" + std::to_string(i) + "P" + std::to_string(i) + "A0>");
+                limbladian += Poly(gamma_minus[i-1], "<P" + std::to_string(i) + "A0M" + std::to_string(i) + ">");
+                limbladian += Poly(-0.5*gamma_minus[i-1], "<A0P" + std::to_string(i) + "M" + std::to_string(i) + ">");
+                limbladian += Poly(-0.5*gamma_minus[i-1], "<P" + std::to_string(i) + "M" + std::to_string(i) + "A0>");
+            }
             limbladian.convertToPaulis();
             limbladian.sort();
 
@@ -2189,11 +2173,18 @@ int main(int argc, char* argv[]) {
         std::cout << std::endl;
     }
     if (verbosity >= 1) {
-        std::cout << "Known ideal: " << knownIdeal << std::endl;
-        std::cout << "Upper bound: " << upperBound << " (" << 100*(upperBound-knownIdeal)/knownIdeal << "%)" << std::endl;
-        std::cout << "Lower bound: " << lowerBound << " (" << 100*(lowerBound-knownIdeal)/knownIdeal << "%)" << std::endl;
-        std::cout << "Difference: " << upperBound - lowerBound << std::endl;
-        std::cout << "Error: " << 100*(upperBound-lowerBound)/knownIdeal << "%" << std::endl;
+        if (idealIsKnown) {
+            std::cout << "Lower bound: " << lowerBound << " (" << 100*(lowerBound-knownIdeal)/knownIdeal << "%)" << std::endl;
+            std::cout << "Upper bound: " << upperBound << " (" << 100*(upperBound-knownIdeal)/knownIdeal << "%)" << std::endl;
+            std::cout << "Known ideal: " << knownIdeal << std::endl;
+            std::cout << "Difference: " << upperBound - lowerBound << std::endl;
+            std::cout << "Error: " << 100*(upperBound-lowerBound)/knownIdeal << "%" << std::endl;
+        } else {
+            std::cout << "Lower bound: " << lowerBound << std::endl;
+            std::cout << "Upper bound: " << upperBound << std::endl;
+            std::cout << "Difference: " << upperBound - lowerBound << std::endl;
+
+        }
     }
 
     // Exit without errors
