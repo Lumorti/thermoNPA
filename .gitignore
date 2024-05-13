@@ -1,1 +1,4 @@
 run
+runDebug
+*.o
+src/*.o
