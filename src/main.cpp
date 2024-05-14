@@ -494,93 +494,6 @@ int main(int argc, char* argv[]) {
     // If asked to try removing constraints
     if (findMinimal) {
 
-        // Try to find the minimal set TODO
-        //std::vector<Mon> varNames2;
-        //std::vector<std::complex<double>> varVals2;
-        //int originalSize = constraintsZero.size();
-        //for (int j=0; j<constraintsZero.size(); j++) {
-
-            //// Try removing each constraint
-            //double bestBound = 1e10;
-            //int bestIndex = -1;
-            //for (int i=0; i<constraintsZero.size(); i++) {
-                //if (constraintsZero[i].size() == 0) {
-                    //continue;
-                //}
-                //std::vector<Poly> constraintsZeroReduced = constraintsZero;
-                //constraintsZeroReduced.erase(constraintsZeroReduced.begin() + i);
-                //double newBound = solveMOSEK(objective, momentMatrices, constraintsZeroReduced, verbosity, varNames2, varVals2);
-                //if (newBound < bestBound) {
-                    //bestBound = newBound;
-                    //bestIndex = i;
-                //}
-            //}
-
-            //// Remove the best constraint
-            //std::cout << "Removing constraint " << bestIndex << " (" << variablesToPut[bestIndex] << ") gives bound " << bestBound << " (with " << originalSize-j-1 << " constraints)" << std::endl;
-            //std::cout << "Constraint contains monomials: " << constraintsZero[bestIndex].monomials() << std::endl;
-            //constraintsZero[bestIndex] = Poly();
-
-        //}
-
-        // Start with the objective, and keep replacing vars TODO
-        //Poly ob = objective;
-        //std::unordered_map<Mon, Poly> replacements;
-        //std::vector<Mon> ignoreList;
-        //for (int i=0; i<5; i++) {
-
-            //// Get the current bounds
-            //double upper = 0;
-            //double lower = 0;
-            //for (int j=0; j<ob.size(); j++) {
-                //if (ob[j].second.size() == 0) {
-                    //upper += std::real(ob[j].first);
-                    //lower += std::real(ob[j].first);
-                //} else {
-                    //upper += std::abs(ob[j].first);
-                    //lower -= std::abs(ob[j].first);
-                //}
-            //}
-            //std::cout << std::endl;
-            //std::cout << "Poly: " << ob << std::endl;
-            //std::cout << "Bounds: " << lower << " to " << upper << std::endl;
-
-            //// Pick the smallest monomial
-            //int monInd = -1;
-            //int bestSize = 100000;
-            //for (int j=0; j<ob.size(); j++) {
-                //if (ob[j].second.size() < bestSize && ob[j].second.size() > 0 && std::find(ignoreList.begin(), ignoreList.end(), ob[j].second) == ignoreList.end()) {
-                    //monInd = j;
-                    //bestSize = ob[j].second.size();
-                //}
-            //}
-            //Mon smallestMon = ob[monInd].second;
-            //std::cout << "Smallest monomial: " << smallestMon << std::endl;
-
-            //// Put things into the Limbladian until we find a constraint that contains the monomial
-            //for (int j=0; j<variablesToPut.size(); j++) {
-                //Poly toPut(variablesToPut[j]);
-                //std::pair<char,int> oldMon('A', 0);
-                //Poly newConstraint = limbladian.replaced(oldMon, toPut);
-                //for (auto& [key, value] : replacements) {
-                    //newConstraint.replace(key, value);
-                //}
-                //std::cout << "Putting in " << toPut << " gives " << newConstraint << std::endl;
-                //if (newConstraint.hasMonomial(smallestMon)) {
-                    //Poly rearranged = newConstraint.rearranged(smallestMon);
-                    //for (auto& [key, value] : replacements) {
-                        //value.replace(smallestMon, rearranged);
-                    //}
-                    //replacements[smallestMon] = rearranged;
-                    //ob.replace(smallestMon, rearranged);
-                    //break;
-                //}
-            //}
-
-        //}
-
-        //return 0;
-
         // Add constraints based on the monomials we already have TODO
         std::unordered_set<Mon> monomsUsed;
         std::unordered_set<Mon> monomsInConstraints;
@@ -620,6 +533,22 @@ int main(int argc, char* argv[]) {
             for (int j=0; j<monomsInCon.size(); j++) {
                 monomsInConstraints.insert(monomsInCon[j]);
             }
+
+            // Run the SDP
+            std::vector<Mon> varNames2;
+            std::vector<std::complex<double>> varVals2;
+            double upperBoundTemp = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity, varNames2, varVals2);
+            for (int i=0; i<objective.size(); i++) {
+                objective[i].first *= -1;
+            }
+            double lowerBoundTemp = -solveMOSEK(objective, momentMatrices, constraintsZero, verbosity, varNames2, varVals2);
+            std::cout << "Constraint: " << monToAdd << std::endl;
+            std::cout << "Lower bound: " << lowerBoundTemp << std::endl;
+            std::cout << "Upper bound: " << upperBoundTemp << std::endl;
+            if (upperBoundTemp - lowerBoundTemp < 1e-4) {
+                break;
+            }
+
 
         }
 

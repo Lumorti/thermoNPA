@@ -1,6 +1,6 @@
 CXX=g++
 CXXFLAGS=-fmax-errors=3 -O3 -march=native
-DEBUGFLAGS=-g -fmax-errors=3 -O0
+#CXXFLAGS=-g -fmax-errors=3 -Og -march=native -Wall
 LIBSEIGEN= -I${EIGENHOME}
 LIBSMOSEK= -I${MSKHOME}/h -L${MSKHOME}/bin -Wl,-rpath-link,${MSKHOME}/bin -Wl,-rpath=${MSKHOME}/bin -lmosek64 -lfusion64
 LIBS=$(LIBSEIGEN) $(LIBSMOSEK)
@@ -12,9 +12,6 @@ all: run
 
 run: $(MAIN) $(ASOBJ)
 	$(CXX) $(CXXFLAGS) -o run $(MAIN) $(ASOBJ) $(LIBS)
-
-runDebug: $(MAIN) $(ASOBJ)
-	$(CXX) $(DEBUGFLAGS) -o runDebug $(MAIN) $(LIBS)
 
 %.o: %.cpp %.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@ $(LIBS)

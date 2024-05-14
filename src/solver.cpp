@@ -51,6 +51,7 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
         for (int j=0; j<variables.size(); j++) {
             if (variables[j] == toFind) {
                 c[j] += std::real(obj[i].first);
+                c[j+1] += std::real(obj[i].first);
                 break;
             }
         }
@@ -312,4 +313,39 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
 
 }
 
+// Solve a linear system TODO
+double solveLinear(Poly obj, std::vector<Poly> constraintsZero, int verbosity) {
+
+    // Get the list of variables
+    std::vector<Mon> variables = {Mon()};
+    for (int i=0; i<constraintsZero.size(); i++) {
+        addVariables(variables, constraintsZero[i]);
+    }
+    addVariables(variables, obj);
+
+    // Output the variable list
+    if (verbosity >= 3) {
+        std::cout << "Variables:" << std::endl;
+        for (int i=0; i<variables.size(); i++) {
+            std::cout << i << " " << variables[i] << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
+    // Convert to an Eigen matrix
+    Eigen::MatrixXcd A = Eigen::MatrixXcd::Zero(constraintsZero.size(), variables.size());
+    for (int i=0; i<constraintsZero.size(); i++) {
+        for (int j=0; j<constraintsZero[i].size(); j++) {
+            for (int k=0; k<variables.size(); k++) {
+                if (variables[k] == constraintsZero[i][j].second) {
+                    A(i, k) = constraintsZero[i][j].first;
+                    break;
+                }
+            }
+        }
+    }
+
+
+    
+}
 
