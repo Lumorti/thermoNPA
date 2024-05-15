@@ -78,7 +78,7 @@ Mon Mon::reversed() {
 }
 
 // Multiply two monomials
-Mon Mon::operator*(const Mon& other) {
+Mon Mon::operator*(const Mon& other) const {
     Mon toReturn;
     toReturn.monomial = monomial;
     for (size_t i=0; i<other.monomial.size(); i++) {
@@ -115,7 +115,7 @@ bool Mon::compareReversed(const std::pair<char, int>& a, const std::pair<char, i
 }
 
 // Comparison between this and another monomial, but reversed
-bool Mon::compareReversed(Mon& a, Mon& b) {
+bool Mon::compareReversed(Mon& a, Mon& b) const {
     for (size_t i=0; i<std::min(a.size(), b.size()); i++) {
         if (a[i].second != b[i].second) {
             return a[i].second < b[i].second;
@@ -132,7 +132,7 @@ bool Mon::operator>(const Mon& other) const {
     return monomial > other.monomial;
 }
 
-std::pair<std::complex<double>, Mon> Mon::reduce(std::string swapType, bool diffLettersCommute, bool diffNumbersCommute, bool pauliReductions, std::vector<int> reductionsToIgnore) {
+std::pair<std::complex<double>, Mon> Mon::reduce(std::string swapType, bool diffLettersCommute, bool diffNumbersCommute, bool pauliReductions, std::vector<int> reductionsToIgnore) const {
 
     // Sort the monomial as much as we can
     Mon mon = *this;

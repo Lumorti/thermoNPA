@@ -44,14 +44,15 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
 
     // The c vector defining the objective
     std::vector<double> c(variables.size());
-    for (int i=0; i<obj.size(); i++) {
+    //for (int i=0; i<obj.size(); i++) {
+    for (auto& term : obj.polynomial) {
 
         // Find the location of this variable
-        Mon toFind(obj[i].second);
+        Mon toFind(term.first);
         for (int j=0; j<variables.size(); j++) {
             if (variables[j] == toFind) {
-                c[j] += std::real(obj[i].first);
-                c[j+1] += std::real(obj[i].first);
+                c[j] += std::real(term.second);
+                c[j+1] += std::real(term.second);
                 break;
             }
         }
@@ -64,11 +65,12 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
     std::vector<int> ARows;
     std::vector<int> ACols;
     std::vector<double> AVals;
+    int numCons = 0;
     for (int i=0; i<constraintsZero.size(); i++) {
-        for (int j=0; j<constraintsZero[i].size(); j++) {
+        for (auto& term : constraintsZero[i].polynomial) {
 
             // Find the location of this variable
-            Mon toFind(constraintsZero[i][j].second);
+            Mon toFind(term.first);
             int realLoc = -1;
             int imagLoc = -1;
             for (int k=0; k<variables.size(); k++) {
@@ -82,27 +84,41 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
             // c_r*x_r - c_i*x_i = 0
             ARows.push_back(2*i);
             ACols.push_back(realLoc);
-            AVals.push_back(std::real(constraintsZero[i][j].first));
+            AVals.push_back(std::real(term.second));
             ARows.push_back(2*i);
             ACols.push_back(imagLoc);
-            AVals.push_back(-std::imag(constraintsZero[i][j].first));
+            AVals.push_back(-std::imag(term.second));
+            numCons++;
 
             // c_r*x_i + c_i*x_r = 0
             ARows.push_back(2*i+1);
             ACols.push_back(imagLoc);
-            AVals.push_back(std::real(constraintsZero[i][j].first));
+            AVals.push_back(std::real(term.second));
             ARows.push_back(2*i+1);
             ACols.push_back(realLoc);
-            AVals.push_back(std::imag(constraintsZero[i][j].first));
+            AVals.push_back(std::imag(term.second));
+            numCons++;
 
         }
     }
+
+    // Single Paulis should be real TODO
+    for (int i=0; i<variables.size(); i+=2) {
+        if (variables[i].size() == 1) {
+            ARows.push_back(numCons);
+            ACols.push_back(i+1);
+            AVals.push_back(1.0);
+            numCons++;
+        }
+    }
+
+    // Convert to MOSEK form
     if (verbosity >= 3) {
         std::cout << "ARows: " << ARows << std::endl;
         std::cout << "ACols: " << ACols << std::endl;
         std::cout << "AVals: " << AVals << std::endl;
     }
-    auto AM = mosek::fusion::Matrix::sparse(2*constraintsZero.size(), variables.size(), monty::new_array_ptr<int>(ARows), monty::new_array_ptr<int>(ACols), monty::new_array_ptr<double>(AVals));
+    auto AM = mosek::fusion::Matrix::sparse(numCons, variables.size(), monty::new_array_ptr<int>(ARows), monty::new_array_ptr<int>(ACols), monty::new_array_ptr<double>(AVals));
 
     // The vectors defining the PSD constraints
     std::vector<std::shared_ptr<monty::ndarray<int,1>>> indicesPSDPerMat;
@@ -122,7 +138,7 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
                 // Find this in the variable list
                 int realLoc = -1;
                 int imagLoc = -1;
-                Mon toFind(psd[k][i][j][0].second);
+                Mon toFind(psd[k][i][j].getKey());
                 for (int k2=0; k2<variables.size(); k2++) {
                     if (variables[k2] == toFind) {
                         realLoc = k2;
@@ -138,8 +154,9 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
                 int imagInd2 = matLocToVecLoc(j, i+imagOffset, fullMatSize);
 
                 // If it's a real coeff
-                if (std::imag(psd[k][i][j][0].first) == 0) {
-                    double coeff = std::real(psd[k][i][j][0].first);
+                std::complex<double> val = psd[k][i][j].getValue();
+                if (std::imag(val) == 0) {
+                    double coeff = std::real(val);
                     indicesPSD[realInd] = realLoc;
                     coeffsPSD[realInd] = coeff;
                     indicesPSD[realInd2] = realLoc;
@@ -151,7 +168,7 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
 
                 // If it's an imaginary coeff
                 } else {
-                    double coeff = std::imag(psd[k][i][j][0].first);
+                    double coeff = std::imag(val);
                     indicesPSD[realInd] = imagLoc;
                     coeffsPSD[realInd] = coeff;
                     indicesPSD[realInd2] = imagLoc;
@@ -335,17 +352,17 @@ double solveLinear(Poly obj, std::vector<Poly> constraintsZero, int verbosity) {
     // Convert to an Eigen matrix
     Eigen::MatrixXcd A = Eigen::MatrixXcd::Zero(constraintsZero.size(), variables.size());
     for (int i=0; i<constraintsZero.size(); i++) {
-        for (int j=0; j<constraintsZero[i].size(); j++) {
+        for (auto& term : constraintsZero[i].polynomial) {
             for (int k=0; k<variables.size(); k++) {
-                if (variables[k] == constraintsZero[i][j].second) {
-                    A(i, k) = constraintsZero[i][j].first;
+                if (variables[k] == term.first) {
+                    A(i, k) = term.second;
                     break;
                 }
             }
         }
     }
 
-
+    return 0.0;
     
 }
 

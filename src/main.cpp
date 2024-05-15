@@ -241,7 +241,6 @@ int main(int argc, char* argv[]) {
             objective += Poly(0.5*epsilon_c*gamma_c_minus, "<P2M2P2M2>");
             objective += Poly(0.5*epsilon_c*gamma_c_minus, "<P2M2P2M2>");
             objective.convertToPaulis();
-            objective.sort();
             
             // Construct the Limbadlian as a polynomial from plus/minus
             limbladian = Poly();
@@ -266,7 +265,6 @@ int main(int argc, char* argv[]) {
             limbladian += Poly(-0.5*gamma_c_minus, "<A0P2M2>");
             limbladian += Poly(-0.5*gamma_c_minus, "<P2M2A0>");
             limbladian.convertToPaulis();
-            limbladian.sort();
 
         // Many-body Limbladian TODO
         } else if (argAsString == "--many" || argAsString == "--manyv") {
@@ -337,7 +335,6 @@ int main(int argc, char* argv[]) {
                 limbladian += Poly(-0.5*gamma_minus[i-1], "<P" + std::to_string(i) + "M" + std::to_string(i) + "A0>");
             }
             limbladian.convertToPaulis();
-            limbladian.sort();
 
         // Set the seed
         } else if (argAsString == "-S") {
@@ -471,10 +468,7 @@ int main(int argc, char* argv[]) {
     if (extraMonomials.size() > 0) {
         std::vector<Poly> topRow = momentMatrices[0][0];
         for (int i=0; i<extraMonomials.size(); i++) {
-            Poly extraMonomial(extraMonomials[i]);
-            for (int j=0; j<extraMonomial.size(); j++) {
-                extraMonomial[j].second.reverse();
-            }
+            Poly extraMonomial(Mon(extraMonomials[i]).reversed());
             topRow.push_back(extraMonomial);
             std::cout << "Added " << extraMonomial << " to the top row" << std::endl;
         }
@@ -491,10 +485,11 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // If asked to try removing constraints
+    // If asked to find the minimal set of linear constraints TODO
+    // time ./run --many 20 -l 0 -m 0 -M 1000        1.995s
     if (findMinimal) {
 
-        // Add constraints based on the monomials we already have TODO
+        // Add constraints based on the monomials we already have
         std::unordered_set<Mon> monomsUsed;
         std::unordered_set<Mon> monomsInConstraints;
         std::vector<Mon> monomsInCon = objective.monomials();
@@ -508,7 +503,7 @@ int main(int argc, char* argv[]) {
             }
         }
         for (int i=0; i<variablesToPut.size(); i++) {
-            monomsUsed.insert(variablesToPut[i][0].second);
+            monomsUsed.insert(variablesToPut[i].getKey());
         }
         while (constraintsZero.size() < findMinimalAmount) {
 
@@ -535,19 +530,19 @@ int main(int argc, char* argv[]) {
             }
 
             // Run the SDP
-            std::vector<Mon> varNames2;
-            std::vector<std::complex<double>> varVals2;
-            double upperBoundTemp = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity, varNames2, varVals2);
-            for (int i=0; i<objective.size(); i++) {
-                objective[i].first *= -1;
-            }
-            double lowerBoundTemp = -solveMOSEK(objective, momentMatrices, constraintsZero, verbosity, varNames2, varVals2);
-            std::cout << "Constraint: " << monToAdd << std::endl;
-            std::cout << "Lower bound: " << lowerBoundTemp << std::endl;
-            std::cout << "Upper bound: " << upperBoundTemp << std::endl;
-            if (upperBoundTemp - lowerBoundTemp < 1e-4) {
-                break;
-            }
+            //std::vector<Mon> varNames2;
+            //std::vector<std::complex<double>> varVals2;
+            //double upperBoundTemp = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity, varNames2, varVals2);
+            //objective *= -1;
+            //double lowerBoundTemp = -solveMOSEK(objective, momentMatrices, constraintsZero, verbosity, varNames2, varVals2);
+            //if (verbosity >= 3) {
+                //std::cout << "Constraint: " << monToAdd << std::endl;
+                //std::cout << "Lower bound: " << lowerBoundTemp << std::endl;
+                //std::cout << "Upper bound: " << upperBoundTemp << std::endl;
+            //}
+            //if (upperBoundTemp - lowerBoundTemp < 1e-4) {
+                //break;
+            //}
 
 
         }
@@ -586,9 +581,7 @@ int main(int argc, char* argv[]) {
     std::vector<Mon> varNames;
     std::vector<std::complex<double>> varVals;
     double upperBound = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity, varNames, varVals);
-    for (int i=0; i<objective.size(); i++) {
-        objective[i].first *= -1;
-    }
+    objective *= -1;
     double lowerBound = -solveMOSEK(objective, momentMatrices, constraintsZero, verbosity, varNames, varVals);
     if (verbosity >= 2) {
         std::cout << std::endl;

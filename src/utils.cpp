@@ -8,13 +8,14 @@ Eigen::MatrixXcd replaceVariables(std::vector<std::vector<Poly>>& momentMatrix, 
     Eigen::MatrixXcd momentMatrixEigen = Eigen::MatrixXcd::Zero(momentMatrix.size(), momentMatrix.size());
     for (int i=0; i<momentMatrix.size(); i++) {
         for (int j=0; j<momentMatrix[i].size(); j++) {
-            for (int k=0; k<momentMatrix[i][j].size(); k++) {
+            //for (int k=0; k<momentMatrix[i][j].size(); k++) {
+            for (auto& term : momentMatrix[i][j]) {
                 for (int l=0; l<variables.size(); l++) {
-                    if (momentMatrix[i][j][k].second == variables[l]) {
+                    if (term.first == variables[l]) {
                         if (i > j) {
-                            momentMatrixEigen(i, j) += momentMatrix[i][j][k].first * varVals[l];
+                            momentMatrixEigen(i, j) += term.second * varVals[l];
                         } else {
-                            momentMatrixEigen(i, j) += momentMatrix[i][j][k].first * std::conj(varVals[l]);
+                            momentMatrixEigen(i, j) += term.second * std::conj(varVals[l]);
                         }
                         break;
                     }
@@ -57,11 +58,12 @@ void getEigens(std::vector<std::vector<Poly>>& momentMatrix, const std::vector<M
 void addSingleMonomials(std::vector<Mon>& variables, Poly functional) {
 
     // Iterate through the functional
-    for (long unsigned int i=0; i<functional.size(); i++) {
+    //for (long unsigned int i=0; i<functional.size(); i++) {
+    for (auto& term : functional) {
 
         // Iterate through the monomial
-        for (long unsigned int j=0; j<functional[i].second.size(); j++) {
-            Mon currentMonomial(functional[i].second[j]);
+        for (long unsigned int j=0; j<term.first.size(); j++) {
+            Mon currentMonomial(term.first[j]);
 
             // Check if this moment is already in the list
             bool found = false;
@@ -134,29 +136,23 @@ std::vector<std::vector<Poly>> generateFromTopRow(std::vector<Poly> monomsInTopR
         for (long unsigned int j=i; j<monomsInTopRow.size(); j++) {
 
             // Form the new polynomial
-            Poly newPolynomial;
-            for (long unsigned int k=0; k<monomsInTopRow[i].size(); k++) {
-                for (long unsigned int l=0; l<monomsInTopRow[j].size(); l++) {
+            Poly newPolynomial = monomsInTopRow[j] * monomsInTopRow[i].conj();
+            //for (long unsigned int k=0; k<monomsInTopRow[i].size(); k++) {
+                //for (long unsigned int l=0; l<monomsInTopRow[j].size(); l++) {
 
-                    // Form the new monomial
-                    Mon newMonomial;
-                    for (long unsigned int m=0; m<monomsInTopRow[i][k].second.size(); m++) {
-                        newMonomial.monomial.push_back(monomsInTopRow[i][k].second[m]);
-                    }
-                    for (int m=int(monomsInTopRow[j][l].second.size())-1; m>=0; m--) {
-                        newMonomial.monomial.push_back(monomsInTopRow[j][l].second[m]);
-                    }
+                    //// Form the new monomial
+                    //Mon newMonomial= monomsInTopRow[i][k].second * monomsInTopRow[j][l].second;
 
-                    // Reduce the monomial
-                    std::pair<std::complex<double>, Mon> monomCoeff = newMonomial.reduce();
-                    newMonomial = monomCoeff.second;
+                    //// Reduce the monomial
+                    //std::pair<std::complex<double>, Mon> monomCoeff = newMonomial.reduce();
+                    //newMonomial = monomCoeff.second;
 
-                    // Add to the polynomial
-                    std::complex<double> newCoefficient = monomCoeff.first * monomsInTopRow[i][k].first * std::conj(monomsInTopRow[j][l].first);
-                    newPolynomial += Poly(monomCoeff.first, newMonomial);
+                    //// Add to the polynomial
+                    //std::complex<double> newCoefficient = monomCoeff.first * monomsInTopRow[i][k].first * std::conj(monomsInTopRow[j][l].first);
+                    //newPolynomial += Poly(monomCoeff.first, newMonomial);
 
-                }
-            }
+                //}
+            //}
 
             // Set the matrix elements
             matrixToReturn[i][j] = newPolynomial;
@@ -290,7 +286,7 @@ std::vector<Poly> generateMonomials(std::vector<Mon> variables, int level, int v
 
     // Remove the 1 if there is
     for (long unsigned int i=0; i<monomsInTopRow.size(); i++) {
-        if (monomsInTopRow[i].size() == 1 && monomsInTopRow[i][0].second == Mon()) {
+        if (monomsInTopRow[i].size() == 1 && monomsInTopRow[i].getKey() == Mon()) {
             monomsInTopRow.erase(monomsInTopRow.begin()+i);
             break;
         }
@@ -359,8 +355,8 @@ void addVariables(std::vector<Mon>& variables, std::vector<std::vector<Poly>> to
         for (long unsigned int j=0; j<toAdd[i].size(); j++) {
 
             // Iterate through the polynomial
-            for (long unsigned int k=0; k<toAdd[i][j].size(); k++) {
-                Mon currentMonomial(toAdd[i][j][k].second);
+            for (auto& term : toAdd[i][j]) {
+                Mon currentMonomial(term.first);
 
                 // Check if this monomial is already in the list
                 bool found = false;
@@ -386,9 +382,10 @@ void addVariables(std::vector<Mon>& variables, std::vector<std::vector<Poly>> to
 // Add variables from a polynomial
 void addVariables(std::vector<Mon>& variables, Poly toAdd) {
 
-    // Iterate through the monomial
-    for (long unsigned int i=0; i<toAdd.size(); i++) {
-        Mon currentMonomial(toAdd[i].second);
+    // Iterate through the polynomial
+    //for (long unsigned int i=0; i<toAdd.size(); i++) {
+    for (auto& term : toAdd) {
+        Mon currentMonomial(term.first);
 
         // Check if this monomial is already in the list
         bool found = false;

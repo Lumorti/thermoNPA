@@ -33,13 +33,17 @@ public:
     Mon reversed();
 
     // If multiplied by another monomial
-    Mon operator*(const Mon& other);
+    Mon operator*(const Mon& other) const;
 
     // Bracket access
     std::pair<char, int>& operator[](size_t index);
-
-    // Bracket access
     const std::pair<char, int>& operator[](size_t index) const;
+
+    // Iterators
+    std::vector<std::pair<char,int>>::iterator begin() {return monomial.begin();}
+    std::vector<std::pair<char,int>>::iterator end()   {return monomial.end();}
+    std::vector<std::pair<char,int>>::const_iterator begin() const {return monomial.begin();}
+    std::vector<std::pair<char,int>>::const_iterator end() const {return monomial.end();}
 
     // Check equality
     bool operator==(const Mon& other) const;
@@ -51,14 +55,14 @@ public:
     bool compareReversed(const std::pair<char, int>& a, const std::pair<char, int>& b) const;
 
     // Comparison between this and another monomial, but reversed
-    bool compareReversed(Mon& a, Mon& b);
+    bool compareReversed(Mon& a, Mon& b) const;
 
     // Comparison between this and another monomial
     bool operator<(const Mon& other) const;
     bool operator>(const Mon& other) const;
 
     // Given a monomial, reduce it to its simplest form
-    std::pair<std::complex<double>, Mon> reduce(std::string swapType = "none", bool diffLettersCommute=false, bool diffNumbersCommute=true, bool pauliReductions=true, std::vector<int> reductionsToIgnore={});
+    std::pair<std::complex<double>, Mon> reduce(std::string swapType = "none", bool diffLettersCommute=false, bool diffNumbersCommute=true, bool pauliReductions=true, std::vector<int> reductionsToIgnore={}) const;
 
     // Pretty printing
     friend std::ostream& operator<<(std::ostream& os, const Mon& m);

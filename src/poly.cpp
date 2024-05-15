@@ -6,43 +6,41 @@ const std::complex<double> imag(0, 1);
 const double zeroTol = 1e-13;
 
 // If initialized from nothing
-Poly::Poly() {
-    polynomial = {};
-}
+Poly::Poly() {}
 
 // If initialized from just a coeff
 Poly::Poly(std::complex<double> coeff) {
-    polynomial = {{coeff, Mon()}};
+    polynomial[Mon()] = coeff;
 }
 
 // If initialized from just a monomial
 Poly::Poly(Mon mon) {
-    polynomial = {{1, mon}};
+    polynomial[mon] = 1;
 }
 
-// If initialized from a vector
-Poly::Poly (std::vector<std::pair<std::complex<double>, Mon>> polynomial) {
+// If initialized from a map
+Poly::Poly (std::unordered_map<Mon, std::complex<double>> poly) {
     polynomial = polynomial;
 }
 
 // If initialized from a single coeff + monomial
 Poly::Poly(std::pair<std::complex<double>, Mon> pair) {
-    polynomial = {pair};
+    polynomial[pair.second] = pair.first;
 }
 
 // If initialized from a coeff and a monomial
 Poly::Poly(std::complex<double> coeff, Mon mon) {
-    polynomial = {{coeff, mon}};
+    polynomial[mon] = coeff;
 }
 
 // If initialized from a single part of monomial
 Poly::Poly(std::pair<char, int> part) {
-    polynomial = {{1, Mon(part)}};
+    polynomial[Mon(part)] = 1;
 }
 
 // If initialized from a coeff and a string
 Poly::Poly(std::complex<double> coeff, std::string asString) {
-    polynomial = {{coeff, Mon(asString)}};
+    polynomial[Mon(asString)] = coeff;
 }
 
 // If initialized from a string
@@ -58,7 +56,7 @@ Poly::Poly(std::string asString) {
     asString = newString;
 
     // Iterate through the string
-    std::vector<std::pair<std::complex<double>, Mon>> toReturn;
+    std::unordered_map<Mon, std::complex<double>> toReturn;
     std::string currentCoefficient;
     std::string currentMonomial;
     for (size_t i=0; i<asString.size(); i++) {
@@ -77,7 +75,11 @@ Poly::Poly(std::string asString) {
             if (asString[i] == '>') {
                 currentMonomial += asString[i];
             }
-            toReturn.push_back(std::make_pair(std::stod(currentCoefficient), Mon(currentMonomial)));
+            if (toReturn.find(Mon(currentMonomial)) == toReturn.end()) {
+                toReturn[Mon(currentMonomial)] = std::stod(currentCoefficient);
+            } else {
+                toReturn[Mon(currentMonomial)] += std::stod(currentCoefficient);
+            }
             currentMonomial = "";
             currentCoefficient = "";
 
@@ -100,7 +102,11 @@ Poly::Poly(std::string asString) {
 
     // If there's a coefficient left over, add it
     if (currentCoefficient != "") {
-        toReturn.push_back(std::make_pair(std::stod(currentCoefficient), Mon(currentMonomial)));
+        if (toReturn.find(Mon(currentMonomial)) == toReturn.end()) {
+            toReturn[Mon(currentMonomial)] = std::stod(currentCoefficient);
+        } else {
+            toReturn[Mon(currentMonomial)] += std::stod(currentCoefficient);
+        }
     }
 
     // Set the polynomial
@@ -109,7 +115,7 @@ Poly::Poly(std::string asString) {
 }
 
 // When assigning manually with a vector
-Poly& Poly::operator=(const std::vector<std::pair<std::complex<double>, Mon>>& other) {
+Poly& Poly::operator=(const std::unordered_map<Mon, std::complex<double>>& other) {
     polynomial = other;
     return *this;
 }
@@ -123,16 +129,30 @@ bool Poly::operator==(const Poly& other) {
 Poly Poly::operator+(const Poly& other) {
     Poly toReturn;
     toReturn.polynomial = polynomial;
-    for (size_t i=0; i<other.polynomial.size(); i++) {
-        toReturn.polynomial.push_back(other.polynomial[i]);
+    //for (size_t i=0; i<other.polynomial.size(); i++) {
+        //toReturn.polynomial.push_back(other.polynomial[i]);
+    //}
+    for (auto& term : other.polynomial) {
+        if (toReturn.polynomial.find(term.first) == toReturn.polynomial.end()) {
+            toReturn.polynomial[term.first] = term.second;
+        } else {
+            toReturn.polynomial[term.first] += term.second;
+        }
     }
     return toReturn;
 }
 
 // When summing in-place
 Poly& Poly::operator+=(const Poly& other) {
-    for (size_t i=0; i<other.polynomial.size(); i++) {
-        polynomial.push_back(other.polynomial[i]);
+    //for (size_t i=0; i<other.polynomial.size(); i++) {
+        //polynomial.push_back(other.polynomial[i]);
+    //}
+    for (auto& term : other.polynomial) {
+        if (polynomial.find(term.first) == polynomial.end()) {
+            polynomial[term.first] = term.second;
+        } else {
+            polynomial[term.first] += term.second;
+        }
     }
     return *this;
 }
@@ -141,28 +161,53 @@ Poly& Poly::operator+=(const Poly& other) {
 Poly Poly::operator-(const Poly& other) {
     Poly toReturn;
     toReturn.polynomial = polynomial;
-    for (size_t i=0; i<other.polynomial.size(); i++) {
-        toReturn.polynomial.push_back(std::make_pair(-other.polynomial[i].first, other.polynomial[i].second));
+    //for (size_t i=0; i<other.polynomial.size(); i++) {
+        //toReturn.polynomial.push_back(std::make_pair(-other.polynomial[i].first, other.polynomial[i].second));
+    //}
+    for (auto& term : other.polynomial) {
+        if (toReturn.polynomial.find(term.first) == toReturn.polynomial.end()) {
+            toReturn.polynomial[term.first] = -term.second;
+        } else {
+            toReturn.polynomial[term.first] -= term.second;
+        }
     }
     return toReturn;
 }
 
 // When subtracting in-place
 Poly& Poly::operator-=(const Poly& other) {
-    for (size_t i=0; i<other.polynomial.size(); i++) {
-        polynomial.push_back(std::make_pair(-other.polynomial[i].first, other.polynomial[i].second));
+    //for (size_t i=0; i<other.polynomial.size(); i++) {
+        //polynomial.push_back(std::make_pair(-other.polynomial[i].first, other.polynomial[i].second));
+    //}
+    for (auto& term : other.polynomial) {
+        if (polynomial.find(term.first) == polynomial.end()) {
+            polynomial[term.first] = -term.second;
+        } else {
+            polynomial[term.first] -= term.second;
+        }
     }
     return *this;
 }
 
 // When multiplying two polynomials
-Poly Poly::operator*(const Poly& other) {
+Poly Poly::operator*(const Poly& other) const {
     Poly toReturn;
-    for (size_t i=0; i<polynomial.size(); i++) {
-        for (size_t j=0; j<other.polynomial.size(); j++) {
-            std::complex<double> newCoefficient = polynomial[i].first * other.polynomial[j].first;
-            Mon newMonomial = polynomial[i].second * other.polynomial[j].second;
-            toReturn += Poly(newCoefficient, newMonomial);
+    //for (size_t i=0; i<polynomial.size(); i++) {
+        //for (size_t j=0; j<other.polynomial.size(); j++) {
+            //std::complex<double> newCoefficient = polynomial[i].first * other.polynomial[j].first;
+            //Mon newMonomial = polynomial[i].second * other.polynomial[j].second;
+            //toReturn += Poly(newCoefficient, newMonomial);
+        //}
+    //}
+    for (const auto& term1 : polynomial) {
+        for (const auto& term2 : other.polynomial) {
+            std::complex<double> newCoefficient = term1.second * term2.second;
+            Mon newMonomial = term1.first * term2.first;
+            if (toReturn.polynomial.find(newMonomial) == toReturn.polynomial.end()) {
+                toReturn.polynomial[newMonomial] = newCoefficient;
+            } else {
+                toReturn.polynomial[newMonomial] += newCoefficient;
+            }
         }
     }
     return toReturn;
@@ -171,16 +216,22 @@ Poly Poly::operator*(const Poly& other) {
 // When multiplying by a constant
 Poly Poly::operator*(const std::complex<double>& other) {
     Poly toReturn;
-    for (size_t i=0; i<polynomial.size(); i++) {
-        toReturn.polynomial.push_back(std::make_pair(polynomial[i].first * other, polynomial[i].second));
+    //for (size_t i=0; i<polynomial.size(); i++) {
+        //toReturn.polynomial.push_back(std::make_pair(polynomial[i].first * other, polynomial[i].second));
+    //}
+    for (auto& term : polynomial) {
+        toReturn.polynomial[term.first] = term.second * other;
     }
     return toReturn;
 }
 
 // When multiplying by a constant in-place
 Poly& Poly::operator*=(const std::complex<double>& other) {
-    for (size_t i=0; i<polynomial.size(); i++) {
-        polynomial[i].first *= other;
+    //for (size_t i=0; i<polynomial.size(); i++) {
+        //polynomial[i].first *= other;
+    //}
+    for (auto& term : polynomial) {
+        term.second *= other;
     }
     return *this;
 }
@@ -188,25 +239,24 @@ Poly& Poly::operator*=(const std::complex<double>& other) {
 // When dividing by a constant
 Poly Poly::operator/(const std::complex<double>& other) {
     Poly toReturn;
-    for (size_t i=0; i<polynomial.size(); i++) {
-        toReturn.polynomial.push_back(std::make_pair(polynomial[i].first / other, polynomial[i].second));
+    //for (size_t i=0; i<polynomial.size(); i++) {
+        //toReturn.polynomial.push_back(std::make_pair(polynomial[i].first / other, polynomial[i].second));
+    //}
+    for (auto& term : polynomial) {
+        toReturn.polynomial[term.first] = term.second / other;
     }
     return toReturn;
 }
 
 // When dividing by a constant in-place
 Poly& Poly::operator/=(const std::complex<double>& other) {
-    for (size_t i=0; i<polynomial.size(); i++) {
-        polynomial[i].first /= other;
+    //for (size_t i=0; i<polynomial.size(); i++) {
+        //polynomial[i].first /= other;
+    //}
+    for (auto& term : polynomial) {
+        term.second /= other;
     }
     return *this;
-}
-
-// Sort the terms by monomial
-void Poly::sort() {
-    std::sort(polynomial.begin(), polynomial.end(), [](const std::pair<std::complex<double>, Mon>& a, const std::pair<std::complex<double>, Mon>& b) {
-        return a.second < b.second;
-    });
 }
 
 // Size of the polynomial
@@ -215,20 +265,24 @@ const size_t Poly::size() const {
 }
 
 // Allow bracket access
-const std::pair<std::complex<double>, Mon>& Poly::operator[](size_t index) const {
-    return polynomial[index];
+const std::complex<double> Poly::operator[](Mon mon) const {
+    auto it = polynomial.find(mon);
+    return it != polynomial.end() ? it->second : std::complex<double>(0,0);
 }
 
 // Allow bracket access
-std::pair<std::complex<double>, Mon>& Poly::operator[](size_t index) {
-    return polynomial[index];
+std::complex<double>& Poly::operator[](Mon mon) {
+    return polynomial[mon];
 }
 
 // Self-negative
 Poly Poly::operator-() {
     Poly toReturn = *this;
-    for (size_t i=0; i<toReturn.size(); i++) {
-        toReturn.polynomial[i].first = -toReturn.polynomial[i].first;
+    //for (size_t i=0; i<toReturn.size(); i++) {
+        //toReturn.polynomial[i].first = -toReturn.polynomial[i].first;
+    //}
+    for (auto& term : toReturn.polynomial) {
+        term.second = -term.second;
     }
     return toReturn;
 }
@@ -236,96 +290,80 @@ Poly Poly::operator-() {
 // Self-conjugate
 Poly Poly::conj() {
     Poly toReturn = *this;
-    for (size_t i=0; i<toReturn.size(); i++) {
-        toReturn.polynomial[i].first = std::conj(toReturn.polynomial[i].first);
+    //for (size_t i=0; i<toReturn.size(); i++) {
+        //toReturn.polynomial[i].first = std::conj(toReturn.polynomial[i].first);
+    //}
+    for (auto& term : toReturn.polynomial) {
+        term.second = std::conj(term.second);
     }
     return toReturn;
-}
-
-// Combine like terms
-void Poly::simplify() {
-
-    // Iterate through the polynomial
-    for (size_t i=0; i<size(); i++) {
-
-        // Check if this monomial is already in the return polynomial
-        bool found = false;
-        for (size_t j=0; j<size(); j++) {
-            if (i == j) {
-                continue;
-            }
-            if (polynomial[i].second == polynomial[j].second) {
-                polynomial[j].first += polynomial[i].first;
-                polynomial.erase(polynomial.begin()+i);
-                i--;
-                break;
-            }
-        }
-
-    }
-
-    // Remove any zero terms
-    for (int i=size()-1; i>=0; i--) {
-        if (std::abs(polynomial[i].first) < zeroTol) {
-            polynomial.erase(polynomial.begin()+i);
-        }
-    }
-
 }
 
 // Given a polynomial, reduce each monomial and combine
 void Poly::reduce() {
 
     // Apply the reduction to each monomial
-    for (int j=0; j<size(); j++) {
-        std::pair<std::complex<double>, Mon> reducedMonomial = polynomial[j].second.reduce();
-        polynomial[j].first *= reducedMonomial.first;
-        polynomial[j].second = reducedMonomial.second;
-    }
+    //for (int j=0; j<size(); j++) {
+        //std::pair<std::complex<double>, Mon> reducedMonomial = polynomial[j].second.reduce();
+        //polynomial[j].first *= reducedMonomial.first;
+        //polynomial[j].second = reducedMonomial.second;
+    //}
 
+    Poly toReturn;
+    for (auto& term : polynomial) {
+        std::pair<std::complex<double>, Mon> reducedMonomial = term.first.reduce();
+        //term.first = reducedMonomial.second;
+        //tfirsterm.second *= reducedMonomial.first;
+        if (toReturn.polynomial.find(reducedMonomial.second) == toReturn.polynomial.end()) {
+            toReturn.polynomial[reducedMonomial.second] = term.second * reducedMonomial.first;
+        } else {
+            toReturn.polynomial[reducedMonomial.second] += term.second * reducedMonomial.first;
+        }
+    }
+    *this = toReturn;
 }
 
 // Pretty print
 std::ostream& operator<<(std::ostream& os, const Poly& p) {
 
     // Check if it's zero
-    if (p.size() == 0 || (p.size() == 1 && p.polynomial[0].first == std::complex<double>(0,0))) {
+    if (p.size() == 0 || (p.size() == 1 && p[Mon()] == std::complex<double>(0,0))) {
         os << "0";
         return os;
     }
 
     // Iterate through the polynomial
-    for (size_t i=0; i<p.size(); i++) {
-        double realPart = p[i].first.real();
-        double imagPart = p[i].first.imag();
+    for (auto& term : p.polynomial) {
+        double realPart = term.second.real();
+        double imagPart = term.second.imag();
         if (imagPart == 0) {
             if (realPart == std::complex<double>(-1, 0)) {
-                os << "-" << p[i].second;
+                os << "-" << term.first;
             } else if (realPart == std::complex<double>(1, 0)) {
-                if (i == 0) {
-                    os << p[i].second;
+                if (term.first == Mon()) {
+                    os << term.second;
                 } else {
-                    os << "+" << p[i].second;
+                    os << "+" << term.second;
                 }
-            } else if (p[i].second.size() == 0 && realPart > 0) {
-                if (i == 0) {
+            } else if (term.first.size() == 0 && realPart > 0) {
+                if (term.first == Mon()) {
                     os << realPart;
                 } else {
                     os << "+" << realPart;
                 }
-            } else if (p[i].second.size() == 0 && realPart < 0) {
+            } else if (term.first.size() == 0 && realPart < 0) {
                 os << realPart;
             } else if (realPart > 0) {
-                if (i == 0) {
-                    os << realPart << p[i].second;
+                if (term.first == Mon()) {
+                    os << realPart;
                 } else {
-                    os << "+" << realPart << p[i].second;
+                    os << "+" << realPart;
                 }
             } else if (realPart != 0) {
-                os << realPart << p[i].second;
+                os << realPart;
             }
         } else {
-            os << p[i].first << p[i].second;
+            os << term.second << term.first;
         }
     }
 
@@ -339,35 +377,61 @@ void Poly::replace(std::pair<char,int> mon, Poly replacement) {
 
     // Iterate through the polynomial
     Poly pNew;
-    for (int i=0; i<size(); i++) {
-        Poly newTerm = Poly(polynomial[i].first);
+    //for (int i=0; i<size(); i++) {
+        //Poly newTerm = Poly(polynomial[i].first);
 
-        // For each of the terms in the monomial
-        for (int j=0; j<polynomial[i].second.size(); j++) {
+        //// For each of the terms in the monomial
+        //for (int j=0; j<polynomial[i].second.size(); j++) {
 
-            // If we have a match
-            Poly toMultiply(polynomial[i].second[j]);
-            if (polynomial[i].second[j] == mon) {
+            //// If we have a match
+            //Poly toMultiply(polynomial[i].second[j]);
+            //if (polynomial[i].second[j] == mon) {
+                //toMultiply = replacement;
+            //} else if (polynomial[i].second[j].first == mon.first && mon.second == 0) {
+                //toMultiply = replacement;
+                //for (int k=0; k<toMultiply.size(); k++) {
+                    //for (int l=0; l<toMultiply[k].second.size(); l++) {
+                        //toMultiply[k].second[l].second = polynomial[i].second[j].second;
+                    //}
+                //}
+            //}
+
+            //// Perform the multiplication and reduce
+            //newTerm = newTerm * toMultiply;
+            //newTerm.reduce();
+
+
+        //}
+
+        //// Add this term to the polynomial
+        //pNew += newTerm;
+
+    //}
+
+    // For each term in the polynomial
+    for (auto& term : polynomial) {
+        Poly newTerm = Poly(term.second);
+
+        // For each of the sections in this monomial
+        for (int j=0; j<term.first.size(); j++) {
+
+            // Determine the monomial to multiply
+            Poly toMultiply(term.first[j]);
+            if (term.first[j] == mon) {
                 toMultiply = replacement;
-            } else if (polynomial[i].second[j].first == mon.first && mon.second == 0) {
+            } else if (term.first[j].first == mon.first && mon.second == 0) {
                 toMultiply = replacement;
-                for (int k=0; k<toMultiply.size(); k++) {
-                    for (int l=0; l<toMultiply[k].second.size(); l++) {
-                        toMultiply[k].second[l].second = polynomial[i].second[j].second;
-                    }
-                }
+                // TODO
             }
 
-            // Perform the multiplication and reduce
+            // Perform the multiplication
             newTerm = newTerm * toMultiply;
-            newTerm.reduce();
-
 
         }
 
-        // Add this term to the polynomial
+        // Reduce the new term and add it to the polynomial
+        newTerm.reduce();
         pNew += newTerm;
-        pNew.simplify();
 
     }
 
@@ -388,17 +452,23 @@ void Poly::replace(Mon mon, Poly replacement) {
 
     // Iterate through the polynomial
     Poly pNew;
-    for (int i=0; i<size(); i++) {
-        if (polynomial[i].second == mon) {
-            pNew += replacement * polynomial[i].first;
-            continue;
+    //for (int i=0; i<size(); i++) {
+        //if (polynomial[i].second == mon) {
+            //pNew += replacement * polynomial[i].first;
+            //continue;
+        //} else {
+            //pNew += polynomial[i];
+        //}
+    //}
+    for (auto& term : polynomial) {
+        if (term.first == mon) {
+            pNew += replacement * term.second;
         } else {
-            pNew += polynomial[i];
+            pNew += term.second;
         }
     }
 
     // Set the new polynomial
-    pNew.simplify();
     *this = pNew;
 
 }
@@ -416,7 +486,6 @@ void Poly::convertToPaulis() {
     Poly toReplaceM = Poly(0.5, "<X0>") + Poly(-0.5*imag, "<Y0>");
     replace(std::make_pair('P', 0), toReplaceP);
     replace(std::make_pair('M', 0), toReplaceM);
-    simplify();
     reduce();
 }
 
@@ -479,8 +548,8 @@ std::vector<Mon> Poly::monomials() {
 
     // Get the list of monomials
     std::vector<Mon> toReturn;
-    for (size_t i=0; i<size(); i++) {
-        toReturn.push_back(polynomial[i].second);
+    for (auto& term : polynomial) {
+        toReturn.push_back(term.first);
     }
     return toReturn;
 
@@ -493,11 +562,11 @@ Poly Poly::rearranged(Mon mon) {
     // Find this monomial
     Poly returnPoly;
     std::complex<double> coeff = 1;
-    for (size_t i=0; i<size(); i++) {
-        if (polynomial[i].second == mon) {
-            coeff = polynomial[i].first;
+    for (auto& term : polynomial) {
+        if (term.first == mon) {
+            coeff = term.second;
         } else {
-            returnPoly += Poly(polynomial[i].first, polynomial[i].second);
+            returnPoly += Poly(term.second, term.first);
         }
     }
 
@@ -509,12 +578,15 @@ Poly Poly::rearranged(Mon mon) {
 
 // Check if a polynomial has a monomial
 bool Poly::hasMonomial(Mon mon) {
-    for (size_t i=0; i<size(); i++) {
-        if (polynomial[i].second == mon) {
-            return true;
-        }
-    }
-    return false;
+    return polynomial.find(mon) != polynomial.end();
+}
+
+// If asking for just the first monomial
+std::complex<double>& Poly::getValue() {
+    return polynomial.begin()->second;
+}
+Mon Poly::getKey() {
+    return polynomial.begin()->first;
 }
 
 
