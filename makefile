@@ -5,7 +5,7 @@ LIBSEIGEN= -I${EIGENHOME}
 LIBSMOSEK= -I${MSKHOME}/h -L${MSKHOME}/bin -Wl,-rpath-link,${MSKHOME}/bin -Wl,-rpath=${MSKHOME}/bin -lmosek64 -lfusion64
 LIBS=$(LIBSEIGEN) $(LIBSMOSEK)
 MAIN=src/main.cpp
-FILES=src/mon.cpp src/poly.cpp src/printing.cpp src/utils.cpp src/solver.cpp
+FILES=src/mon.cpp src/poly.cpp src/printing.cpp src/utils.cpp src/mosek.cpp
 ASOBJ=$(FILES:.cpp=.o)
 
 all: run

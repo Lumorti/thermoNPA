@@ -477,7 +477,7 @@ void Poly::replace(std::pair<char,int> mon, Poly replacement) {
 
     }
 
-    // Remove the old terms TODO 8%
+    // Remove the old terms
     for (auto& mon : toRemove) {
         polynomial.erase(mon);
     }

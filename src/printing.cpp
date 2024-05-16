@@ -2,7 +2,9 @@
 
 // Pretty print complex numbers
 std::ostream& operator<<(std::ostream& os, const std::complex<double>& c) {
-    if (c.imag() == 0) {
+    if (c.imag() == 0 && c.real() == 0) {
+        os << "0";
+    } else if (c.imag() == 0) {
         if (c.real() >= 0) {
             os << "+" << c.real();
         } else {

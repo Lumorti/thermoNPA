@@ -13,7 +13,7 @@
 #include "poly.h"
 #include "printing.h"
 #include "utils.h"
-#include "solver.h"
+#include "mosek.h"
  
 // https://stackoverflow.com/questions/2647858/multiplying-complex-with-constant-in-c
 template <typename T>
@@ -42,19 +42,6 @@ const std::complex<double> imag(0, 1);
 
 // Generic entry function
 int main(int argc, char* argv[]) {
-
-    //Mon test1("<X2Z1>");
-    //Mon test2("<Z1X2>");
-    //std::cout << "<X2Z1> < <Z1X2>: " << (test1 < test2) << std::endl;
-    //std::cout << "<Z1X2> < <X2Z1>: " << (test2 < test1) << std::endl;
-    //std::cout << "<X2Z1> > <Z1X2>: " << (test1 > test2) << std::endl;
-    //std::cout << "<Z1X2> > <X2Z1>: " << (test2 > test1) << std::endl;
-    //std::cout << "<X2Z1> == <Z1X2>: " << (test1 == test2) << std::endl;
-    //auto res = test1.reduce();
-    //auto res2 = test2.reduce();
-    //std::cout << "Reduced <X2Z1>: " << res.second << std::endl;
-    //std::cout << "Reduced <Z1X2>: " << res2.second << std::endl;
-    //return 0;
 
     // Define the scenario
     int level = 1;
@@ -382,6 +369,8 @@ int main(int argc, char* argv[]) {
 
         // If trying to find the minimal set of linear constraints
         } else if (argAsString == "-M") {
+            level = 0;
+            limbladLevel = 0;
             findMinimal = true;
             findMinimalAmount = std::stoi(argv[i+1]);
             i++;
@@ -459,7 +448,9 @@ int main(int argc, char* argv[]) {
             std::cout << "Variable to put: " << newPoly << std::endl;
             std::cout << "New constraint: " << newConstraint << std::endl;
         }
-        constraintsZero.push_back(newConstraint);
+        if (newConstraint.size() > 0) {
+            constraintsZero.push_back(newConstraint);
+        }
     }
 
     // Reduce the constraints as much as possible
@@ -498,67 +489,156 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // If asked to find the minimal set of linear constraints TODO
-    // time ./run --many 20 -l 0 -m 0 -M 1000        1.995s
-    // time ./run --many 20 -l 0 -m 0 -M 1000        0.358s
-    // time ./run --many 20 -l 0 -m 0 -M 1000        0.301s
+    // If asked to find the minimal set of linear constraints 
     if (findMinimal) {
 
-        // Add constraints based on the monomials we already have
-        std::set<Mon> monomsUsed;
-        std::set<Mon> monomsInConstraints;
-        std::vector<Mon> monomsInCon = objective.monomials();
-        for (size_t i=0; i<monomsInCon.size(); i++) {
-            monomsInConstraints.insert(monomsInCon[i]);
+        // If given zero, set to what seems to be the minimum needed TODO
+        if (findMinimalAmount == 0) {
+            findMinimalAmount = 2*numQubits*numQubits - numQubits;
+            std::cout << "Auto setting constraint limit to: " << findMinimalAmount << std::endl;
         }
-        for (size_t i=0; i<constraintsZero.size(); i++) {
-            monomsInCon = constraintsZero[i].monomials();
-            for (size_t j=0; j<monomsInCon.size(); j++) {
-                monomsInConstraints.insert(monomsInCon[j]);
-            }
-        }
-        for (size_t i=0; i<variablesToPut.size(); i++) {
-            monomsUsed.insert(variablesToPut[i].getKey());
-        }
-        while (int(constraintsZero.size()) < findMinimalAmount) {
 
-            // Find a monomial that hasn't been used
-            Mon monToAdd;
-            for (auto& mon : monomsInConstraints) {
-                if (monomsUsed.find(mon) == monomsUsed.end()) {
-                    monToAdd = mon;
-                    break;
+        // If a max num of constraints is given
+        if (findMinimalAmount > 0) {
+
+            // Add constraints based on the monomials we already have
+            std::set<Mon> monomsUsed;
+            std::set<Mon> monomsInConstraints;
+            std::vector<Mon> monomsInCon = objective.monomials();
+            for (size_t i=0; i<monomsInCon.size(); i++) {
+                monomsInConstraints.insert(monomsInCon[i]);
+            }
+            for (size_t i=0; i<constraintsZero.size(); i++) {
+                monomsInCon = constraintsZero[i].monomials();
+                for (size_t j=0; j<monomsInCon.size(); j++) {
+                    monomsInConstraints.insert(monomsInCon[j]);
                 }
             }
+            for (size_t i=0; i<variablesToPut.size(); i++) {
+                monomsUsed.insert(variablesToPut[i].getKey());
+            }
+            while (int(constraintsZero.size()) < findMinimalAmount && monomsUsed.size() < monomsInConstraints.size()) {
 
-            // Put the monomial in the Limbladian
-            Poly toPut(monToAdd);
-            std::pair<char,int> oldMon('A', 0);
-            Poly newConstraint = limbladian.replaced(oldMon, toPut);
+                // Find a monomial that hasn't been used
+                Mon monToAdd;
+                for (auto& mon : monomsInConstraints) {
+                    if (monomsUsed.find(mon) == monomsUsed.end()) {
+                        monToAdd = mon;
+                        break;
+                    }
+                }
 
-            // Add the constraint
-            constraintsZero.push_back(newConstraint); 
-            monomsUsed.insert(monToAdd);
-            monomsInCon = newConstraint.monomials();
-            for (size_t j=0; j<monomsInCon.size(); j++) {
-                monomsInConstraints.insert(monomsInCon[j]);
+                // Put the monomial in the Limbladian
+                Poly toPut(monToAdd);
+                std::pair<char,int> oldMon('A', 0);
+                Poly newConstraint = limbladian.replaced(oldMon, toPut);
+
+                // Add the constraint
+                if (newConstraint.size() > 0) {
+                    constraintsZero.push_back(newConstraint); 
+                }
+                monomsUsed.insert(monToAdd);
+                monomsInCon = newConstraint.monomials();
+                for (size_t j=0; j<monomsInCon.size(); j++) {
+                    monomsInConstraints.insert(monomsInCon[j]);
+                }
+
             }
 
-            // Run the SDP
-            //std::vector<Mon> varNames2;
-            //std::vector<std::complex<double>> varVals2;
-            //double upperBoundTemp = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity, varNames2, varVals2);
-            //objective *= -1;
-            //double lowerBoundTemp = -solveMOSEK(objective, momentMatrices, constraintsZero, verbosity, varNames2, varVals2);
-            //if (verbosity >= 3) {
-                //std::cout << "Constraint: " << monToAdd << std::endl;
-                //std::cout << "Lower bound: " << lowerBoundTemp << std::endl;
-                //std::cout << "Upper bound: " << upperBoundTemp << std::endl;
-            //}
-            //if (upperBoundTemp - lowerBoundTemp < 1e-4) {
-                //break;
-            //}
+        // If a value not given, binary search TODO
+        } else {
 
+            // First try adding constraints until it's exact
+            std::set<Mon> monomsUsed;
+            std::set<Mon> monomsInConstraints;
+            std::vector<Mon> monomsInCon = objective.monomials();
+            for (size_t i=0; i<monomsInCon.size(); i++) {
+                monomsInConstraints.insert(monomsInCon[i]);
+            }
+            constraintsZero.clear();
+            int amountToTest = 50;
+            for (int l=0; l<1000; l++) {
+
+                // Add constraints based on the monomials we already have
+                while (int(constraintsZero.size()) < amountToTest && monomsUsed.size() < monomsInConstraints.size()) {
+
+                    // Find a monomial that hasn't been used
+                    Mon monToAdd;
+                    for (auto& mon : monomsInConstraints) {
+                        if (monomsUsed.find(mon) == monomsUsed.end()) {
+                            monToAdd = mon;
+                            break;
+                        }
+                    }
+
+                    // Put the monomial in the Limbladian
+                    Poly toPut(monToAdd);
+                    std::pair<char,int> oldMon('A', 0);
+                    Poly newConstraint = limbladian.replaced(oldMon, toPut);
+
+                    // Add the constraint
+                    if (newConstraint.size() > 0) {
+                        constraintsZero.push_back(newConstraint); 
+                    }
+                    monomsUsed.insert(monToAdd);
+                    monomsInCon = newConstraint.monomials();
+                    for (size_t j=0; j<monomsInCon.size(); j++) {
+                        monomsInConstraints.insert(monomsInCon[j]);
+                    }
+
+                }
+
+                // Run the SDP
+                std::vector<Mon> varNames2;
+                std::vector<std::complex<double>> varVals2;
+                double upperBoundTemp = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity, varNames2, varVals2);
+                objective *= -1;
+                double lowerBoundTemp = -solveMOSEK(objective, momentMatrices, constraintsZero, verbosity, varNames2, varVals2);
+                double diff = upperBoundTemp - lowerBoundTemp;
+                std::cout << "cons: " << amountToTest << ", diff: " << diff << std::endl;
+                if (diff < 1e-3) {
+                    break;
+                } else {
+                    amountToTest *= 2;
+                }
+
+            }
+
+            // Now try removing constraints until it's not exact
+            int minNum = 0;
+            int maxNum = int(constraintsZero.size());
+            std::vector<Poly> constraintsZeroCopy = constraintsZero;
+            for (int l=0; l<100; l++) {
+
+                // Subset of constraints
+                int toTest = (maxNum + minNum) / 2;
+                constraintsZero.clear();
+                for (int i=0; i<toTest; i++) {
+                    constraintsZero.push_back(constraintsZeroCopy[i]);
+                }
+
+                // Run the SDP
+                std::vector<Mon> varNames2;
+                std::vector<std::complex<double>> varVals2;
+                double upperBoundTemp = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity, varNames2, varVals2);
+                objective *= -1;
+                double lowerBoundTemp = -solveMOSEK(objective, momentMatrices, constraintsZero, verbosity, varNames2, varVals2);
+                double diff = upperBoundTemp - lowerBoundTemp;
+                std::cout << "cons: " << toTest << ", diff: " << diff << std::endl;
+                if (diff < 1e-3) {
+                    maxNum = toTest;
+                } else {
+                    minNum = toTest;
+                }
+                if (maxNum - minNum <= 1) {
+                    break;
+                }
+
+            }
+
+            // Output the minimal number of constraints
+            std::cout << "Minimal num constraints: " << maxNum << std::endl;
+            constraintsZero = constraintsZeroCopy;
 
         }
 

@@ -1,4 +1,4 @@
-#include "solver.h"
+#include "mosek.h"
 #include "utils.h"
 #include "printing.h"
 #include <iostream>
@@ -296,7 +296,6 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
             std::cout << variables[i] << ": " << variableValues[i] << std::endl;
         }
         std::cout << "There are " << variables.size() << " variables." << std::endl;
-
         Eigen::MatrixXcd A = replaceVariables(psd[0], variables, variableValues);
         std::cout << "Moment matrix:" << std::endl;
         std::cout << psd[0] << std::endl;
@@ -324,41 +323,4 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
 
 }
 
-// Solve a linear system TODO
-double solveLinear(Poly obj, std::vector<Poly> constraintsZero, int verbosity) {
-
-    // Get the list of variables
-    std::set<Mon> variableSet;
-    for (size_t i=0; i<constraintsZero.size(); i++) {
-        addVariables(variableSet, constraintsZero[i]);
-    }
-    addVariables(variableSet, obj);
-    std::vector<Mon> variables = toVector(variableSet);
-
-    // Output the variable list
-    if (verbosity >= 3) {
-        std::cout << "Variables:" << std::endl;
-        for (size_t i=0; i<variables.size(); i++) {
-            std::cout << i << " " << variables[i] << std::endl;
-        }
-        std::cout << std::endl;
-    }
-
-    // Cache the variable locations
-    std::map<Mon, int> variableLocs;
-    for (size_t i=0; i<variables.size(); i++) {
-        variableLocs[variables[i]] = i;
-    }
-
-    // Convert to an Eigen matrix
-    Eigen::MatrixXcd A = Eigen::MatrixXcd::Zero(constraintsZero.size(), variables.size());
-    for (size_t i=0; i<constraintsZero.size(); i++) {
-        for (auto& term : constraintsZero[i].polynomial) {
-            A(i, variableLocs[term.first]) = term.second;
-        }
-    }
-
-    return 0.0;
-    
-}
 
