@@ -2,8 +2,8 @@
 #include <iostream>
 #include <vector>
 #include <complex>
-#include <unordered_map>
-#include <unordered_set>
+#include <set>
+#include <map>
 
 // Import Eigen
 #include <Eigen/Dense>
@@ -42,6 +42,19 @@ const std::complex<double> imag(0, 1);
 
 // Generic entry function
 int main(int argc, char* argv[]) {
+
+    //Mon test1("<X2Z1>");
+    //Mon test2("<Z1X2>");
+    //std::cout << "<X2Z1> < <Z1X2>: " << (test1 < test2) << std::endl;
+    //std::cout << "<Z1X2> < <X2Z1>: " << (test2 < test1) << std::endl;
+    //std::cout << "<X2Z1> > <Z1X2>: " << (test1 > test2) << std::endl;
+    //std::cout << "<Z1X2> > <X2Z1>: " << (test2 > test1) << std::endl;
+    //std::cout << "<X2Z1> == <Z1X2>: " << (test1 == test2) << std::endl;
+    //auto res = test1.reduce();
+    //auto res2 = test2.reduce();
+    //std::cout << "Reduced <X2Z1>: " << res.second << std::endl;
+    //std::cout << "Reduced <Z1X2>: " << res2.second << std::endl;
+    //return 0;
 
     // Define the scenario
     int level = 1;
@@ -193,14 +206,14 @@ int main(int argc, char* argv[]) {
                                    + gamma_h_minus*(sigma_h_minus*rho*sigma_h_plus 
                                                    - 0.5*sigma_h_plus*sigma_h_minus*rho 
                                                    - 0.5*rho*sigma_h_plus*sigma_h_minus);
-            double Q_ss_h_direct = tr(H_s*term2);
+            //double Q_ss_h_direct = tr(H_s*term2);
             
-            double exp_hmhphmhp = tr(sigma_h_minus*sigma_h_plus*sigma_h_minus*sigma_h_plus*rho);
-            double exp_hphmhphm = tr(sigma_h_plus*sigma_h_minus*sigma_h_plus*sigma_h_minus*rho);
-            double exp_hmhp = tr(sigma_h_minus*sigma_h_plus*rho);
-            double exp_hphm = tr(sigma_h_plus*sigma_h_minus*rho);
+            //double exp_hmhphmhp = tr(sigma_h_minus*sigma_h_plus*sigma_h_minus*sigma_h_plus*rho);
+            //double exp_hphmhphm = tr(sigma_h_plus*sigma_h_minus*sigma_h_plus*sigma_h_minus*rho);
+            //double exp_hmhp = tr(sigma_h_minus*sigma_h_plus*rho);
+            //double exp_hphm = tr(sigma_h_plus*sigma_h_minus*rho);
             
-            double Q_ss_h_reduced = epsilon_h*gamma_h_plus*exp_hmhp - epsilon_h*gamma_h_minus*exp_hphm;
+            //double Q_ss_h_reduced = epsilon_h*gamma_h_plus*exp_hmhp - epsilon_h*gamma_h_minus*exp_hphm;
                 
             double exp_sigma_z_h = tr(sigma_z_h*rho);
             double exp_sigma_z_c = tr(sigma_z_c*rho);
@@ -425,19 +438,19 @@ int main(int argc, char* argv[]) {
         variables.push_back(Mon("<Z" + std::to_string(i+1) + ">"));
     }
     std::vector<Poly> variablesToPut = generateMonomials(variables, limbladLevel, verbosity);
-    for (int i=0; i<extraMonomialsLim.size(); i++) {
+    for (size_t i=0; i<extraMonomialsLim.size(); i++) {
         variablesToPut.push_back(Poly(extraMonomialsLim[i]));
     }
     if (verbosity >= 2) {
         std::cout << std::endl;
         std::cout << "Variables to put in Limbladian: " << std::endl;
-        for (int i=0; i<variablesToPut.size(); i++) {
+        for (size_t i=0; i<variablesToPut.size(); i++) {
             std::cout << variablesToPut[i] << std::endl;
         }
         std::cout << std::endl;
         std::cout << "Original Limbladian: " << limbladian << std::endl;
     }
-    for (int i=0; i<variablesToPut.size(); i++) {
+    for (size_t i=0; i<variablesToPut.size(); i++) {
         std::pair<char,int> oldMon('A', 0);
         Poly newPoly(variablesToPut[i]);
         Poly newConstraint = limbladian.replaced(oldMon, newPoly);
@@ -450,7 +463,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Reduce the constraints as much as possible
-    for (int i=0; i<constraintsZero.size(); i++) {
+    for (size_t i=0; i<constraintsZero.size(); i++) {
         if (verbosity >= 3) {
             std::cout << std::endl;
             std::cout << "Reducing constraint: " << constraintsZero[i] << std::endl;
@@ -467,7 +480,7 @@ int main(int argc, char* argv[]) {
     // If told to add extra to the top row
     if (extraMonomials.size() > 0) {
         std::vector<Poly> topRow = momentMatrices[0][0];
-        for (int i=0; i<extraMonomials.size(); i++) {
+        for (size_t i=0; i<extraMonomials.size(); i++) {
             Poly extraMonomial(Mon(extraMonomials[i]).reversed());
             topRow.push_back(extraMonomial);
             std::cout << "Added " << extraMonomial << " to the top row" << std::endl;
@@ -478,8 +491,8 @@ int main(int argc, char* argv[]) {
     // See how big the moment matrix is
     if (verbosity >= 1) {
         int largestMomentMatrix = 0;
-        for (int i=0; i<momentMatrices.size(); i++) {
-            if (momentMatrices[i].size() > largestMomentMatrix) {
+        for (size_t i=0; i<momentMatrices.size(); i++) {
+            if (int(momentMatrices[i].size()) > largestMomentMatrix) {
                 largestMomentMatrix = momentMatrices[i].size();
             }
         }
@@ -487,25 +500,27 @@ int main(int argc, char* argv[]) {
 
     // If asked to find the minimal set of linear constraints TODO
     // time ./run --many 20 -l 0 -m 0 -M 1000        1.995s
+    // time ./run --many 20 -l 0 -m 0 -M 1000        0.358s
+    // time ./run --many 20 -l 0 -m 0 -M 1000        0.301s
     if (findMinimal) {
 
         // Add constraints based on the monomials we already have
-        std::unordered_set<Mon> monomsUsed;
-        std::unordered_set<Mon> monomsInConstraints;
+        std::set<Mon> monomsUsed;
+        std::set<Mon> monomsInConstraints;
         std::vector<Mon> monomsInCon = objective.monomials();
-        for (int i=0; i<monomsInCon.size(); i++) {
+        for (size_t i=0; i<monomsInCon.size(); i++) {
             monomsInConstraints.insert(monomsInCon[i]);
         }
-        for (int i=0; i<constraintsZero.size(); i++) {
+        for (size_t i=0; i<constraintsZero.size(); i++) {
             monomsInCon = constraintsZero[i].monomials();
-            for (int j=0; j<monomsInCon.size(); j++) {
+            for (size_t j=0; j<monomsInCon.size(); j++) {
                 monomsInConstraints.insert(monomsInCon[j]);
             }
         }
-        for (int i=0; i<variablesToPut.size(); i++) {
+        for (size_t i=0; i<variablesToPut.size(); i++) {
             monomsUsed.insert(variablesToPut[i].getKey());
         }
-        while (constraintsZero.size() < findMinimalAmount) {
+        while (int(constraintsZero.size()) < findMinimalAmount) {
 
             // Find a monomial that hasn't been used
             Mon monToAdd;
@@ -525,7 +540,7 @@ int main(int argc, char* argv[]) {
             constraintsZero.push_back(newConstraint); 
             monomsUsed.insert(monToAdd);
             monomsInCon = newConstraint.monomials();
-            for (int j=0; j<monomsInCon.size(); j++) {
+            for (size_t j=0; j<monomsInCon.size(); j++) {
                 monomsInConstraints.insert(monomsInCon[j]);
             }
 
@@ -561,7 +576,7 @@ int main(int argc, char* argv[]) {
             std::cout << objective << std::endl << std::endl;
         }
         if (momentMatrices.size() > 0) {
-            for (int i=0; i<momentMatrices.size(); i++) {
+            for (size_t i=0; i<momentMatrices.size(); i++) {
                 std::cout << "Moment matrix " << i  << " (" << momentMatrices[i].size() << "x" << momentMatrices[i].size() << "): " << std::endl;
                 if (momentMatrices[i].size() < 10 || verbosity >= 3) {
                     std::cout << momentMatrices[i] << std::endl;

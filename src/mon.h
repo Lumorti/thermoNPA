@@ -9,7 +9,6 @@ public:
 
     // Vars
     std::vector<std::pair<char, int>> monomial;
-    int verbosity = 1;
 
     // If initialized from nothing
     Mon();
@@ -62,7 +61,7 @@ public:
     bool operator>(const Mon& other) const;
 
     // Given a monomial, reduce it to its simplest form
-    std::pair<std::complex<double>, Mon> reduce(std::string swapType = "none", bool diffLettersCommute=false, bool diffNumbersCommute=true, bool pauliReductions=true, std::vector<int> reductionsToIgnore={}) const;
+    std::pair<std::complex<double>, Mon> reduce(std::string swapType = "none", bool diffLettersCommute=false, bool diffNumbersCommute=true, bool pauliReductions=true) const;
 
     // Pretty printing
     friend std::ostream& operator<<(std::ostream& os, const Mon& m);
@@ -72,17 +71,5 @@ public:
     // Convert a monomial to a string
     std::string toString() const;
 
-};
-
-template <>
-struct std::hash<Mon>
-{
-  std::size_t operator()(const Mon& k) const
-  {
-    using std::size_t;
-    using std::hash;
-    using std::string;
-    return hash<string>()(k.toString());
-  }
 };
 

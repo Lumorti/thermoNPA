@@ -42,7 +42,7 @@ Mon::Mon(std::string asString) {
     for (size_t i=0; i<asString.size(); i++) {
 
         // Check if this char is an integer
-        if (asString[i] >= '0' && asString[i] <= '9' || asString[i] == '-') {
+        if ((asString[i] >= '0' && asString[i] <= '9') || asString[i] == '-') {
             currentIndex += asString[i];
 
         // Otherwise it's a variable
@@ -81,9 +81,7 @@ Mon Mon::reversed() {
 Mon Mon::operator*(const Mon& other) const {
     Mon toReturn;
     toReturn.monomial = monomial;
-    for (size_t i=0; i<other.monomial.size(); i++) {
-        toReturn.monomial.push_back(other.monomial[i]);
-    }
+    toReturn.monomial.insert(toReturn.monomial.end(), other.monomial.begin(), other.monomial.end());
     return toReturn;
 }
 
@@ -126,19 +124,44 @@ bool Mon::compareReversed(Mon& a, Mon& b) const {
 
 // Comparison between this and another monomial
 bool Mon::operator<(const Mon& other) const {
-    return monomial < other.monomial;
+    if (monomial.size() != other.monomial.size()) {
+        return monomial.size() < other.monomial.size();
+    } else {
+        for (size_t i=0; i<monomial.size(); i++) {
+            if (monomial[i].second != other.monomial[i].second) {
+                return monomial[i].second < other.monomial[i].second;
+            } else if (monomial[i].first != other.monomial[i].first) {
+                return monomial[i].first < other.monomial[i].first;
+            }
+        }
+    }
+    return false;
 }
 bool Mon::operator>(const Mon& other) const {
-    return monomial > other.monomial;
+    if (monomial.size() != other.monomial.size()) {
+        return monomial.size() > other.monomial.size();
+    } else {
+        for (size_t i=0; i<monomial.size(); i++) {
+            if (monomial[i].second != other.monomial[i].second) {
+                return monomial[i].second > other.monomial[i].second;
+            } else if (monomial[i].first != other.monomial[i].first) {
+                return monomial[i].first > other.monomial[i].first;
+            }
+        }
+    }
+    return false;
 }
 
-std::pair<std::complex<double>, Mon> Mon::reduce(std::string swapType, bool diffLettersCommute, bool diffNumbersCommute, bool pauliReductions, std::vector<int> reductionsToIgnore) const {
+// Reduce a monomial, returning the coefficient and the reduced monomial
+std::pair<std::complex<double>, Mon> Mon::reduce(std::string swapType, bool diffLettersCommute, bool diffNumbersCommute, bool pauliReductions) const {
 
     // Sort the monomial as much as we can
     Mon mon = *this;
+    int monSize = int(mon.size());
+    int monSize1 = monSize-1;
     if (diffLettersCommute) {
-        for (int i=0; i<mon.size(); i++) {
-            for (int j=0; j<int(mon.size())-1; j++) {
+        for (int i=0; i<monSize; i++) {
+            for (int j=0; j<monSize1; j++) {
                 if (mon[j].first != mon[j+1].first && mon[j] > mon[j+1]) {
                     std::swap(mon[j], mon[j+1]);
                 }
@@ -146,9 +169,9 @@ std::pair<std::complex<double>, Mon> Mon::reduce(std::string swapType, bool diff
         }
     }
     if (diffNumbersCommute) {
-        for (int i=0; i<mon.size(); i++) {
-            for (int j=0; j<int(mon.size())-1; j++) {
-                if (mon[j].second != mon[j+1].second && !compareReversed(mon[j], mon[j+1]) && mon[j].second > 0 && mon[j+1].second > 0) {
+        for (int i=0; i<monSize; i++) {
+            for (int j=0; j<monSize1; j++) {
+                if (mon[j].second != mon[j+1].second && mon[j].second > 0 && mon[j+1].second > 0 && !compareReversed(mon[j], mon[j+1])) {
                     std::swap(mon[j], mon[j+1]);
                 }
             }
@@ -161,46 +184,44 @@ std::pair<std::complex<double>, Mon> Mon::reduce(std::string swapType, bool diff
     // YZ = iX
     std::complex<double> coeff(1, 0);
     if (pauliReductions) {
-        if (std::find(reductionsToIgnore.begin(), reductionsToIgnore.end(), mon.size()) == reductionsToIgnore.end() && pauliReductions) {
-            for (int i=mon.size()-1; i>0; i--) {
-                if (mon[i-1].second == mon[i].second) {
-                    if (mon[i-1].first == 'X' && mon[i].first == 'Y') {
-                        coeff *= imag;
-                        mon[i-1] = std::make_pair('Z', mon[i-1].second);
-                        mon.monomial.erase(mon.monomial.begin()+i);
-                    } else if (mon[i-1].first == 'X' && mon[i].first == 'Z') {
-                        coeff *= -imag;
-                        mon[i-1] = std::make_pair('Y', mon[i-1].second);
-                        mon.monomial.erase(mon.monomial.begin()+i);
-                    } else if (mon[i-1].first == 'Y' && mon[i].first == 'Z') {
-                        coeff *= imag;
-                        mon[i-1] = std::make_pair('X', mon[i-1].second);
-                        mon.monomial.erase(mon.monomial.begin()+i);
-                    } else if (mon[i-1].first == 'Y' && mon[i].first == 'X') {
-                        coeff *= -imag;
-                        mon[i-1] = std::make_pair('Z', mon[i-1].second);
-                        mon.monomial.erase(mon.monomial.begin()+i);
-                    } else if (mon[i-1].first == 'Z' && mon[i].first == 'X') {
-                        coeff *= imag;
-                        mon[i-1] = std::make_pair('Y', mon[i-1].second);
-                        mon.monomial.erase(mon.monomial.begin()+i);
-                    } else if (mon[i-1].first == 'Z' && mon[i].first == 'Y') {
-                        coeff *= -imag;
-                        mon[i-1] = std::make_pair('X', mon[i-1].second);
-                        mon.monomial.erase(mon.monomial.begin()+i);
-                    } else if (mon[i-1].first == 'X' && mon[i].first == 'X') {
-                        mon.monomial.erase(mon.monomial.begin()+i);
-                        mon.monomial.erase(mon.monomial.begin()+i-1);
-                        i--;
-                    } else if (mon[i-1].first == 'Y' && mon[i].first == 'Y') {
-                        mon.monomial.erase(mon.monomial.begin()+i);
-                        mon.monomial.erase(mon.monomial.begin()+i-1);
-                        i--;
-                    } else if (mon[i-1].first == 'Z' && mon[i].first == 'Z') {
-                        mon.monomial.erase(mon.monomial.begin()+i);
-                        mon.monomial.erase(mon.monomial.begin()+i-1);
-                        i--;
-                    }
+        for (int i=mon.size()-1; i>0; i--) {
+            if (mon[i-1].second == mon[i].second) {
+                if (mon[i-1].first == 'X' && mon[i].first == 'Y') {
+                    coeff *= imag;
+                    mon[i-1] = std::make_pair('Z', mon[i-1].second);
+                    mon.monomial.erase(mon.monomial.begin()+i);
+                } else if (mon[i-1].first == 'X' && mon[i].first == 'Z') {
+                    coeff *= -imag;
+                    mon[i-1] = std::make_pair('Y', mon[i-1].second);
+                    mon.monomial.erase(mon.monomial.begin()+i);
+                } else if (mon[i-1].first == 'Y' && mon[i].first == 'Z') {
+                    coeff *= imag;
+                    mon[i-1] = std::make_pair('X', mon[i-1].second);
+                    mon.monomial.erase(mon.monomial.begin()+i);
+                } else if (mon[i-1].first == 'Y' && mon[i].first == 'X') {
+                    coeff *= -imag;
+                    mon[i-1] = std::make_pair('Z', mon[i-1].second);
+                    mon.monomial.erase(mon.monomial.begin()+i);
+                } else if (mon[i-1].first == 'Z' && mon[i].first == 'X') {
+                    coeff *= imag;
+                    mon[i-1] = std::make_pair('Y', mon[i-1].second);
+                    mon.monomial.erase(mon.monomial.begin()+i);
+                } else if (mon[i-1].first == 'Z' && mon[i].first == 'Y') {
+                    coeff *= -imag;
+                    mon[i-1] = std::make_pair('X', mon[i-1].second);
+                    mon.monomial.erase(mon.monomial.begin()+i);
+                } else if (mon[i-1].first == 'X' && mon[i].first == 'X') {
+                    mon.monomial.erase(mon.monomial.begin()+i);
+                    mon.monomial.erase(mon.monomial.begin()+i-1);
+                    i--;
+                } else if (mon[i-1].first == 'Y' && mon[i].first == 'Y') {
+                    mon.monomial.erase(mon.monomial.begin()+i);
+                    mon.monomial.erase(mon.monomial.begin()+i-1);
+                    i--;
+                } else if (mon[i-1].first == 'Z' && mon[i].first == 'Z') {
+                    mon.monomial.erase(mon.monomial.begin()+i);
+                    mon.monomial.erase(mon.monomial.begin()+i-1);
+                    i--;
                 }
             }
         }
@@ -212,7 +233,7 @@ std::pair<std::complex<double>, Mon> Mon::reduce(std::string swapType, bool diff
         if (mon[i] == mon[i+1]) {
             mon.monomial.erase(mon.monomial.begin()+i+1);
             mon.monomial.erase(mon.monomial.begin()+i);
-            i = -1;
+            i -= 2;
         }
         i++;
     }
@@ -228,11 +249,6 @@ std::pair<std::complex<double>, Mon> Mon::reduce(std::string swapType, bool diff
         if (compareReversed(monFlipped, mon)) {
             mon = monFlipped;
         }
-    }
-
-    // Verbose output
-    if (verbosity >= 3) {
-        std::cout << "Reduced monomial: " << *this << " -> " << coeff << " " << mon << std::endl;
     }
 
     return {coeff, mon};

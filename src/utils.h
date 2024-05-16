@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <complex>
+#include <set>
 #include <Eigen/Dense>
 #include "poly.h"
 
@@ -26,14 +27,17 @@ std::vector<Poly> generateMonomials(std::vector<Mon> variables, int level, int v
 std::vector<std::vector<std::vector<Poly>>> generateAllMomentMatrices(const Poly& functional, std::vector<Poly> zeroCons, int level, int verbosity, std::vector<int> reductionsToIgnore);
 
 // Add variables from a moment matrix
-void addVariables(std::vector<Mon>& variables, std::vector<std::vector<Poly>> toAdd);
+void addVariables(std::set<Mon>& variables, std::vector<std::vector<Poly>> toAdd);
 
 // Add variables from a polynomial
-void addVariables(std::vector<Mon>& variables, Poly toAdd);
+void addVariables(std::set<Mon>& variables, Poly toAdd);
 
 // Convert from a matrix location to an svec location
 int matLocToVecLoc(int i, int j, int n);
 
 // Take the trace of a matrix, assuming it's real
 double tr(Eigen::MatrixXcd A);
+
+// Convert a set to a vector
+std::vector<Mon> toVector(std::set<Mon> s);
 

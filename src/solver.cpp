@@ -11,18 +11,20 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
 
     // Get the list of variables
     int oneIndex = 0;
-    variables = {Mon()};
-    for (int i=0; i<psd.size(); i++) {
-        addVariables(variables, psd[i]);
+    std::set<Mon> variableSet;
+    variableSet.insert(Mon());
+    for (size_t i=0; i<psd.size(); i++) {
+        addVariables(variableSet, psd[i]);
     }
-    for (int i=0; i<constraintsZero.size(); i++) {
-        addVariables(variables, constraintsZero[i]);
+    for (size_t i=0; i<constraintsZero.size(); i++) {
+        addVariables(variableSet, constraintsZero[i]);
     }
-    addVariables(variables, obj);
+    addVariables(variableSet, obj);
+    variables = toVector(variableSet);
 
     // Add an imaginary part for each variable
     std::vector<Mon> newVarList;
-    for (int i=0; i<variables.size(); i++) {
+    for (size_t i=0; i<variables.size(); i++) {
         newVarList.push_back(variables[i]);
         newVarList.push_back(variables[i]);
     }
@@ -30,9 +32,12 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
     int oneIndexImag = 1;
 
     // Output the variable list
+    if (verbosity >= 2) {
+        std::cout << "Num variables: " << variables.size() << std::endl;
+    }
     if (verbosity >= 3) {
         std::cout << "Variables:" << std::endl;
-        for (int i=0; i<variables.size(); i++) {
+        for (size_t i=0; i<variables.size(); i++) {
             if (i % 2 == 0) {
                 std::cout << i << " " << variables[i] << std::endl;
             } else {
@@ -42,23 +47,24 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
         std::cout << std::endl;
     }
 
+    // Cache the variable locations
+    std::map<Mon, int> variableLocs;
+    for (size_t i=0; i<variables.size(); i+=2) {
+        variableLocs[variables[i]] = i;
+    }
+
     // The c vector defining the objective
     std::vector<double> c(variables.size());
-    //for (int i=0; i<obj.size(); i++) {
     for (auto& term : obj.polynomial) {
 
         // Find the location of this variable
-        Mon toFind(term.first);
-        for (int j=0; j<variables.size(); j++) {
-            if (variables[j] == toFind) {
-                c[j] += std::real(term.second);
-                c[j+1] += std::real(term.second);
-                break;
-            }
-        }
+        int varLoc = variableLocs[term.first];
+
+        // Add the real and imaginary terms
+        c[varLoc] += std::real(term.second);
+        c[varLoc+1] += std::imag(term.second);
 
     }
-    auto cM = monty::new_array_ptr<double>(c);
 
     // The A matrix defining the equality constraints
     // f(x) = (c_r + i c_i)*(x_r + i x_i) = 0
@@ -66,20 +72,12 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
     std::vector<int> ACols;
     std::vector<double> AVals;
     int numCons = 0;
-    for (int i=0; i<constraintsZero.size(); i++) {
+    for (size_t i=0; i<constraintsZero.size(); i++) {
         for (auto& term : constraintsZero[i].polynomial) {
 
             // Find the location of this variable
-            Mon toFind(term.first);
-            int realLoc = -1;
-            int imagLoc = -1;
-            for (int k=0; k<variables.size(); k++) {
-                if (variables[k] == toFind) {
-                    realLoc = k;
-                    imagLoc = k+1;
-                    break;
-                }
-            }
+            int realLoc = variableLocs[term.first];
+            int imagLoc = realLoc+1;
 
             // c_r*x_r - c_i*x_i = 0
             ARows.push_back(2*i);
@@ -102,8 +100,8 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
         }
     }
 
-    // Single Paulis should be real TODO
-    for (int i=0; i<variables.size(); i+=2) {
+    // Single Paulis should be real
+    for (size_t i=0; i<variables.size(); i+=2) {
         if (variables[i].size() == 1) {
             ARows.push_back(numCons);
             ACols.push_back(i+1);
@@ -112,19 +110,18 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
         }
     }
 
-    // Convert to MOSEK form
+    // Verbose output of the A matrix
     if (verbosity >= 3) {
         std::cout << "ARows: " << ARows << std::endl;
         std::cout << "ACols: " << ACols << std::endl;
         std::cout << "AVals: " << AVals << std::endl;
     }
-    auto AM = mosek::fusion::Matrix::sparse(numCons, variables.size(), monty::new_array_ptr<int>(ARows), monty::new_array_ptr<int>(ACols), monty::new_array_ptr<double>(AVals));
 
     // The vectors defining the PSD constraints
     std::vector<std::shared_ptr<monty::ndarray<int,1>>> indicesPSDPerMat;
     std::vector<std::shared_ptr<monty::ndarray<double,1>>> coeffsPSDPerMat;
     std::vector<std::pair<int,int>> matDims;
-    for (int k=0; k<psd.size(); k++) {
+    for (size_t k=0; k<psd.size(); k++) {
 
         // The indices and coefficients for the svec
         int fullMatSize = 2*psd[k].size();
@@ -132,20 +129,12 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
         int imagOffset = psd[k].size();
         std::vector<int> indicesPSD(sVecSize);
         std::vector<double> coeffsPSD(sVecSize);
-        for (int i=0; i<psd[k].size(); i++) {
-            for (int j=i; j<psd[k][i].size(); j++) {
+        for (size_t i=0; i<psd[k].size(); i++) {
+            for (size_t j=i; j<psd[k][i].size(); j++) {
 
                 // Find this in the variable list
-                int realLoc = -1;
-                int imagLoc = -1;
-                Mon toFind(psd[k][i][j].getKey());
-                for (int k2=0; k2<variables.size(); k2++) {
-                    if (variables[k2] == toFind) {
-                        realLoc = k2;
-                        imagLoc = k2+1;
-                        break;
-                    }
-                }
+                int realLoc = variableLocs[psd[k][i][j].getKey()];
+                int imagLoc = realLoc+1;
 
                 // Locations in the svec for the real and imaginary parts
                 int realInd = matLocToVecLoc(i, j, fullMatSize);
@@ -225,6 +214,10 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
 
     }
 
+    // Convert to MOSEK form
+    auto cM = monty::new_array_ptr<double>(c);
+    auto AM = mosek::fusion::Matrix::sparse(numCons, variables.size(), monty::new_array_ptr<int>(ARows), monty::new_array_ptr<int>(ACols), monty::new_array_ptr<double>(AVals));
+
     // Create a model
     mosek::fusion::Model::t M = new mosek::fusion::Model(); auto _M = monty::finally([&]() {M->dispose();});
     if (verbosity >= 3) {
@@ -271,7 +264,7 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
     // Get all of the variable values
     auto xMLevel = *(xM->level());
     variableValues.resize(variables.size());
-    for (int i=0; i<variables.size(); i+=2) {
+    for (size_t i=0; i<variables.size(); i+=2) {
         variableValues[i] = std::complex<double>(xMLevel[i], xMLevel[i+1]);
     }
 
@@ -279,12 +272,12 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
     if (verbosity >= 2) {
         std::cout << std::endl;
         std::cout << "Objective value: " << objPrimal << std::endl;
-        for (int i=0; i<psd.size(); i++) {
+        for (size_t i=0; i<psd.size(); i++) {
             std::vector<std::vector<std::complex<double>>> eigenvectors;
             std::vector<std::complex<double>> eigenvalues;
             getEigens(psd[i], variables, variableValues, eigenvectors, eigenvalues);
             double minEig = 1e10;
-            for (int j=0; j<eigenvalues.size(); j++) {
+            for (size_t j=0; j<eigenvalues.size(); j++) {
                 if (std::imag(eigenvalues[j]) > 1e-5) {
                     std::cout << "ERROR - Eigenvalue " << j << " has imaginary part: " << std::imag(eigenvalues[j]) << std::endl;
                 }
@@ -299,7 +292,7 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
     // If superverbose, output all monomials
     if (verbosity >= 3) {
         std::cout << "Solution: " << std::endl;
-        for (int i=0; i<variables.size(); i+=2) {
+        for (size_t i=0; i<variables.size(); i+=2) {
             std::cout << variables[i] << ": " << variableValues[i] << std::endl;
         }
         std::cout << "There are " << variables.size() << " variables." << std::endl;
@@ -313,10 +306,11 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
     // If verbose, just output monomials that are in the objective
     } else if (verbosity >= 2) {
         std::cout << "Solution: " << std::endl;
-        std::vector<Mon> variablesInObj = {};
-        addVariables(variablesInObj, obj);
-        for (int i=0; i<variablesInObj.size(); i++) {
-            for (int j=0; j<variables.size(); j+=2) {
+        std::set<Mon> variablesInObjSet = {};
+        addVariables(variablesInObjSet, obj);
+        std::vector<Mon> variablesInObj = toVector(variablesInObjSet);
+        for (size_t i=0; i<variablesInObj.size(); i++) {
+            for (size_t j=0; j<variables.size(); j+=2) {
                 if (variablesInObj[i] == variables[j]) {
                     std::cout << variablesInObj[i] << ": " << variableValues[j] << std::endl;
                     break;
@@ -334,31 +328,33 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
 double solveLinear(Poly obj, std::vector<Poly> constraintsZero, int verbosity) {
 
     // Get the list of variables
-    std::vector<Mon> variables = {Mon()};
-    for (int i=0; i<constraintsZero.size(); i++) {
-        addVariables(variables, constraintsZero[i]);
+    std::set<Mon> variableSet;
+    for (size_t i=0; i<constraintsZero.size(); i++) {
+        addVariables(variableSet, constraintsZero[i]);
     }
-    addVariables(variables, obj);
+    addVariables(variableSet, obj);
+    std::vector<Mon> variables = toVector(variableSet);
 
     // Output the variable list
     if (verbosity >= 3) {
         std::cout << "Variables:" << std::endl;
-        for (int i=0; i<variables.size(); i++) {
+        for (size_t i=0; i<variables.size(); i++) {
             std::cout << i << " " << variables[i] << std::endl;
         }
         std::cout << std::endl;
     }
 
+    // Cache the variable locations
+    std::map<Mon, int> variableLocs;
+    for (size_t i=0; i<variables.size(); i++) {
+        variableLocs[variables[i]] = i;
+    }
+
     // Convert to an Eigen matrix
     Eigen::MatrixXcd A = Eigen::MatrixXcd::Zero(constraintsZero.size(), variables.size());
-    for (int i=0; i<constraintsZero.size(); i++) {
+    for (size_t i=0; i<constraintsZero.size(); i++) {
         for (auto& term : constraintsZero[i].polynomial) {
-            for (int k=0; k<variables.size(); k++) {
-                if (variables[k] == term.first) {
-                    A(i, k) = term.second;
-                    break;
-                }
-            }
+            A(i, variableLocs[term.first]) = term.second;
         }
     }
 

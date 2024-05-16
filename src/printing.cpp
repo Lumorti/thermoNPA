@@ -50,7 +50,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<std::vector<double>
             std::stringstream ss;
             ss << m[i][j];
             int sizeWhenWritten = ss.str().size();
-            for (size_t k=0; k<columnWidths[j]-sizeWhenWritten; k++) {
+            for (int k=0; k<columnWidths[j]-sizeWhenWritten; k++) {
                 ss << " ";
             }
             ss << " ";

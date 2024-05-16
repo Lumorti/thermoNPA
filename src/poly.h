@@ -1,5 +1,5 @@
 #pragma once
-#include <unordered_map>
+#include <map>
 #include "mon.h"
 
 // Non-commuting polynomial class
@@ -7,9 +7,7 @@ class Poly {
 public:
 
     // Vars
-    //std::vector<std::pair<std::complex<double>, Mon>> polynomial;
-    //std::map<Mon, std::complex<double>> polynomial;
-    std::unordered_map<Mon, std::complex<double>> polynomial;
+    std::map<Mon, std::complex<double>> polynomial;
     int verbosity = 1;
 
     // If initialized from nothing
@@ -22,7 +20,7 @@ public:
     Poly(Mon mon);
 
     // If initialized from a vector
-    Poly (std::unordered_map<Mon, std::complex<double>> poly);
+    Poly (std::map<Mon, std::complex<double>> poly);
 
     // If initialized from a single coeff + monomial
     Poly(std::pair<std::complex<double>, Mon> pair);
@@ -40,7 +38,7 @@ public:
     Poly(std::string asString);
 
     // When assigning manually with a vector
-    Poly& operator=(const std::unordered_map<Mon, std::complex<double>>& poly);
+    Poly& operator=(const std::map<Mon, std::complex<double>>& poly);
 
     // Checking equality of two polynomials
     bool operator==(const Poly& other);
@@ -59,6 +57,9 @@ public:
 
     // When multiplying two polynomials
     Poly operator*(const Poly& other) const;
+
+    // When multiplying in-place
+    Poly& operator*=(const Poly& other);
 
     // When multiplying by a constant
     Poly operator*(const std::complex<double>& other);
@@ -84,10 +85,10 @@ public:
     Mon getKey();
 
     // Iterators
-    std::unordered_map<Mon,std::complex<double>>::iterator begin() {return polynomial.begin();}
-    std::unordered_map<Mon,std::complex<double>>::iterator end()   {return polynomial.end();}
-    std::unordered_map<Mon,std::complex<double>>::const_iterator begin() const {return polynomial.begin();}
-    std::unordered_map<Mon,std::complex<double>>::const_iterator end() const {return polynomial.end();}
+    std::map<Mon,std::complex<double>>::iterator begin() {return polynomial.begin();}
+    std::map<Mon,std::complex<double>>::iterator end()   {return polynomial.end();}
+    std::map<Mon,std::complex<double>>::const_iterator begin() const {return polynomial.begin();}
+    std::map<Mon,std::complex<double>>::const_iterator end() const {return polynomial.end();}
 
     // Self-negative
     Poly operator-();
@@ -95,8 +96,12 @@ public:
     // Self-conjugate
     Poly conj();
 
-    // Given a polynomial, reduce each monomial and combine
+    // Given a reduce each monomial and combine
     void reduce();
+    Poly reduced();
+
+    // Remove any zero terms from this polynomial
+    void clean();
 
     // Pretty print
     friend std::ostream& operator<<(std::ostream& os, const Poly& p);
@@ -122,7 +127,7 @@ public:
     Poly rearranged(Mon mon);
 
     // Check if a monomial is in the polynomial
-    bool hasMonomial(Mon mon);
+    bool contains(const Mon mon) const;
 
 };
 
