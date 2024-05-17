@@ -8,7 +8,7 @@ std::ostream& operator<<(std::ostream& os, const std::complex<double>& c);
 
 // When printing a matrix of doubles, print it as a string
 std::ostream& operator<<(std::ostream& os, const std::vector<std::vector<double>>& m);
-    
+
 // When printing a vector of something
 template <typename T> std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
 

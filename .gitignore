@@ -2,3 +2,5 @@ run
 runDebug
 *.o
 src/*.o
+*.log
+callgrind*

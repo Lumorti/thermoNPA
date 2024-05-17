@@ -300,4 +300,17 @@ std::ostream& operator<<(std::ostream& os, const std::vector<Mon>& m) {
     return os;
 }
 
+// Pretty print set of monomials
+std::ostream& operator<<(std::ostream& os, const std::set<Mon>& m) {
+    os << "{";
+    for (auto it=m.begin(); it!=m.end(); it++) {
+        os << *it;
+        if (std::next(it) != m.end()) {
+            os << ", ";
+        }
+    }
+    os << "}";
+    return os;
+}
+
     

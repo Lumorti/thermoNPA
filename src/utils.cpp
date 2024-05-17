@@ -93,38 +93,6 @@ void addSingleMonomials(std::vector<Mon>& variables, Poly functional) {
 
 }
 
-// Generate a moment matrix given the top row
-std::vector<std::vector<Poly>> generateFromTopRow(std::vector<Mon> monomsInTopRow, int verbosity) {
-
-    // Generate all combinations of the top row
-    std::vector<std::vector<Poly>> matrixToReturn(monomsInTopRow.size(), std::vector<Poly>(monomsInTopRow.size()));
-    for (size_t i=0; i<monomsInTopRow.size(); i++) {
-        for (size_t j=i; j<monomsInTopRow.size(); j++) {
-
-            // Form the new moment
-            Mon newMonomial;
-            for (size_t k=0; k<monomsInTopRow[j].size(); k++) {
-                newMonomial.monomial.push_back(monomsInTopRow[j][k]);
-            }
-            for (int k=int(monomsInTopRow[i].size())-1; k>=0; k--) {
-                newMonomial.monomial.push_back(monomsInTopRow[i][k]);
-            }
-
-            // Reduce the monomial
-            std::pair<std::complex<double>, Mon> monomCoeff = newMonomial.reduce();
-
-            // Set the matrix elements
-            matrixToReturn[i][j] = Poly(monomCoeff.first, monomCoeff.second);
-            matrixToReturn[j][i] = Poly(std::conj(monomCoeff.first), monomCoeff.second);
-
-        }
-    }
-
-    // Return the matrix
-    return matrixToReturn;
-
-}
-
 // Generate a moment matrix given the top row as polynomials
 std::vector<std::vector<Poly>> generateFromTopRow(std::vector<Poly> monomsInTopRow, int verbosity) {
 
@@ -134,7 +102,8 @@ std::vector<std::vector<Poly>> generateFromTopRow(std::vector<Poly> monomsInTopR
         for (size_t j=i; j<monomsInTopRow.size(); j++) {
 
             // Form the new polynomial
-            Poly newPolynomial = monomsInTopRow[j] * monomsInTopRow[i].conj();
+            Poly newPolynomial = monomsInTopRow[i].conj() * monomsInTopRow[j];
+            newPolynomial.reduce();
 
             // Set the matrix elements
             matrixToReturn[i][j] = newPolynomial;
@@ -382,5 +351,10 @@ std::vector<Mon> toVector(std::set<Mon> s) {
         v.push_back(elem);
     }
     return v;
+}
+
+// Generate a random double between min and max
+double rand(double min, double max) {
+    return min + (max - min) * (double)rand() / RAND_MAX;
 }
 

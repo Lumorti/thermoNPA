@@ -266,8 +266,8 @@ int main(int argc, char* argv[]) {
             limbladian += Poly(-0.5*gamma_c_minus, "<P2M2A0>");
             limbladian.convertToPaulis();
 
-        // Many-body Limbladian TODO
-        } else if (argAsString == "--many" || argAsString == "--manyv") {
+        // Many-body Limbladian
+        } else if (argAsString == "--many" || argAsString == "--manyv" || argAsString == "--manyr") {
 
             // Defining quantities
             double gamma_c = 1.1e-2;
@@ -307,6 +307,18 @@ int main(int argc, char* argv[]) {
             std::vector<double> gamma_minus(numQubits, 0);
             gamma_minus[0] = gamma_h_minus;
             gamma_minus[numQubits-1] = gamma_c_minus;
+            std::vector<double> gs(numQubits, g);
+            
+            // If told to randomize TODO
+            if (argAsString == "--manyr") {
+                srand(std::hash<std::string>{}(seed));
+                for (int j=0; j<numQubits; j++) {
+                    epsilons[j] = rand(epsilon_h, epsilon_c);
+                }
+                for (int j=0; j<numQubits; j++) {
+                    gs[j] = rand(1e-5, 1e-2);
+                }
+            }
 
             // Construct the objective as a polynomial with plus/minus mats
             objective = Poly();
@@ -321,10 +333,10 @@ int main(int argc, char* argv[]) {
                 limbladian += Poly(imag*epsilons[i-1], "<P" + std::to_string(i) + "M" + std::to_string(i) + "A0>");
             }
             for (int i=1; i<=numQubits-1; i++) {
-                limbladian += Poly(-imag*g, "<A0P" + std::to_string(i) + "M" + std::to_string(i+1) + ">");
-                limbladian += Poly(-imag*g, "<A0M" + std::to_string(i) + "P" + std::to_string(i+1) + ">");
-                limbladian += Poly(imag*g, "<P" + std::to_string(i) + "M" + std::to_string(i+1) + "A0>");
-                limbladian += Poly(imag*g, "<M" + std::to_string(i) + "P" + std::to_string(i+1) + "A0>");
+                limbladian += Poly(-imag*gs[i], "<A0P" + std::to_string(i) + "M" + std::to_string(i+1) + ">");
+                limbladian += Poly(-imag*gs[i], "<A0M" + std::to_string(i) + "P" + std::to_string(i+1) + ">");
+                limbladian += Poly(imag*gs[i], "<P" + std::to_string(i) + "M" + std::to_string(i+1) + "A0>");
+                limbladian += Poly(imag*gs[i], "<M" + std::to_string(i) + "P" + std::to_string(i+1) + "A0>");
             }
             for (int i : {1, numQubits}) {
                 limbladian += Poly(gamma_plus[i-1], "<M" + std::to_string(i) + "A0P" + std::to_string(i) + ">");
@@ -416,10 +428,11 @@ int main(int argc, char* argv[]) {
     if (seed == "") {
         srand(time(NULL));
     } else {
-        srand(std::stoi(seed));
+        srand(std::hash<std::string>{}(seed));
     }
 
     // Create the Limbladian applied to many different operators
+    std::vector<std::vector<std::vector<Poly>>> momentMatrices = {};
     std::vector<Mon> variables = {};
     for (int i=0; i<numQubits; i++) {
         variables.push_back(Mon("<X" + std::to_string(i+1) + ">"));
@@ -465,34 +478,10 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // Define the moment matrix
-    std::vector<std::vector<std::vector<Poly>>> momentMatrices = generateAllMomentMatrices(objective, constraintsZero, level, verbosity, reductionsToIgnore);
-
-    // If told to add extra to the top row
-    if (extraMonomials.size() > 0) {
-        std::vector<Poly> topRow = momentMatrices[0][0];
-        for (size_t i=0; i<extraMonomials.size(); i++) {
-            Poly extraMonomial(Mon(extraMonomials[i]).reversed());
-            topRow.push_back(extraMonomial);
-            std::cout << "Added " << extraMonomial << " to the top row" << std::endl;
-        }
-        momentMatrices[0] = generateFromTopRow(topRow, verbosity);
-    }
-
-    // See how big the moment matrix is
-    if (verbosity >= 1) {
-        int largestMomentMatrix = 0;
-        for (size_t i=0; i<momentMatrices.size(); i++) {
-            if (int(momentMatrices[i].size()) > largestMomentMatrix) {
-                largestMomentMatrix = momentMatrices[i].size();
-            }
-        }
-    }
-
     // If asked to find the minimal set of linear constraints 
     if (findMinimal) {
 
-        // If given zero, set to what seems to be the minimum needed TODO
+        // If given zero, set to what seems to be the minimum needed
         if (findMinimalAmount == 0) {
             findMinimalAmount = 2*numQubits*numQubits - numQubits;
             std::cout << "Auto setting constraint limit to: " << findMinimalAmount << std::endl;
@@ -504,28 +493,58 @@ int main(int argc, char* argv[]) {
             // Add constraints based on the monomials we already have
             std::set<Mon> monomsUsed;
             std::set<Mon> monomsInConstraints;
-            std::vector<Mon> monomsInCon = objective.monomials();
-            for (size_t i=0; i<monomsInCon.size(); i++) {
-                monomsInConstraints.insert(monomsInCon[i]);
+            std::vector<Mon> monomsInConstraintsVec;
+            //monomsUsed.insert(Mon());
+            //monomsInConstraintsVec.push_back(Mon("<Z1Z2>"));
+            //monomsInConstraints.insert(Mon("<Z1Z2>"));
+            for (auto& term : objective) {
+                if (!monomsInConstraints.count(term.first)) {
+                    monomsInConstraints.insert(term.first);
+                    monomsInConstraintsVec.push_back(term.first);
+                }
             }
             for (size_t i=0; i<constraintsZero.size(); i++) {
-                monomsInCon = constraintsZero[i].monomials();
-                for (size_t j=0; j<monomsInCon.size(); j++) {
-                    monomsInConstraints.insert(monomsInCon[j]);
+                for (auto& term : constraintsZero[i]) {
+                    if (!monomsInConstraints.count(term.first)) {
+                        monomsInConstraints.insert(term.first);
+                        monomsInConstraintsVec.push_back(term.first);
+                    }
                 }
             }
             for (size_t i=0; i<variablesToPut.size(); i++) {
                 monomsUsed.insert(variablesToPut[i].getKey());
             }
-            while (int(constraintsZero.size()) < findMinimalAmount && monomsUsed.size() < monomsInConstraints.size()) {
+            while (int(constraintsZero.size()) < findMinimalAmount) {
 
                 // Find a monomial that hasn't been used
                 Mon monToAdd;
-                for (auto& mon : monomsInConstraints) {
-                    if (monomsUsed.find(mon) == monomsUsed.end()) {
-                        monToAdd = mon;
-                        break;
+                if (monomsUsed.size() < monomsInConstraints.size()) {
+                    for (auto& mon : monomsInConstraintsVec) {
+                        if (!monomsUsed.count(mon)) {
+                            monToAdd = mon;
+                            break;
+                        }
                     }
+
+                // Otherwise we're looping, need to break out of the cycle TODO
+                } else {
+                    for (auto& mon : monomsInConstraintsVec) {
+                        if (mon.size() >= 2) {
+                            Mon reducedMon = mon;
+                            reducedMon.monomial.erase(reducedMon.monomial.begin());
+                            if (!monomsUsed.count(reducedMon)) {
+                                monToAdd = reducedMon;
+                                std::cout << "Starting new cycle with monomial: " << monToAdd << std::endl;
+                                break;
+                            }
+                        }
+                    }
+
+                }
+
+                // If we can't find anything else, break
+                if (monToAdd.size() == 0 && monomsUsed.count(monToAdd)) {
+                    break;
                 }
 
                 // Put the monomial in the Limbladian
@@ -538,14 +557,16 @@ int main(int argc, char* argv[]) {
                     constraintsZero.push_back(newConstraint); 
                 }
                 monomsUsed.insert(monToAdd);
-                monomsInCon = newConstraint.monomials();
-                for (size_t j=0; j<monomsInCon.size(); j++) {
-                    monomsInConstraints.insert(monomsInCon[j]);
+                for (auto& term : newConstraint) {
+                    if (!monomsInConstraints.count(term.first)) {
+                        monomsInConstraints.insert(term.first);
+                        monomsInConstraintsVec.push_back(term.first);
+                    }
                 }
 
             }
 
-        // If a value not given, binary search TODO
+        // If a value not given, binary search
         } else {
 
             // First try adding constraints until it's exact
@@ -589,11 +610,9 @@ int main(int argc, char* argv[]) {
                 }
 
                 // Run the SDP
-                std::vector<Mon> varNames2;
-                std::vector<std::complex<double>> varVals2;
-                double upperBoundTemp = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity, varNames2, varVals2);
-                objective *= -1;
-                double lowerBoundTemp = -solveMOSEK(objective, momentMatrices, constraintsZero, verbosity, varNames2, varVals2);
+                std::pair<double,double> boundsTemp = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity);
+                double lowerBoundTemp = boundsTemp.first;
+                double upperBoundTemp = boundsTemp.second;
                 double diff = upperBoundTemp - lowerBoundTemp;
                 std::cout << "cons: " << amountToTest << ", diff: " << diff << std::endl;
                 if (diff < 1e-3) {
@@ -618,11 +637,9 @@ int main(int argc, char* argv[]) {
                 }
 
                 // Run the SDP
-                std::vector<Mon> varNames2;
-                std::vector<std::complex<double>> varVals2;
-                double upperBoundTemp = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity, varNames2, varVals2);
-                objective *= -1;
-                double lowerBoundTemp = -solveMOSEK(objective, momentMatrices, constraintsZero, verbosity, varNames2, varVals2);
+                std::pair<double,double> boundsTemp = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity);
+                double lowerBoundTemp = boundsTemp.first;
+                double upperBoundTemp = boundsTemp.second;
                 double diff = upperBoundTemp - lowerBoundTemp;
                 std::cout << "cons: " << toTest << ", diff: " << diff << std::endl;
                 if (diff < 1e-3) {
@@ -642,6 +659,30 @@ int main(int argc, char* argv[]) {
 
         }
 
+    }
+
+    // Create the moment matrices
+    momentMatrices = generateAllMomentMatrices(objective, constraintsZero, level, verbosity, reductionsToIgnore);
+
+    // If told to add extra to the top row
+    if (extraMonomials.size() > 0) {
+        std::vector<Poly> topRow = momentMatrices[0][0];
+        for (size_t i=0; i<extraMonomials.size(); i++) {
+            Poly extraMonomial(Mon(extraMonomials[i]).reversed());
+            topRow.push_back(extraMonomial);
+            std::cout << "Added " << extraMonomial << " to the top row" << std::endl;
+        }
+        momentMatrices[0] = generateFromTopRow(topRow, verbosity);
+    }
+
+    // See how big the moment matrix is
+    if (verbosity >= 1) {
+        int largestMomentMatrix = 0;
+        for (size_t i=0; i<momentMatrices.size(); i++) {
+            if (int(momentMatrices[i].size()) > largestMomentMatrix) {
+                largestMomentMatrix = momentMatrices[i].size();
+            }
+        }
     }
 
     // Output the problem
@@ -673,26 +714,30 @@ int main(int argc, char* argv[]) {
     }
 
     // Convert to MOSEK form and solve
-    std::vector<Mon> varNames;
-    std::vector<std::complex<double>> varVals;
-    double upperBound = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity, varNames, varVals);
-    objective *= -1;
-    double lowerBound = -solveMOSEK(objective, momentMatrices, constraintsZero, verbosity, varNames, varVals);
     if (verbosity >= 2) {
         std::cout << std::endl;
     }
     if (verbosity >= 1) {
-        if (idealIsKnown) {
-            std::cout << "Lower bound: " << lowerBound << " (" << 100*(lowerBound-knownIdeal)/knownIdeal << "%)" << std::endl;
-            std::cout << "Upper bound: " << upperBound << " (" << 100*(upperBound-knownIdeal)/knownIdeal << "%)" << std::endl;
-            std::cout << "Known ideal: " << knownIdeal << std::endl;
-            std::cout << "Difference: " << upperBound - lowerBound << std::endl;
-            std::cout << "Error: " << 100*(upperBound-lowerBound)/knownIdeal << "%" << std::endl;
-        } else {
-            std::cout << "Lower bound: " << lowerBound << std::endl;
-            std::cout << "Upper bound: " << upperBound << std::endl;
-            std::cout << "Difference: " << upperBound - lowerBound << std::endl;
+        int maxMatSize = 0;
+        for (size_t i=0; i<momentMatrices.size(); i++) {
+            if (momentMatrices[i].size() > maxMatSize) {
+                maxMatSize = momentMatrices[i].size();
+            }
+        }
+        int numCons = constraintsZero.size();
+        std::cout << "Solving SDPs with " << numCons << " constraints and max moment mat size of " << maxMatSize << "..." << std::endl;
 
+    }
+    //double lowerBound = -solveMOSEK(-objective, momentMatrices, constraintsZero, verbosity);
+    std::pair<double,double> bounds = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity);
+    double lowerBound = bounds.first;
+    double upperBound = bounds.second;
+    if (verbosity >= 1) {
+        std::cout << "Bounds: " << lowerBound << "  <  " << upperBound << std::endl;
+        std::cout << "Difference: " << upperBound - lowerBound << std::endl;
+        if (idealIsKnown) {
+            std::cout << "Known ideal: " << knownIdeal << std::endl;
+            std::cout << "Error: " << 100*(upperBound-lowerBound)/knownIdeal << "%" << std::endl;
         }
     }
 

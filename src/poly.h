@@ -96,6 +96,10 @@ public:
     // Self-conjugate
     Poly conj();
 
+    // Evaluate, given a list of variables and values
+    std::complex<double> eval(std::vector<std::pair<Mon, std::complex<double>>> vals);
+    std::complex<double> eval(std::map<Mon, std::complex<double>> vals);
+
     // Given a reduce each monomial and combine
     void reduce();
     Poly reduced();

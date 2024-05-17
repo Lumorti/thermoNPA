@@ -14,9 +14,6 @@ void getEigens(std::vector<std::vector<Poly>>& momentMatrix, const std::vector<M
 // Add all single order monomials from a functional to a list of variables
 void addSingleMonomials(std::vector<Mon>& variables, Poly functional);
 
-// Generate a moment matrix given the top row
-std::vector<std::vector<Poly>> generateFromTopRow(std::vector<Mon> monomsInTopRow, int verbosity);
-
 // Generate a moment matrix given the top row as polynomials
 std::vector<std::vector<Poly>> generateFromTopRow(std::vector<Poly> monomsInTopRow, int verbosity);
 
@@ -40,4 +37,7 @@ double tr(Eigen::MatrixXcd A);
 
 // Convert a set to a vector
 std::vector<Mon> toVector(std::set<Mon> s);
+
+// Generate random number between min and max
+double rand(double min, double max);
 

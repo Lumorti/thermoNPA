@@ -2,6 +2,7 @@
 #include <vector>
 #include <complex>
 #include <string>
+#include <set>
 
 // Non-commuting monomial class
 class Mon {
@@ -67,6 +68,7 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const Mon& m);
     friend std::ostream& operator<<(std::ostream& os, const std::pair<char, int>& p);
     friend std::ostream& operator<<(std::ostream& os, const std::vector<Mon>& m);
+    friend std::ostream& operator<<(std::ostream& os, const std::set<Mon>& m);
 
     // Convert a monomial to a string
     std::string toString() const;
