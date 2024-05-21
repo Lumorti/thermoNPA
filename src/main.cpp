@@ -14,6 +14,7 @@
 #include "printing.h"
 #include "utils.h"
 #include "mosek.h"
+#include "gurobi.h"
  
 // https://stackoverflow.com/questions/2647858/multiplying-complex-with-constant-in-c
 template <typename T>
@@ -49,6 +50,7 @@ int main(int argc, char* argv[]) {
     int numQubits = 1;
     Poly objective("<Z1>");
     int verbosity = 1;
+    std::string solver = "mosek";
     std::complex<double> knownIdeal = 0.0;
     bool idealIsKnown = false;
     bool findMinimal = false;
@@ -387,6 +389,10 @@ int main(int argc, char* argv[]) {
             findMinimalAmount = std::stoi(argv[i+1]);
             i++;
 
+        // If told to use Gurobi
+        } else if (argAsString == "-G") {
+            solver = "gurobi";
+
         // Output the help
         } else if (argAsString == "-h" || argAsString == "--help") {
             std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
@@ -414,6 +420,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  -M              Try to find the minimal set of linear constraints" << std::endl;
             std::cout << "  -v <num>        Verbosity level" << std::endl;
             std::cout << "  -t <num>        Run a section of not-yet-finished code" << std::endl;
+            std::cout << "  -G              use Gurobi as a solver instead of MOSEK" << std::endl;
             return 0;
 
         // Otherwise we don't know what this is
@@ -725,11 +732,20 @@ int main(int argc, char* argv[]) {
             }
         }
         int numCons = constraintsZero.size();
-        std::cout << "Solving SDPs with " << numCons << " constraints and max moment mat size of " << maxMatSize << "..." << std::endl;
+        if (maxMatSize == 1) {
+            std::cout << "Solving LP with " << numCons << " constraints" << std::endl;
+        } else {
+            std::cout << "Solving SDP with " << numCons << " constraints and max moment mat size of " << maxMatSize << "..." << std::endl;
+        }
 
     }
     //double lowerBound = -solveMOSEK(-objective, momentMatrices, constraintsZero, verbosity);
-    std::pair<double,double> bounds = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity);
+    std::pair<double,double> bounds;
+    if (solver == "mosek") {
+        bounds = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity);
+    } else if (solver == "gurobi") {
+        bounds = solveGurobi(objective, constraintsZero, verbosity);
+    }
     double lowerBound = bounds.first;
     double upperBound = bounds.second;
     if (verbosity >= 1) {

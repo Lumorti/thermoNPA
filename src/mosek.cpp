@@ -59,13 +59,8 @@ std::pair<double,double> solveMOSEK(Poly obj, std::vector<std::vector<std::vecto
     std::vector<double> AVals;
     int numCons = 0;
     for (size_t i=0; i<constraintsZero.size(); i++) {
-        if (i == 500) {
-            std::cout << "500: " << constraintsZero[i] << std::endl;
-        }
-        if (i == 501) {
-            std::cout << "skipping 501: " << constraintsZero[i] << std::endl;
-            //continue;
-        }
+
+        // For each term in the constraint
         bool realConNonZero = false;
         bool imagConNonZero = false;
         for (auto& term : constraintsZero[i]) {
@@ -314,6 +309,7 @@ std::pair<double,double> solveMOSEK(Poly obj, std::vector<std::vector<std::vecto
 
     M->objective(mosek::fusion::ObjectiveSense::Minimize, mosek::fusion::Expr::dot(cM, xM));
     M->solve();
+    double objPrimal2 = M->primalObjValue();
     double lowerBound = M->dualObjValue();
 
     // Return the objective
