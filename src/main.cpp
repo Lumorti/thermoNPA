@@ -410,6 +410,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  --twov <num> <num>" << std::endl;
             std::cout << "                  Use the two-body Limbladian with coeffs" << std::endl;
             std::cout << "  --many <num>" << std::endl;
+            std::cout << "  --manyr <num>" << std::endl;
             std::cout << "  --manyv <num> <num> <num>" << std::endl;
             std::cout << "                  Use the many-body Limbladian with coeffs" << std::endl;
             std::cout << "  -m <num>        Level of the moment matrix" << std::endl;
@@ -459,17 +460,19 @@ int main(int argc, char* argv[]) {
         std::cout << std::endl;
         std::cout << "Original Limbladian: " << limbladian << std::endl;
     }
-    for (size_t i=0; i<variablesToPut.size(); i++) {
-        std::pair<char,int> oldMon('A', 0);
-        Poly newPoly(variablesToPut[i]);
-        Poly newConstraint = limbladian.replaced(oldMon, newPoly);
-        if (verbosity >= 3) {
-            std::cout << std::endl;
-            std::cout << "Variable to put: " << newPoly << std::endl;
-            std::cout << "New constraint: " << newConstraint << std::endl;
-        }
-        if (newConstraint.size() > 0) {
-            constraintsZero.push_back(newConstraint);
+    if (!findMinimal) {
+        for (size_t i=0; i<variablesToPut.size(); i++) {
+            std::pair<char,int> oldMon('A', 0);
+            Poly newPoly(variablesToPut[i]);
+            Poly newConstraint = limbladian.replaced(oldMon, newPoly);
+            if (verbosity >= 3) {
+                std::cout << std::endl;
+                std::cout << "Variable to put: " << newPoly << std::endl;
+                std::cout << "New constraint: " << newConstraint << std::endl;
+            }
+            if (newConstraint.size() > 0) {
+                constraintsZero.push_back(newConstraint);
+            }
         }
     }
 
@@ -501,25 +504,11 @@ int main(int argc, char* argv[]) {
             std::set<Mon> monomsUsed;
             std::set<Mon> monomsInConstraints;
             std::vector<Mon> monomsInConstraintsVec;
-            //monomsUsed.insert(Mon());
-            //monomsInConstraintsVec.push_back(Mon("<Z1Z2>"));
-            //monomsInConstraints.insert(Mon("<Z1Z2>"));
             for (auto& term : objective) {
                 if (!monomsInConstraints.count(term.first)) {
                     monomsInConstraints.insert(term.first);
                     monomsInConstraintsVec.push_back(term.first);
                 }
-            }
-            for (size_t i=0; i<constraintsZero.size(); i++) {
-                for (auto& term : constraintsZero[i]) {
-                    if (!monomsInConstraints.count(term.first)) {
-                        monomsInConstraints.insert(term.first);
-                        monomsInConstraintsVec.push_back(term.first);
-                    }
-                }
-            }
-            for (size_t i=0; i<variablesToPut.size(); i++) {
-                monomsUsed.insert(variablesToPut[i].getKey());
             }
             while (int(constraintsZero.size()) < findMinimalAmount) {
 
@@ -534,19 +523,26 @@ int main(int argc, char* argv[]) {
                     }
 
                 // Otherwise we're looping, need to break out of the cycle TODO
+                // -S 10 --manyr 15
                 } else {
-                    for (auto& mon : monomsInConstraintsVec) {
-                        if (mon.size() >= 2) {
-                            Mon reducedMon = mon;
-                            reducedMon.monomial.erase(reducedMon.monomial.begin());
-                            if (!monomsUsed.count(reducedMon)) {
-                                monToAdd = reducedMon;
-                                std::cout << "Starting new cycle with monomial: " << monToAdd << std::endl;
-                                break;
-                            }
+                    //for (auto& mon : monomsInConstraintsVec) {
+                        //if (mon.size() >= 2) {
+                            //Mon reducedMon = mon;
+                            //reducedMon.monomial.erase(reducedMon.monomial.begin());
+                            //if (!monomsUsed.count(reducedMon)) {
+                                //monToAdd = reducedMon;
+                                //break;
+                            //}
+                        //}
+                    //}
+                    //monToAdd = Mon("<X1X15>");
+                    for (int i=0; i<=variablesToPut.size(); i++) {
+                        if (std::find(monomsUsed.begin(), monomsUsed.end(), variablesToPut[i].getKey()) == monomsUsed.end()) {
+                            monToAdd = variablesToPut[i].getKey();
+                            break;
                         }
                     }
-
+                    std::cout << "Starting new cycle with monomial: " << monToAdd << std::endl;
                 }
 
                 // If we can't find anything else, break
@@ -724,24 +720,22 @@ int main(int argc, char* argv[]) {
     if (verbosity >= 2) {
         std::cout << std::endl;
     }
-    if (verbosity >= 1) {
-        int maxMatSize = 0;
-        for (size_t i=0; i<momentMatrices.size(); i++) {
-            if (momentMatrices[i].size() > maxMatSize) {
-                maxMatSize = momentMatrices[i].size();
-            }
+    int maxMatSize = 0;
+    for (size_t i=0; i<momentMatrices.size(); i++) {
+        if (momentMatrices[i].size() > maxMatSize) {
+            maxMatSize = momentMatrices[i].size();
         }
-        int numCons = constraintsZero.size();
+    }
+    int numCons = constraintsZero.size();
+    if (verbosity >= 1) {
         if (maxMatSize == 1) {
             std::cout << "Solving LP with " << numCons << " constraints" << std::endl;
         } else {
             std::cout << "Solving SDP with " << numCons << " constraints and max moment mat size of " << maxMatSize << "..." << std::endl;
         }
-
     }
-    //double lowerBound = -solveMOSEK(-objective, momentMatrices, constraintsZero, verbosity);
     std::pair<double,double> bounds;
-    if (solver == "mosek") {
+    if (solver == "mosek" || maxMatSize > 1) {
         bounds = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity);
     } else if (solver == "gurobi") {
         bounds = solveGurobi(objective, constraintsZero, verbosity);
