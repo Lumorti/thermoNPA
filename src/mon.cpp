@@ -71,7 +71,7 @@ void Mon::reverse() {
 }
 
 // If asked to reverse the monomial
-Mon Mon::reversed() {
+Mon Mon::reversed() const {
     Mon toReturn = *this;
     std::reverse(toReturn.monomial.begin(), toReturn.monomial.end());
     return toReturn;
@@ -312,5 +312,25 @@ std::ostream& operator<<(std::ostream& os, const std::set<Mon>& m) {
     os << "}";
     return os;
 }
+
+// Cycle the monomial to put a certain thing at the end
+Mon Mon::cycleTo(char variable, int index) const {
+
+    // Find this variable
+    int location = -1;
+    for (size_t i=0; i<monomial.size(); i++) {
+        if (monomial[i].first == variable && monomial[i].second == index) {
+            location = i;
+            break;
+        }
+    }
+
+    // Cycle by this amount
+    Mon toReturn = *this;
+    std::rotate(toReturn.monomial.begin(), toReturn.monomial.begin()+location+1, toReturn.monomial.end());
+    return toReturn;
+
+}
+
 
     

@@ -63,6 +63,7 @@ public:
 
     // When multiplying by a constant
     Poly operator*(const std::complex<double>& other);
+    friend Poly operator*(const std::complex<double>& other, const Poly& p);
 
     // When multiplying by a constant in-place
     Poly& operator*=(const std::complex<double>& other);
@@ -94,7 +95,10 @@ public:
     Poly operator-();
 
     // Self-conjugate
-    Poly conj();
+    Poly conj() const;
+
+    // Dagger operator
+    Poly dagger() const;
 
     // Evaluate, given a list of variables and values
     std::complex<double> eval(std::vector<std::pair<Mon, std::complex<double>>> vals);
@@ -124,6 +128,10 @@ public:
     // Convert a polynomial to Paulis
     Poly convertedToPaulis();
 
+    // Comuttator and anticommutator
+    Poly commutator(Poly other);
+    Poly anticommutator(Poly other);
+
     // Get the list of monomials
     std::vector<Mon> monomials();
 
@@ -132,6 +140,10 @@ public:
 
     // Check if a monomial is in the polynomial
     bool contains(const Mon mon) const;
+
+    // Cycle each term such that a monomial is at the end
+    void cycleTo(char variable, int index);
+    void cycleToAndRemove(char variable, int index);
 
 };
 

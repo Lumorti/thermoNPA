@@ -45,7 +45,7 @@ const std::complex<double> imag(0, 1);
 int main(int argc, char* argv[]) {
 
     // Define the scenario
-    int level = 1;
+    int level = 0;
     int limbladLevel = 1;
     int numQubits = 1;
     Poly objective("<Z1>");
@@ -54,13 +54,13 @@ int main(int argc, char* argv[]) {
     std::complex<double> knownIdeal = 0.0;
     bool idealIsKnown = false;
     bool findMinimal = false;
+    bool tryRemove = false;
     int findMinimalAmount = 0;
     std::string seed = "";
     Poly limbladian("<X1A0X1>+<Y1A0Y1>-<A0>");
     std::vector<std::string> extraMonomials;
     std::vector<std::string> extraMonomialsLim;
     std::vector<Poly> constraintsZero;
-    std::vector<int> reductionsToIgnore = {};
 
     // Process command-line args
     for (int i=1; i<argc; i++) {
@@ -145,9 +145,7 @@ int main(int argc, char* argv[]) {
             double Gamma = Gamma_h + Gamma_c;
             double chi = (4.0*g*g+Gamma_h*Gamma_c)*Gamma*Gamma + 4.0*delta*delta*Gamma_h*Gamma_c;
 
-            //double J_ss = (8.0*g*g*(gamma_h_plus*gamma_c_minus - gamma_h_minus*gamma_c_plus) / chi) * (epsilon_h*Gamma_c + epsilon_c*Gamma_h);
-            //std::cout << "ideal J_ss: " << J_ss << std::endl;
-
+            // The rho from the paper
             Eigen::MatrixXcd rho = Eigen::MatrixXcd::Zero(4,4);
             rho(0,0) = (4.0*g*g*(gamma_h_plus + gamma_c_plus)*(gamma_h_plus + gamma_c_plus)  + gamma_h_plus*gamma_c_plus*(Gamma*Gamma + 4.0*delta*delta)) / chi;
             rho(1,1) = (4.0*g*g*(gamma_h_minus + gamma_c_minus)*(gamma_h_plus + gamma_c_plus)  + gamma_h_plus*gamma_c_minus*(Gamma*Gamma + 4.0*delta*delta)) / chi;
@@ -156,9 +154,7 @@ int main(int argc, char* argv[]) {
             rho(1,2) = (2.0*g*(gamma_h_plus*gamma_c_minus - gamma_h_minus*gamma_c_plus)*(imag*Gamma-2.0*delta)) / chi;
             rho(2,1) = std::conj(rho(1,2));
 
-            //std::cout << "ideal rho: " << std::endl;
-            //std::cout << rho << std::endl;
-            
+            // Constants
             Eigen::MatrixXcd sigma_z = Eigen::MatrixXcd::Zero(2,2);
             sigma_z(0,0) = 1.0;
             sigma_z(1,1) = -1.0;
@@ -187,6 +183,7 @@ int main(int argc, char* argv[]) {
             Eigen::MatrixXcd sigma_h_x = kroneckerProduct(sigma_x, eye);
             Eigen::MatrixXcd sigma_c_x = kroneckerProduct(eye, sigma_x);
 
+            // Calculate the ideal J_ss
             Eigen::MatrixXcd H_s = epsilon_h*sigma_h_plus*sigma_h_minus 
                                    + epsilon_c*sigma_c_plus*sigma_c_minus;  
             Eigen::MatrixXcd term2 = gamma_h_plus*(sigma_h_plus*rho*sigma_h_minus 
@@ -195,18 +192,8 @@ int main(int argc, char* argv[]) {
                                    + gamma_h_minus*(sigma_h_minus*rho*sigma_h_plus 
                                                    - 0.5*sigma_h_plus*sigma_h_minus*rho 
                                                    - 0.5*rho*sigma_h_plus*sigma_h_minus);
-            //double Q_ss_h_direct = tr(H_s*term2);
-            
-            //double exp_hmhphmhp = tr(sigma_h_minus*sigma_h_plus*sigma_h_minus*sigma_h_plus*rho);
-            //double exp_hphmhphm = tr(sigma_h_plus*sigma_h_minus*sigma_h_plus*sigma_h_minus*rho);
-            //double exp_hmhp = tr(sigma_h_minus*sigma_h_plus*rho);
-            //double exp_hphm = tr(sigma_h_plus*sigma_h_minus*rho);
-            
-            //double Q_ss_h_reduced = epsilon_h*gamma_h_plus*exp_hmhp - epsilon_h*gamma_h_minus*exp_hphm;
-                
             double exp_sigma_z_h = tr(sigma_z_h*rho);
             double exp_sigma_z_c = tr(sigma_z_c*rho);
-            
             double Q_ss_h = 0.5*epsilon_h*(gamma_h_plus-gamma_h_minus) - 0.5*epsilon_h*(gamma_h_plus+gamma_h_minus)*exp_sigma_z_h;
             double Q_ss_c = 0.5*epsilon_c*(gamma_c_plus-gamma_c_minus) - 0.5*epsilon_c*(gamma_c_plus+gamma_c_minus)*exp_sigma_z_c;
             double J_ss_from_rho = Q_ss_h - Q_ss_c;
@@ -268,6 +255,63 @@ int main(int argc, char* argv[]) {
             limbladian += Poly(-0.5*gamma_c_minus, "<P2M2A0>");
             limbladian.convertToPaulis();
 
+        // The Limbladian from the tensor paper TODO
+        } else if (argAsString == "--tensor") {
+
+            // Defining quantities
+            double J = 0.5;
+            double gamma_minus = 1;
+            double h = 0.5;
+
+            // Regardless we should be given the number of qubits
+            numQubits = std::stoi(argv[i+1]);
+            i++;
+
+            // The Hamiltonian
+            // H = J * \sum_i <Z{i}Z{i+1}> + h * \sum_i <Xi>
+            Poly H;
+            for (int i=1; i<=numQubits; i++) {
+                H += Poly(h, "<X" + std::to_string(i) + ">");
+            }
+            for (int i=1; i<numQubits; i++) {
+                H += Poly(J, "<Z" + std::to_string(i) + "Z" + std::to_string(i+1) + ">");
+            }
+
+            // The jump operators
+            // Gamma_k = sqrt(gamma_minus)/2 * (<X{i}> - i <Y{i}>)
+            std::vector<Poly> Gamma_k(numQubits);
+            for (int i=1; i<=numQubits; i++) {
+                Gamma_k[i-1] = Poly("<X" + std::to_string(i) + ">") - imag*Poly("<Y" + std::to_string(i) + ">");
+                Gamma_k[i-1] *= std::sqrt(gamma_minus)/2.0;
+            }
+
+            // The full Limbladian
+            // -i[H, rho] + \sum_k Gamma_k rho Gamma_k^dagger - 0.5 {Gamma_k^dagger Gamma_k, rho}
+            Poly rho("<R1>");
+            limbladian = -imag*H.commutator(rho);
+            for (int i=0; i<numQubits; i++) {
+                limbladian += Gamma_k[i] * rho * Gamma_k[i].dagger();
+                limbladian -= 0.5 * (Gamma_k[i].dagger() * Gamma_k[i]).anticommutator(rho);
+            }
+            limbladian = Poly("<A0>") * limbladian;
+            limbladian.cycleToAndRemove('R', 1);
+            limbladian.reduce();
+
+            // Objective is just the average magnetization
+            objective = Poly();
+            for (int i=1; i<=numQubits; i++) {
+                objective += Poly(1.0/numQubits, "<Z" + std::to_string(i) + ">");
+            }
+            
+            // Print everything for sanity
+            std::cout << "Hamiltonian: " << H << std::endl;
+            std::cout << "Jump operators: " << std::endl;
+            for (int i=0; i<numQubits; i++) {
+                std::cout << "  " << Gamma_k[i] << std::endl;
+            }
+            std::cout << "Limbladian: " << limbladian << std::endl;
+            std::cout << "Objective: " << objective << std::endl;
+
         // Many-body Limbladian
         } else if (argAsString == "--many" || argAsString == "--manyv" || argAsString == "--manyr") {
 
@@ -280,7 +324,7 @@ int main(int argc, char* argv[]) {
             double delta = 0.005;
             double epsilon_h = 1.0;
 
-            // Regardless we have an
+            // Regardless we should be given the number of qubits
             numQubits = std::stoi(argv[i+1]);
             i++;
 
@@ -311,7 +355,7 @@ int main(int argc, char* argv[]) {
             gamma_minus[numQubits-1] = gamma_c_minus;
             std::vector<double> gs(numQubits, g);
             
-            // If told to randomize TODO
+            // If told to randomize
             if (argAsString == "--manyr") {
                 srand(std::hash<std::string>{}(seed));
                 for (int j=0; j<numQubits; j++) {
@@ -355,12 +399,6 @@ int main(int argc, char* argv[]) {
             seed = std::string(argv[i+1]);
             i++;
 
-        // If told to ignore certain Pauli reductions
-        } else if (argAsString == "-2") {
-            reductionsToIgnore.push_back(2);
-        } else if (argAsString == "-3") {
-            reductionsToIgnore.push_back(3);
-
         // If setting verbosity
         } else if (argAsString == "-v") {
             verbosity = std::stoi(argv[i+1]);
@@ -393,6 +431,10 @@ int main(int argc, char* argv[]) {
         } else if (argAsString == "-G") {
             solver = "gurobi";
 
+        // If told to try removing constraints
+        } else if (argAsString == "-R") {
+            tryRemove = true;
+
         // Output the help
         } else if (argAsString == "-h" || argAsString == "--help") {
             std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
@@ -402,25 +444,24 @@ int main(int argc, char* argv[]) {
             std::cout << "  --objX          Use sigma_X as the objective" << std::endl;
             std::cout << "  --objY          Use sigma_Y as the objective" << std::endl;
             std::cout << "  --objZ          Use sigma_Z as the objective" << std::endl;
-            std::cout << "  -2              Don't use second order Pauli reductions" << std::endl;
-            std::cout << "  -3              Don't use third order Pauli reductions" << std::endl;
-            std::cout << "  --pauli <num> <num> <num>" << std::endl;
+            std::cout << "  --pauli <dbl> <dbl> <dbl>" << std::endl;
             std::cout << "                  Use the Pauli Limbladian with coeffs" << std::endl;
             std::cout << "  --two" << std::endl;
-            std::cout << "  --twov <num> <num>" << std::endl;
-            std::cout << "                  Use the two-body Limbladian with coeffs" << std::endl;
-            std::cout << "  --many <num>" << std::endl;
-            std::cout << "  --manyr <num>" << std::endl;
-            std::cout << "  --manyv <num> <num> <num>" << std::endl;
-            std::cout << "                  Use the many-body Limbladian with coeffs" << std::endl;
-            std::cout << "  -m <num>        Level of the moment matrix" << std::endl;
-            std::cout << "  -l <num>        Level of the moments to put in the Limbladian" << std::endl;
-            std::cout << "  -e <monom>      Add an extra monomial to the top row of the moment matrix" << std::endl;
-            std::cout << "  -E <monom>      Add an extra monomial to the list of Limbladian replacements" << std::endl;
+            std::cout << "  --twov <dbl> <dbl>" << std::endl;
+            std::cout << "                  Use the two-body Limbladian" << std::endl;
+            std::cout << "  --many  <int>" << std::endl;
+            std::cout << "  --manyr <int>" << std::endl;
+            std::cout << "  --manyv <int> <dbl> <dbl>" << std::endl;
+            std::cout << "                  Use the many-body Limbladian" << std::endl;
+            std::cout << "  --tensor <int>  Use the Limbladian from the tensor paper" << std::endl;
+            std::cout << "  -m <int>        Level of the moment matrix" << std::endl;
+            std::cout << "  -l <int>        Level of the moments to put in the Limbladian" << std::endl;
+            std::cout << "  -e <mon>        Add an extra monomial to the top row of the moment matrix" << std::endl;
+            std::cout << "  -E <mon>        Add an extra monomial to the list of Limbladian replacements" << std::endl;
             std::cout << "  -S <str>        Seed for the random number generator" << std::endl;
-            std::cout << "  -M              Try to find the minimal set of linear constraints" << std::endl;
-            std::cout << "  -v <num>        Verbosity level" << std::endl;
-            std::cout << "  -t <num>        Run a section of not-yet-finished code" << std::endl;
+            std::cout << "  -M <int>        Try to generate the minimal set of linear constraints" << std::endl;
+            std::cout << "  -R              Try removing random constraints" << std::endl;
+            std::cout << "  -v <int>        Verbosity level" << std::endl;
             std::cout << "  -G              use Gurobi as a solver instead of MOSEK" << std::endl;
             return 0;
 
@@ -510,6 +551,13 @@ int main(int argc, char* argv[]) {
                     monomsInConstraintsVec.push_back(term.first);
                 }
             }
+            for (size_t i=0; i<variablesToPut.size(); i++) {
+                Mon monToAdd = variablesToPut[i].getKey();
+                if (!monomsInConstraints.count(monToAdd)) {
+                    monomsInConstraints.insert(monToAdd);
+                    monomsInConstraintsVec.push_back(monToAdd);
+                }
+            }
             while (int(constraintsZero.size()) < findMinimalAmount) {
 
                 // Find a monomial that hasn't been used
@@ -536,7 +584,7 @@ int main(int argc, char* argv[]) {
                         //}
                     //}
                     //monToAdd = Mon("<X1X15>");
-                    for (int i=0; i<=variablesToPut.size(); i++) {
+                    for (int i=0; i<variablesToPut.size(); i++) {
                         if (std::find(monomsUsed.begin(), monomsUsed.end(), variablesToPut[i].getKey()) == monomsUsed.end()) {
                             monToAdd = variablesToPut[i].getKey();
                             break;
@@ -581,7 +629,7 @@ int main(int argc, char* argv[]) {
             }
             constraintsZero.clear();
             int amountToTest = 50;
-            for (int l=0; l<1000; l++) {
+            for (int l=0; l<20; l++) {
 
                 // Add constraints based on the monomials we already have
                 while (int(constraintsZero.size()) < amountToTest && monomsUsed.size() < monomsInConstraints.size()) {
@@ -664,8 +712,58 @@ int main(int argc, char* argv[]) {
 
     }
 
+    // If removing constraints TODO
+    if (tryRemove) {
+
+        // Initial run
+        std::pair<double,double> boundsStart = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity);
+        double currentBoundDiff = boundsStart.second - boundsStart.first;
+        std::cout << "Original diff: " << currentBoundDiff << std::endl;
+        std::vector<Poly> constraintsZeroCopy = constraintsZero;
+
+        // Per pass
+        for (int l=0; l<100; l++) {
+            bool removedSomething = false;
+            
+            // Check each constraint
+            for (size_t i=0; i<constraintsZero.size(); i++) {
+
+                // Remove the constraint
+                constraintsZero = constraintsZeroCopy;
+                constraintsZero.erase(constraintsZero.begin() + i);
+
+                // Get the bounds
+                //std::pair<double,double> boundsTemp = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity);
+                std::pair<double,double> boundsTemp = solveGurobi(objective, constraintsZero, verbosity);
+                double lowerBoundTemp = boundsTemp.first;
+                double upperBoundTemp = boundsTemp.second;
+                double diff = upperBoundTemp - lowerBoundTemp;
+                std::cout << "Removed " << i << ", diff: " << diff << std::endl;
+
+                // If it's better, remove it
+                if (diff <= currentBoundDiff + 1e-9) {
+                    std::cout << "Removing constraint " << i << std::endl;
+                    constraintsZeroCopy.erase(constraintsZeroCopy.begin() + i);
+                    removedSomething = true;
+                    break;
+                }
+
+            }
+
+            // If nothing was removed, break
+            if (!removedSomething) {
+                break;
+            }
+
+        }
+
+        std::cout << "Final constraints: " << constraintsZeroCopy.size() << std::endl;
+        constraintsZero = constraintsZeroCopy;
+
+    }
+
     // Create the moment matrices
-    momentMatrices = generateAllMomentMatrices(objective, constraintsZero, level, verbosity, reductionsToIgnore);
+    momentMatrices = generateAllMomentMatrices(objective, constraintsZero, level, verbosity);
 
     // If told to add extra to the top row
     if (extraMonomials.size() > 0) {

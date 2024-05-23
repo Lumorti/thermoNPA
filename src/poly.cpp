@@ -249,6 +249,15 @@ Poly Poly::operator*(const std::complex<double>& other) {
     return toReturn;
 }
 
+// When multiplying by a constant (other way around)
+Poly operator*(const std::complex<double>& other, const Poly& p) {
+    Poly toReturn;
+    for (auto& term : p.polynomial) {
+        toReturn.polynomial[term.first] = term.second * other;
+    }
+    return toReturn;
+}
+
 // When multiplying by a constant in-place
 Poly& Poly::operator*=(const std::complex<double>& other) {
     for (auto& term : polynomial) {
@@ -300,10 +309,19 @@ Poly Poly::operator-() {
 }
 
 // Self-conjugate
-Poly Poly::conj() {
+Poly Poly::conj() const {
     Poly toReturn = *this;
     for (auto& term : toReturn.polynomial) {
         term.second = std::conj(term.second);
+    }
+    return toReturn;
+}
+
+// Dagger operator
+Poly Poly::dagger() const {
+    Poly toReturn;
+    for (auto& term : polynomial) {
+        toReturn.polynomial[term.first.reversed()] = std::conj(term.second);
     }
     return toReturn;
 }
@@ -664,5 +682,36 @@ std::complex<double> Poly::eval(std::map<Mon, std::complex<double>> vals) {
     }
     return toReturn;
 }
+
+// Comuttator with another polynomial
+Poly Poly::commutator(Poly p2) {
+    return (*this) * p2 - p2 * (*this);
+}
+
+// Anticommutator with another polynomial
+Poly Poly::anticommutator(Poly p2) {
+    return (*this) * p2 + p2 * (*this);
+}
+
+// Cycle each term such that a monomial is at the end
+void Poly::cycleTo(char variable, int index) {
+    Poly toReturn;
+    for (auto& term : polynomial) {
+        toReturn[term.first.cycleTo(variable, index)] = term.second;
+    }
+    *this = toReturn;
+}
+
+// Cycle each term such that a monomial is at the end, removing it
+void Poly::cycleToAndRemove(char variable, int index) {
+    Poly toReturn;
+    for (auto& term : polynomial) {
+        Mon newMon = term.first.cycleTo(variable, index);
+        newMon.monomial.pop_back();
+        toReturn[newMon] = term.second;
+    }
+    *this = toReturn;
+}
+
 
 

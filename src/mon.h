@@ -30,7 +30,7 @@ public:
     void reverse();
     
     // If asked to reverse the monomial
-    Mon reversed();
+    Mon reversed() const;
 
     // If multiplied by another monomial
     Mon operator*(const Mon& other) const;
@@ -72,6 +72,10 @@ public:
 
     // Convert a monomial to a string
     std::string toString() const;
+
+    // Cycle the monomial to put a certain thing at the end
+    Mon cycleTo(char variable, int index) const;
+
 
 };
 

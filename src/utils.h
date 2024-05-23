@@ -21,7 +21,7 @@ std::vector<std::vector<Poly>> generateFromTopRow(std::vector<Poly> monomsInTopR
 std::vector<Poly> generateMonomials(std::vector<Mon> variables, int level, int verbosity);
 
 // Generate all moment matrices for a given level given a polynomial
-std::vector<std::vector<std::vector<Poly>>> generateAllMomentMatrices(const Poly& functional, std::vector<Poly> zeroCons, int level, int verbosity, std::vector<int> reductionsToIgnore);
+std::vector<std::vector<std::vector<Poly>>> generateAllMomentMatrices(const Poly& functional, std::vector<Poly> zeroCons, int level, int verbosity);
 
 // Add variables from a moment matrix
 void addVariables(std::set<Mon>& variables, std::vector<std::vector<Poly>> toAdd);
