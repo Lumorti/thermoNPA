@@ -145,5 +145,8 @@ public:
     void cycleTo(char variable, int index);
     void cycleToAndRemove(char variable, int index);
 
+    // Check if the polynomial is constant
+    bool isConstant() const;
+
 };
 

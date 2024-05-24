@@ -713,5 +713,10 @@ void Poly::cycleToAndRemove(char variable, int index) {
     *this = toReturn;
 }
 
+// Check if the polynomial is constant
+bool Poly::isConstant() const {
+    return polynomial.size() == 1 && polynomial.find(Mon()) != polynomial.end();
+}
+
 
 

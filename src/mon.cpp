@@ -3,6 +3,13 @@
 #include <iostream>
 #include "mon.h"
 
+// Settings regarding reduction
+const bool pauliReductions = true;
+const std::string commutating = "numbers"; // "none", "letters", "numbers", "both"
+const std::string ASquaredEquals = "1"; // "AA", "1", "A"
+const std::string sortOrder = "numberFirst"; // "numberFirst", "letterFirst"
+const bool trySwap = false;
+
 // Useful constants
 const std::complex<double> imag(0, 1);
 const double zeroTol = 1e-13;
@@ -128,10 +135,18 @@ bool Mon::operator<(const Mon& other) const {
         return monomial.size() < other.monomial.size();
     } else {
         for (size_t i=0; i<monomial.size(); i++) {
-            if (monomial[i].second != other.monomial[i].second) {
-                return monomial[i].second < other.monomial[i].second;
-            } else if (monomial[i].first != other.monomial[i].first) {
-                return monomial[i].first < other.monomial[i].first;
+            if (sortOrder == "numberFirst") {
+                if (monomial[i].second != other.monomial[i].second) {
+                    return monomial[i].second < other.monomial[i].second;
+                } else if (monomial[i].first != other.monomial[i].first) {
+                    return monomial[i].first < other.monomial[i].first;
+                }
+            } else if (sortOrder == "letterFirst") {
+                if (monomial[i].first != other.monomial[i].first) {
+                    return monomial[i].first < other.monomial[i].first;
+                } else if (monomial[i].second != other.monomial[i].second) {
+                    return monomial[i].second < other.monomial[i].second;
+                }
             }
         }
     }
@@ -142,10 +157,18 @@ bool Mon::operator>(const Mon& other) const {
         return monomial.size() > other.monomial.size();
     } else {
         for (size_t i=0; i<monomial.size(); i++) {
-            if (monomial[i].second != other.monomial[i].second) {
-                return monomial[i].second > other.monomial[i].second;
-            } else if (monomial[i].first != other.monomial[i].first) {
-                return monomial[i].first > other.monomial[i].first;
+            if (sortOrder == "numberFirst") {
+                if (monomial[i].second != other.monomial[i].second) {
+                    return monomial[i].second > other.monomial[i].second;
+                } else if (monomial[i].first != other.monomial[i].first) {
+                    return monomial[i].first > other.monomial[i].first;
+                }
+            } else if (sortOrder == "letterFirst") {
+                if (monomial[i].first != other.monomial[i].first) {
+                    return monomial[i].first > other.monomial[i].first;
+                } else if (monomial[i].second != other.monomial[i].second) {
+                    return monomial[i].second > other.monomial[i].second;
+                }
             }
         }
     }
@@ -153,13 +176,13 @@ bool Mon::operator>(const Mon& other) const {
 }
 
 // Reduce a monomial, returning the coefficient and the reduced monomial
-std::pair<std::complex<double>, Mon> Mon::reduce(std::string swapType, bool diffLettersCommute, bool diffNumbersCommute, bool pauliReductions) const {
+std::pair<std::complex<double>, Mon> Mon::reduce() const {
 
     // Sort the monomial as much as we can
     Mon mon = *this;
     int monSize = int(mon.size());
     int monSize1 = monSize-1;
-    if (diffLettersCommute) {
+    if (commutating == "letters") {
         for (int i=0; i<monSize; i++) {
             for (int j=0; j<monSize1; j++) {
                 if (mon[j].first != mon[j+1].first && mon[j] > mon[j+1]) {
@@ -167,11 +190,18 @@ std::pair<std::complex<double>, Mon> Mon::reduce(std::string swapType, bool diff
                 }
             }
         }
-    }
-    if (diffNumbersCommute) {
+    } else if (commutating == "numbers") {
         for (int i=0; i<monSize; i++) {
             for (int j=0; j<monSize1; j++) {
                 if (mon[j].second != mon[j+1].second && mon[j].second > 0 && mon[j+1].second > 0 && !compareReversed(mon[j], mon[j+1])) {
+                    std::swap(mon[j], mon[j+1]);
+                }
+            }
+        }
+    } else if (commutating == "both") {
+        for (int i=0; i<monSize; i++) {
+            for (int j=0; j<monSize1; j++) {
+                if (mon[j] > mon[j+1]) {
                     std::swap(mon[j], mon[j+1]);
                 }
             }
@@ -228,25 +258,31 @@ std::pair<std::complex<double>, Mon> Mon::reduce(std::string swapType, bool diff
     }
 
     // <A1A1> = <1>
-    int i = 0;
-    while (i < int(mon.size())-1) {
-        if (mon[i] == mon[i+1]) {
-            mon.monomial.erase(mon.monomial.begin()+i+1);
-            mon.monomial.erase(mon.monomial.begin()+i);
-            i -= 2;
+    if (ASquaredEquals == "1") {
+        int i = 0;
+        while (i < int(mon.size())-1) {
+            if (mon[i] == mon[i+1]) {
+                mon.monomial.erase(mon.monomial.begin()+i+1);
+                mon.monomial.erase(mon.monomial.begin()+i);
+                i -= 2;
+            }
+            i++;
         }
-        i++;
+    } else if (ASquaredEquals == "A") {
+        int i = 0;
+        while (i < int(mon.size())-1) {
+            if (mon[i] == mon[i+1]) {
+                mon.monomial.erase(mon.monomial.begin()+i+1);
+                i--;
+            }
+            i++;
+        }
     }
 
     // Flip it to see if it's smaller
-    if (swapType == "letFirst") {
+    if (trySwap) {
         Mon monFlipped = mon.reversed();
         if (monFlipped < mon) {
-            mon = monFlipped;
-        }
-    } else if (swapType == "numFirst") {
-        Mon monFlipped = mon.reversed();
-        if (compareReversed(monFlipped, mon)) {
             mon = monFlipped;
         }
     }

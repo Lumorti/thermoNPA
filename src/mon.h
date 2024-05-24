@@ -62,7 +62,7 @@ public:
     bool operator>(const Mon& other) const;
 
     // Given a monomial, reduce it to its simplest form
-    std::pair<std::complex<double>, Mon> reduce(std::string swapType = "none", bool diffLettersCommute=false, bool diffNumbersCommute=true, bool pauliReductions=true) const;
+    std::pair<std::complex<double>, Mon> reduce() const;
 
     // Pretty printing
     friend std::ostream& operator<<(std::ostream& os, const Mon& m);
