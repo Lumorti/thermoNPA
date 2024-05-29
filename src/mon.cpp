@@ -2,13 +2,7 @@
 #include <sstream>
 #include <iostream>
 #include "mon.h"
-
-// Settings regarding reduction
-const bool pauliReductions = true;
-const std::string commutating = "numbers"; // "none", "letters", "numbers", "both"
-const std::string ASquaredEquals = "1"; // "AA", "1", "A"
-const std::string sortOrder = "numberFirst"; // "numberFirst", "letterFirst"
-const bool trySwap = false;
+#include "settings.h"
 
 // Useful constants
 const std::complex<double> imag(0, 1);
@@ -103,6 +97,15 @@ const std::pair<char, int>& Mon::operator[](size_t index) const {
 // Check equality
 bool Mon::operator==(const Mon& other) const {
     return monomial == other.monomial;
+}
+bool Mon::operator!=(const Mon& other) const {
+    return monomial != other.monomial;
+}
+bool Mon::operator==(const int other) const {
+    return monomial.size() == 0;
+}
+bool Mon::operator!=(const int other) const {
+    return monomial.size() != 0;
 }
 
 // Size of the monomial
@@ -366,6 +369,11 @@ Mon Mon::cycleTo(char variable, int index) const {
     std::rotate(toReturn.monomial.begin(), toReturn.monomial.begin()+location+1, toReturn.monomial.end());
     return toReturn;
 
+}
+
+// Check if the monomial is empty (and thus represents 1)
+bool Mon::isConstant() const {
+    return size() == 0;
 }
 
 

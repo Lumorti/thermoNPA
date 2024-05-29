@@ -124,6 +124,9 @@ Poly& Poly::operator=(const std::map<Mon, std::complex<double>>& other) {
 bool Poly::operator==(const Poly& other) {
     return polynomial == other.polynomial;
 }
+bool Poly::operator!=(const Poly& other) {
+    return polynomial != other.polynomial;
+}
 
 // When summing two polynomials
 Poly Poly::operator+(const Poly& other) {
@@ -377,7 +380,7 @@ Poly Poly::reduced() {
 std::ostream& operator<<(std::ostream& os, const Poly& p) {
 
     // Check if it's zero
-    if (p.size() == 0 || (p.size() == 1 && p.contains(Mon()) && std::abs(p[Mon()]) < zeroTol)) {
+    if (p.size() == 0 || (p.isConstant()&& std::abs(p[Mon()]) < zeroTol)) {
         os << "0";
         return os;
     }
@@ -386,46 +389,48 @@ std::ostream& operator<<(std::ostream& os, const Poly& p) {
     for (auto& term : p.polynomial) {
         double realPart = term.second.real();
         double imagPart = term.second.imag();
-        if (std::abs(imagPart) < zeroTol) {
-            if (realPart == -1) {
-                os << "-" << term.first;
-            } else if (realPart == 1) {
-                os << "+" << term.first;
-            } else if (term.first.size() == 0 && realPart < 0) {
-                os << realPart;
-            } else if (term.first.size() == 0 && realPart > 0) {
-                os << "+" << realPart;
-            } else if (realPart > 0) {
-                os << "+" << realPart << term.first;
-            } else {
-                os << realPart << term.first;
-            }
-        } else if (std::abs(realPart) < zeroTol) {
-            if (imagPart == -1) {
-                os << "-i" << term.first;
-            } else if (imagPart == 1) {
-                os << "+i" << term.first;
-            } else if (term.first.size() == 0 && imagPart < 0) {
-                os << imagPart << "i";
-            } else if (term.first.size() == 0 && imagPart > 0) {
-                os << "+" << imagPart << "i";
-            } else if (imagPart > 0) {
-                os << "+" << imagPart << "i" << term.first;
-            } else {
-                os << imagPart << "i" << term.first;
-            }
-        } else {
-            if (term.first.size() == 0) {
-                if (imagPart > 0) {
-                    os << "+(" << realPart << "+" << imagPart << "i)";
+        if (std::abs(realPart) > zeroTol || std::abs(imagPart) > zeroTol) {
+            if (std::abs(imagPart) < zeroTol) {
+                if (realPart == -1) {
+                    os << "-" << term.first;
+                } else if (realPart == 1) {
+                    os << "+" << term.first;
+                } else if (term.first.size() == 0 && realPart < 0) {
+                    os << realPart;
+                } else if (term.first.size() == 0 && realPart > 0) {
+                    os << "+" << realPart;
+                } else if (realPart > 0) {
+                    os << "+" << realPart << term.first;
                 } else {
-                    os << "+(" << realPart << imagPart << "i)";
+                    os << realPart << term.first;
+                }
+            } else if (std::abs(realPart) < zeroTol) {
+                if (imagPart == -1) {
+                    os << "-i" << term.first;
+                } else if (imagPart == 1) {
+                    os << "+i" << term.first;
+                } else if (term.first.size() == 0 && imagPart < 0) {
+                    os << imagPart << "i";
+                } else if (term.first.size() == 0 && imagPart > 0) {
+                    os << "+" << imagPart << "i";
+                } else if (imagPart > 0) {
+                    os << "+" << imagPart << "i" << term.first;
+                } else {
+                    os << imagPart << "i" << term.first;
                 }
             } else {
-                if (imagPart > 0) {
-                    os << "+(" << realPart << "+" << imagPart << "i)" << term.first;
+                if (term.first.size() == 0) {
+                    if (imagPart > 0) {
+                        os << "+(" << realPart << "+" << imagPart << "i)";
+                    } else {
+                        os << "+(" << realPart << imagPart << "i)";
+                    }
                 } else {
-                    os << "+(" << realPart << imagPart << "i)" << term.first;
+                    if (imagPart > 0) {
+                        os << "+(" << realPart << "+" << imagPart << "i)" << term.first;
+                    } else {
+                        os << "+(" << realPart << imagPart << "i)" << term.first;
+                    }
                 }
             }
         }
@@ -660,7 +665,7 @@ Mon Poly::getKey() {
 }
 
 // Evaluate, given a list of variables and values
-std::complex<double> Poly::eval(std::vector<std::pair<Mon, std::complex<double>>> vals) {
+std::complex<double> Poly::eval(std::vector<std::pair<Mon, std::complex<double>>>& vals) {
     std::complex<double> toReturn = 0;
     for (auto& term : polynomial) {
         std::complex<double> termValue = term.second;
@@ -675,8 +680,9 @@ std::complex<double> Poly::eval(std::vector<std::pair<Mon, std::complex<double>>
 }
 
 // Evaluate, given a list of variables and values
-std::complex<double> Poly::eval(std::map<Mon, std::complex<double>> vals) {
+std::complex<double> Poly::eval(std::map<Mon, std::complex<double>>& vals) {
     std::complex<double> toReturn = 0;
+    vals[Mon()] = 1;
     for (auto& term : polynomial) {
         toReturn += term.second * vals[term.first];
     }
@@ -715,7 +721,36 @@ void Poly::cycleToAndRemove(char variable, int index) {
 
 // Check if the polynomial is constant
 bool Poly::isConstant() const {
-    return polynomial.size() == 1 && polynomial.find(Mon()) != polynomial.end();
+    return polynomial.size() == 0 || (polynomial.size() == 1 && polynomial.find(Mon()) != polynomial.end());
+}
+
+// Apply a monomial map
+Poly Poly::applyMap(std::map<Mon, Mon> map) {
+    Poly toReturn;
+    for (auto& term : polynomial) {
+        Mon newMon = term.first;
+        if (map.find(newMon) != map.end()) {
+            newMon = map[newMon];
+        }
+        toReturn[newMon] = term.second;
+    }
+    return toReturn;
+}
+
+// Multiply by a monomial
+Poly Poly::operator*(const Mon& mon) {
+    Poly toReturn;
+    for (auto& term : polynomial) {
+        toReturn[term.first * mon] = term.second;
+    }
+    return toReturn;
+}
+Poly operator*(const Mon& mon, const Poly& p) {
+    Poly toReturn;
+    for (auto& term : p.polynomial) {
+        toReturn[mon * term.first] = term.second;
+    }
+    return toReturn;
 }
 
 
