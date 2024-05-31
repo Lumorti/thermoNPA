@@ -55,6 +55,7 @@ int main(int argc, char* argv[]) {
     bool idealIsKnown = false;
     bool findMinimal = false;
     bool tryRemove = false;
+    int autoMomentAmount = 0;
     int findMinimalAmount = 0;
     std::string seed = "";
     Poly limbladian("<X1A0X1>+<Y1A0Y1>-<A0>");
@@ -276,6 +277,7 @@ int main(int argc, char* argv[]) {
             for (int i=1; i<numQubits; i++) {
                 H += Poly(J, "<Z" + std::to_string(i) + "Z" + std::to_string(i+1) + ">");
             }
+            H += Poly(J, "<Z" + std::to_string(numQubits) + "Z1>");
 
             // The jump operators
             // Gamma_k = sqrt(gamma_minus)/2 * (<X{i}> - i <Y{i}>)
@@ -304,13 +306,15 @@ int main(int argc, char* argv[]) {
             }
             
             // Print everything for sanity
-            std::cout << "Hamiltonian: " << H << std::endl;
-            std::cout << "Jump operators: " << std::endl;
-            for (int i=0; i<numQubits; i++) {
-                std::cout << "  " << Gamma_k[i] << std::endl;
+            if (verbosity >= 2) {
+                std::cout << "Hamiltonian: " << H << std::endl;
+                std::cout << "Jump operators: " << std::endl;
+                for (int i=0; i<numQubits; i++) {
+                    std::cout << "  " << Gamma_k[i] << std::endl;
+                }
+                std::cout << "Limbladian: " << limbladian << std::endl;
+                std::cout << "Objective: " << objective << std::endl;
             }
-            std::cout << "Limbladian: " << limbladian << std::endl;
-            std::cout << "Objective: " << objective << std::endl;
 
         // Many-body Limbladian
         } else if (argAsString == "--many" || argAsString == "--manyv" || argAsString == "--manyr") {
@@ -460,10 +464,16 @@ int main(int argc, char* argv[]) {
             std::cout << "  -E <mon>        Add an extra monomial to the list of Limbladian replacements" << std::endl;
             std::cout << "  -S <str>        Seed for the random number generator" << std::endl;
             std::cout << "  -M <int>        Try to generate the minimal set of linear constraints" << std::endl;
+            std::cout << "  -A <int>        Try to generate the minimal moment matrix" << std::endl;
             std::cout << "  -R              Try removing random constraints" << std::endl;
             std::cout << "  -v <int>        Verbosity level" << std::endl;
             std::cout << "  -G              use Gurobi as a solver instead of MOSEK" << std::endl;
             return 0;
+
+        // If auto generating the moment matrix
+        } else if (argAsString == "-A") {
+            autoMomentAmount = std::stoi(argv[i+1]);
+            i++;
 
         // Otherwise we don't know what this is
         } else if (argAsString != "./run") {
@@ -504,7 +514,7 @@ int main(int argc, char* argv[]) {
     if (!findMinimal) {
         for (size_t i=0; i<variablesToPut.size(); i++) {
             std::pair<char,int> oldMon('A', 0);
-            Poly newPoly(variablesToPut[i]);
+            Mon newPoly(variablesToPut[i].getKey());
             Poly newConstraint = limbladian.replaced(oldMon, newPoly);
             if (verbosity >= 3) {
                 std::cout << std::endl;
@@ -559,6 +569,7 @@ int main(int argc, char* argv[]) {
                 }
             }
             while (int(constraintsZero.size()) < findMinimalAmount) {
+                std::cout << constraintsZero.size() << " / " << findMinimalAmount << "\r" << std::flush;
 
                 // Find a monomial that hasn't been used
                 Mon monToAdd;
@@ -599,7 +610,7 @@ int main(int argc, char* argv[]) {
                 }
 
                 // Put the monomial in the Limbladian
-                Poly toPut(monToAdd);
+                Mon toPut(monToAdd);
                 std::pair<char,int> oldMon('A', 0);
                 Poly newConstraint = limbladian.replaced(oldMon, toPut);
 
@@ -615,6 +626,20 @@ int main(int argc, char* argv[]) {
                     }
                 }
 
+            }
+
+            // Generate the moment matrix from the monomsUsed TODO
+            if (autoMomentAmount > 0) {
+                std::vector<Poly> topRow = {Poly(1)};
+                int added = 0;
+                for (auto& mon : monomsUsed) {
+                    topRow.push_back(Poly(mon));
+                    added++;
+                    if (added >= autoMomentAmount) {
+                        break;
+                    }
+                }
+                momentMatrices = {generateFromTopRow(topRow, verbosity)};
             }
 
         // If a value not given, binary search
@@ -644,7 +669,7 @@ int main(int argc, char* argv[]) {
                     }
 
                     // Put the monomial in the Limbladian
-                    Poly toPut(monToAdd);
+                    Mon toPut(monToAdd);
                     std::pair<char,int> oldMon('A', 0);
                     Poly newConstraint = limbladian.replaced(oldMon, toPut);
 
@@ -763,7 +788,9 @@ int main(int argc, char* argv[]) {
     }
 
     // Create the moment matrices
-    momentMatrices = generateAllMomentMatrices(objective, constraintsZero, level, verbosity);
+    if (autoMomentAmount == 0) {
+        momentMatrices = generateAllMomentMatrices(objective, constraintsZero, level, verbosity);
+    }
 
     // If told to add extra to the top row
     if (extraMonomials.size() > 0) {

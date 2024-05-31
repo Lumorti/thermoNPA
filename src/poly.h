@@ -121,7 +121,9 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const std::vector<Poly>& v);
     friend std::ostream& operator<<(std::ostream& os, const std::vector<std::vector<Poly>>& m);
 
-    // Replace a monomial by a polynomial
+    // Replace a monomial with something
+    void replace(std::pair<char,int> mon, Mon replacement);
+    Poly replaced(std::pair<char,int> mon, Mon replacement);
     void replace(std::pair<char,int> mon, Poly replacement);
     Poly replaced(std::pair<char,int> mon, Poly replacement);
     void replace(Mon mon, Poly replacement);

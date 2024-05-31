@@ -19,7 +19,7 @@ Poly::Poly(Mon mon) {
 }
 
 // If initialized from a map
-Poly::Poly (std::map<Mon, std::complex<double>> poly) {
+Poly::Poly(std::map<Mon, std::complex<double>> poly) {
     polynomial = polynomial;
 }
 
@@ -360,13 +360,9 @@ Poly Poly::reduced() {
     std::vector<Mon> toRemove;
     for (auto& term : polynomial) {
         std::pair<std::complex<double>, Mon> reducedMonomial = term.first.reduce();
-        if (toReturn.polynomial.find(reducedMonomial.second) == toReturn.polynomial.end()) {
-            toReturn.polynomial[reducedMonomial.second] = term.second * reducedMonomial.first;
-        } else {
-            toReturn.polynomial[reducedMonomial.second] += term.second * reducedMonomial.first;
-            if (std::abs(toReturn.polynomial[reducedMonomial.second]) < zeroTol) {
-                toRemove.push_back(reducedMonomial.second);
-            }
+        toReturn.polynomial[reducedMonomial.second] += term.second * reducedMonomial.first;
+        if (std::abs(toReturn.polynomial[reducedMonomial.second]) < zeroTol) {
+            toRemove.push_back(reducedMonomial.second);
         }
     }
     for (auto& mon : toRemove) {
@@ -439,6 +435,43 @@ std::ostream& operator<<(std::ostream& os, const Poly& p) {
     // Return the stream
     return os;
 
+}
+
+// Replace a monomial by a monomial in-place
+void Poly::replace(std::pair<char,int> mon, Mon replacement) {
+
+    // For each term in the polynomial
+    Poly pNew;
+    std::vector<Mon> toRemove;
+    for (auto& term : polynomial) {
+
+        // Start with the original
+        Mon newMon = term.first;
+
+        // Replace that monom
+        for (size_t j=0; j<newMon.size(); j++) {
+            if (newMon[j] == mon || (newMon[j].first == mon.first && mon.second == 0)) {
+                newMon.monomial.erase(newMon.begin()+j);
+                newMon.monomial.insert(newMon.begin()+j, replacement.monomial.begin(), replacement.monomial.end());
+                j += replacement.size();
+            }
+        }
+
+        // Add the new term
+        pNew[newMon] += term.second;
+
+    }
+
+    // Add the new terms
+    *this = pNew.reduced();
+
+}
+
+// Replace a monomial by a monomial
+Poly Poly::replaced(std::pair<char,int> mon, Mon replacement) {
+    Poly toReturn = *this;
+    toReturn.replace(mon, replacement);
+    return toReturn;
 }
 
 // Replace a monomial by a polynomial
