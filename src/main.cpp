@@ -72,6 +72,16 @@ int main(int argc, char* argv[]) {
             level = std::stoi(argv[i+1]);
             i++;
 
+        // Manually set the objective
+        } else if (argAsString == "-O" || argAsString == "--obj") {
+            objective = Poly(std::string(argv[i+1]));
+            i++;
+
+        // Manually set the Limbladian
+        } else if (argAsString == "-L") {
+            limbladian = Poly(std::string(argv[i+1]));
+            i++;
+
         // Pauli X objective
         } else if (argAsString == "--objX") {
             objective = Poly();
@@ -256,7 +266,125 @@ int main(int argc, char* argv[]) {
             limbladian += Poly(-0.5*gamma_c_minus, "<P2M2A0>");
             limbladian.convertToPaulis();
 
-        // The Limbladian from the tensor paper TODO
+        // 2D Limbladian test TODO
+        } else if (argAsString == "--2d") {
+
+            // Defining quantities
+            double gamma_c = 1.1e-2;
+            double gamma_h = 1e-3;
+            double g = 1.6e-3;
+            double T_h = 1.0;
+            double T_c = 0.1;
+            double delta = 0.005;
+            double epsilon_h = 1.0;
+
+            // Regardless we should be given the number of qubits
+            int gridWidth = std::stoi(argv[i+1]);
+            int gridHeight = std::stoi(argv[i+2]);
+            numQubits = gridWidth * gridHeight;
+            i += 2;
+
+            // Calculated quantities
+            double epsilon_c = epsilon_h + delta;
+            double epsilon_other = (epsilon_h + epsilon_c) / 2.0;
+            std::vector<double> epsilons(numQubits, epsilon_other);
+            double n_c = 1.0 / (std::exp(epsilon_c / T_c) - 1.0);
+            double n_h = 1.0 / (std::exp(epsilon_h / T_h) - 1.0);
+            double gamma_h_plus = gamma_h * n_h;
+            double gamma_h_minus = gamma_h * (n_h + 1.0);
+            double gamma_c_plus = gamma_c * n_c;
+            double gamma_c_minus = gamma_c * (n_c + 1.0);
+
+            // Connectivity: 2D grid - nearest neighbours
+            std::vector<double> gamma_plus(numQubits, 0);
+            std::vector<double> gamma_minus(numQubits, 0);
+            std::vector<std::vector<double>> gs(numQubits, std::vector<double>(numQubits, 0));
+            for (int i=0; i<numQubits; i++) {
+
+                // Get the x and y location
+                int xLoc = i % gridWidth;
+                int yLoc = i / gridWidth;
+
+                // The leftmost qubits are connected to the hot bath
+                //if (xLoc == 0) {
+                if (xLoc == 0 && yLoc == std::floor(gridHeight/2)) {
+                    gamma_plus[i] = gamma_h_plus;
+                    gamma_minus[i] = gamma_h_minus;
+                    epsilons[i] = epsilon_h;
+
+                // The rightmost qubits are connected to the cold bath
+                //} else if (xLoc == gridWidth-1) {
+                } else if (xLoc == gridWidth-1 && yLoc == std::floor(gridHeight/2)) {
+                    gamma_plus[i] = gamma_c_plus;
+                    gamma_minus[i] = gamma_c_minus;
+                    epsilons[i] = epsilon_c;
+                }
+
+                // The qubit to the right
+                if (xLoc < gridWidth-1) {
+                    int otherInd = xLoc+1 + yLoc*gridWidth;
+                    gs[i][otherInd] = g;
+                    gs[otherInd][i] = g;
+                }
+
+                // The qubit to the left
+                if (xLoc > 0) {
+                    int otherInd = xLoc-1 + yLoc*gridWidth;
+                    gs[i][otherInd] = g;
+                    gs[otherInd][i] = g;
+                }
+
+                // The qubit below
+                if (yLoc < gridHeight-1) {
+                    int otherInd = xLoc + (yLoc+1)*gridWidth;
+                    gs[i][otherInd] = g;
+                    gs[otherInd][i] = g;
+                }
+
+                // The qubit above
+                if (yLoc > 0) {
+                    int otherInd = xLoc + (yLoc-1)*gridWidth;
+                    gs[i][otherInd] = g;
+                    gs[otherInd][i] = g;
+                }
+                
+            }
+            
+            // Construct the objective as a polynomial with plus/minus mats
+            objective = Poly();
+            for (int i=1; i<=numQubits; i++) {
+                objective += Poly(1.0/numQubits, "<Z" + std::to_string(i) + ">");
+            }
+            
+            // Construct the Limbadlian as a polynomial from plus/minus
+            limbladian = Poly();
+            for (int i=1; i<=numQubits; i++) {
+                limbladian += Poly(-imag*epsilons[i-1], "<A0P" + std::to_string(i) + "M" + std::to_string(i) + ">");
+                limbladian += Poly(imag*epsilons[i-1], "<P" + std::to_string(i) + "M" + std::to_string(i) + "A0>");
+            }
+            for (int i=1; i<=numQubits; i++) {
+                for (int j=i+1; j<=numQubits; j++) {
+                    double coeff = gs[i-1][j-1];
+                    limbladian += Poly(-imag*coeff, "<A0P" + std::to_string(i) + "M" + std::to_string(j) + ">");
+                    limbladian += Poly(-imag*coeff, "<A0M" + std::to_string(i) + "P" + std::to_string(j) + ">");
+                    limbladian += Poly(imag*coeff, "<P" + std::to_string(i) + "M" + std::to_string(j) + "A0>");
+                    limbladian += Poly(imag*coeff, "<M" + std::to_string(i) + "P" + std::to_string(j) + "A0>");
+                }
+            }
+            for (int i=1; i<=numQubits; i++) {
+                double coeffPlus = gamma_plus[i-1];
+                double coeffMinus = gamma_minus[i-1];
+                limbladian += Poly(coeffPlus, "<M" + std::to_string(i) + "A0P" + std::to_string(i) + ">");
+                limbladian += Poly(-0.5*coeffPlus, "<A0M" + std::to_string(i) + "P" + std::to_string(i) + ">");
+                limbladian += Poly(-0.5*coeffPlus, "<M" + std::to_string(i) + "P" + std::to_string(i) + "A0>");
+                limbladian += Poly(coeffMinus, "<P" + std::to_string(i) + "A0M" + std::to_string(i) + ">");
+                limbladian += Poly(-0.5*coeffMinus, "<A0P" + std::to_string(i) + "M" + std::to_string(i) + ">");
+                limbladian += Poly(-0.5*coeffMinus, "<P" + std::to_string(i) + "M" + std::to_string(i) + "A0>");
+            }
+            limbladian.clean();
+            limbladian.convertToPaulis();
+
+        // The Limbladian from the tensor paper
         } else if (argAsString == "--tensor") {
 
             // Defining quantities
@@ -443,7 +571,7 @@ int main(int argc, char* argv[]) {
         } else if (argAsString == "-h" || argAsString == "--help") {
             std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
             std::cout << "Options:" << std::endl;
-            std::cout << "  -O <str>        Manually set the objective" << std::endl;
+            std::cout << "  -O --obj <str>  Manually set the objective" << std::endl;
             std::cout << "  -L <str>        Manually set the Limbladian" << std::endl;
             std::cout << "  --objX          Use sigma_X as the objective" << std::endl;
             std::cout << "  --objY          Use sigma_Y as the objective" << std::endl;
@@ -457,6 +585,8 @@ int main(int argc, char* argv[]) {
             std::cout << "  --manyr <int>" << std::endl;
             std::cout << "  --manyv <int> <dbl> <dbl>" << std::endl;
             std::cout << "                  Use the many-body Limbladian" << std::endl;
+            std::cout << "  --2d <int> <int>" << std::endl;
+            std::cout << "                  Use the 2D Limbladian" << std::endl;
             std::cout << "  --tensor <int>  Use the Limbladian from the tensor paper" << std::endl;
             std::cout << "  -m <int>        Level of the moment matrix" << std::endl;
             std::cout << "  -l <int>        Level of the moments to put in the Limbladian" << std::endl;
@@ -584,21 +714,14 @@ int main(int argc, char* argv[]) {
                 // Otherwise we're looping, need to break out of the cycle TODO
                 // -S 10 --manyr 15
                 } else {
-                    //for (auto& mon : monomsInConstraintsVec) {
-                        //if (mon.size() >= 2) {
-                            //Mon reducedMon = mon;
-                            //reducedMon.monomial.erase(reducedMon.monomial.begin());
-                            //if (!monomsUsed.count(reducedMon)) {
-                                //monToAdd = reducedMon;
-                                //break;
-                            //}
-                        //}
-                    //}
-                    //monToAdd = Mon("<X1X15>");
-                    for (int i=0; i<variablesToPut.size(); i++) {
-                        if (std::find(monomsUsed.begin(), monomsUsed.end(), variablesToPut[i].getKey()) == monomsUsed.end()) {
-                            monToAdd = variablesToPut[i].getKey();
-                            break;
+                    for (auto& mon : monomsInConstraintsVec) {
+                        if (mon.size() >= 2) {
+                            Mon reducedMon = mon;
+                            reducedMon.monomial.erase(reducedMon.monomial.begin());
+                            if (!monomsUsed.count(reducedMon)) {
+                                monToAdd = reducedMon;
+                                break;
+                            }
                         }
                     }
                     std::cout << "Starting new cycle with monomial: " << monToAdd << std::endl;
@@ -611,6 +734,9 @@ int main(int argc, char* argv[]) {
 
                 // Put the monomial in the Limbladian
                 Mon toPut(monToAdd);
+                if (verbosity >= 3) {
+                    std::cout << "Putting in monomial: " << toPut << std::endl;
+                }
                 std::pair<char,int> oldMon('A', 0);
                 Poly newConstraint = limbladian.replaced(oldMon, toPut);
 
@@ -841,7 +967,7 @@ int main(int argc, char* argv[]) {
         std::cout << "----------------------------------------" << std::endl;
     }
 
-    // Convert to MOSEK form and solve
+    // Count the size of the problem
     if (verbosity >= 2) {
         std::cout << std::endl;
     }
@@ -852,13 +978,25 @@ int main(int argc, char* argv[]) {
         }
     }
     int numCons = constraintsZero.size();
+    std::set<Mon> variableSet;
+    variableSet.insert(Mon());
+    for (size_t i=0; i<momentMatrices.size(); i++) {
+        addVariables(variableSet, momentMatrices[i]);
+    }
+    for (size_t i=0; i<constraintsZero.size(); i++) {
+        addVariables(variableSet, constraintsZero[i]);
+    }
+    addVariables(variableSet, objective);
+    int numVars = variableSet.size();
     if (verbosity >= 1) {
         if (maxMatSize == 1) {
-            std::cout << "Solving LP with " << numCons << " constraints" << std::endl;
+            std::cout << "Solving LP with " << numCons << " constraints and " << numVars << " variables..." << std::endl;
         } else {
-            std::cout << "Solving SDP with " << numCons << " constraints and max moment mat size of " << maxMatSize << "..." << std::endl;
+            std::cout << "Solving SDP with " << numCons << " constraints, max moment mat size of " << maxMatSize << " and " << numVars << " variables..." << std::endl;
         }
     }
+
+    // Solve
     std::pair<double,double> bounds;
     if (solver == "mosek" || maxMatSize > 1) {
         bounds = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity);
