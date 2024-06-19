@@ -350,7 +350,7 @@ int main(int argc, char* argv[]) {
                 
             }
             
-            // Construct the objective as a polynomial with plus/minus mats
+            // Construct the objective as a polynomial
             objective = Poly();
             for (int i=1; i<=numQubits; i++) {
                 objective += Poly(1.0/numQubits, "<Z" + std::to_string(i) + ">");
@@ -383,6 +383,51 @@ int main(int argc, char* argv[]) {
             }
             limbladian.clean();
             limbladian.convertToPaulis();
+
+        // The Limbladian from David TODO
+        } else if (argAsString == "--david") {
+
+            double g = std::stod(argv[i+1]);
+            i++;
+            numQubits = 3;
+            double gamma_h = 1.0;
+            double gamma_c = 0.5;
+
+            // Construct the objective as a polynomial
+            objective = Poly("<Z1Z2>");
+            
+            // The Hamiltonian
+            // H = \sum_i <X{i}X{i+1}> + g * \sum_i <Zi>
+            Poly H;
+            for (int i=1; i<=numQubits; i++) {
+                H += Poly(g, "<Z" + std::to_string(i) + ">");
+            }
+            for (int i=1; i<numQubits; i++) {
+                H += Poly(1, "<X" + std::to_string(i) + "X" + std::to_string(i+1) + ">");
+            }
+
+            // The jump operators
+            std::vector<Poly> Gamma_k(numQubits);
+            for (int i=1; i<=numQubits; i++) {
+                Gamma_k[i-1] = Poly("<X" + std::to_string(i) + ">") - imag*Poly("<Y" + std::to_string(i) + ">");
+                Gamma_k[i-1] /= 2.0;
+            }
+            Gamma_k[0] *= std::sqrt(gamma_h);
+            Gamma_k[2] *= std::sqrt(gamma_c);
+
+            // The full Limbladian
+            // -i[H, rho] + \sum_k 0.5 * (2*gamma_h * Gamma_k rho Gamma_k^dagger - Gamma_k^dagger Gamma_k rho - rho Gamma_k^dagger Gamma_k)
+            Poly rho("<R1>");
+            limbladian = -imag*H.commutator(rho);
+            for (int i=0; i<numQubits; i++) {
+                if (i == 1) {
+                    continue;
+                }
+                limbladian += 0.5 * (2 * Gamma_k[i] * rho * Gamma_k[i].dagger() - Gamma_k[i].dagger() * Gamma_k[i] * rho - rho * Gamma_k[i].dagger() * Gamma_k[i]);
+            }
+            limbladian = Poly("<A0>") * limbladian;
+            limbladian.cycleToAndRemove('R', 1);
+            limbladian.reduce();
 
         // The Limbladian from the tensor paper
         } else if (argAsString == "--tensor") {
@@ -863,7 +908,7 @@ int main(int argc, char* argv[]) {
 
     }
 
-    // If removing constraints TODO
+    // If removing constraints
     if (tryRemove) {
 
         // Initial run
