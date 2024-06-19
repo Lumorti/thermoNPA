@@ -387,9 +387,10 @@ int main(int argc, char* argv[]) {
         // The Limbladian from David TODO
         } else if (argAsString == "--david") {
 
+            // Parameters
             double g = std::stod(argv[i+1]);
-            i++;
-            numQubits = 3;
+            numQubits = std::stoi(argv[i+2]);
+            i+=2;
             double gamma_h = 1.0;
             double gamma_c = 0.5;
 
@@ -413,17 +414,16 @@ int main(int argc, char* argv[]) {
                 Gamma_k[i-1] /= 2.0;
             }
             Gamma_k[0] *= std::sqrt(gamma_h);
-            Gamma_k[2] *= std::sqrt(gamma_c);
+            Gamma_k[numQubits-1] *= std::sqrt(gamma_c);
 
             // The full Limbladian
             // -i[H, rho] + \sum_k 0.5 * (2*gamma_h * Gamma_k rho Gamma_k^dagger - Gamma_k^dagger Gamma_k rho - rho Gamma_k^dagger Gamma_k)
             Poly rho("<R1>");
             limbladian = -imag*H.commutator(rho);
             for (int i=0; i<numQubits; i++) {
-                if (i == 1) {
-                    continue;
+                if (i == 0 || i == numQubits-1) {
+                    limbladian += 0.5 * (2 * Gamma_k[i] * rho * Gamma_k[i].dagger() - Gamma_k[i].dagger() * Gamma_k[i] * rho - rho * Gamma_k[i].dagger() * Gamma_k[i]);
                 }
-                limbladian += 0.5 * (2 * Gamma_k[i] * rho * Gamma_k[i].dagger() - Gamma_k[i].dagger() * Gamma_k[i] * rho - rho * Gamma_k[i].dagger() * Gamma_k[i]);
             }
             limbladian = Poly("<A0>") * limbladian;
             limbladian.cycleToAndRemove('R', 1);
