@@ -1,6 +1,6 @@
 CXX=g++
 CXXFLAGS=-fmax-errors=3 -O3 -march=native
-#CXXFLAGS=-g -fmax-errors=3 -Og -march=native -Wall
+#CXXFLAGS=-g -fmax-errors=3 -Wall
 LIBSGUROBI= -I${GUROBIHOME}/include -L${GUROBIHOME}/lib
 LIBSEIGEN= -I${EIGENHOME}
 LIBSMOSEK= -I${MSKHOME}/h -L${MSKHOME}/bin -Wl,-rpath-link,${MSKHOME}/bin -Wl,-rpath=${MSKHOME}/bin

@@ -4,3 +4,5 @@ runDebug
 src/*.o
 *.log
 callgrind*
+temp*
+fit.log

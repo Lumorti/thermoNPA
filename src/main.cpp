@@ -44,10 +44,15 @@ const std::complex<double> imag(0, 1);
 // Generic entry function
 int main(int argc, char* argv[]) {
 
+    // Random seed unless specified
+    srand(time(NULL));
+
     // Define the scenario
     int level = 0;
     int limbladLevel = 1;
     int numQubits = 1;
+    int gridWidth = 1;
+    int gridHeight = 1;
     Poly objective("<Z1>");
     int verbosity = 1;
     std::string solver = "mosek";
@@ -57,6 +62,7 @@ int main(int argc, char* argv[]) {
     bool tryRemove = false;
     int autoMomentAmount = 0;
     int findMinimalAmount = 0;
+    int reductiveCons = 0;
     std::string seed = "";
     Poly limbladian("<X1A0X1>+<Y1A0Y1>-<A0>");
     std::vector<std::string> extraMonomials;
@@ -279,8 +285,8 @@ int main(int argc, char* argv[]) {
             double epsilon_h = 1.0;
 
             // Regardless we should be given the number of qubits
-            int gridWidth = std::stoi(argv[i+1]);
-            int gridHeight = std::stoi(argv[i+2]);
+            gridWidth = std::stoi(argv[i+1]);
+            gridHeight = std::stoi(argv[i+2]);
             numQubits = gridWidth * gridHeight;
             i += 2;
 
@@ -385,7 +391,7 @@ int main(int argc, char* argv[]) {
             limbladian.convertToPaulis();
 
         // The Limbladian from David TODO
-        } else if (argAsString == "--david") {
+        } else if (argAsString == "--david" || argAsString == "--davidr") {
 
             // Parameters
             double g = std::stod(argv[i+1]);
@@ -395,16 +401,25 @@ int main(int argc, char* argv[]) {
             double gamma_c = 0.5;
 
             // Construct the objective as a polynomial
-            objective = Poly("<Z1Z2>");
+            objective = Poly("<Z1>");
             
             // The Hamiltonian
             // H = \sum_i <X{i}X{i+1}> + g * \sum_i <Zi>
             Poly H;
-            for (int i=1; i<=numQubits; i++) {
-                H += Poly(g, "<Z" + std::to_string(i) + ">");
-            }
-            for (int i=1; i<numQubits; i++) {
-                H += Poly(1, "<X" + std::to_string(i) + "X" + std::to_string(i+1) + ">");
+            if (argAsString == "--davidr") {
+                for (int i=1; i<=numQubits; i++) {
+                    H += Poly(rand(-1.0, 1.0), "<Z" + std::to_string(i) + ">");
+                }
+                for (int i=1; i<numQubits; i++) {
+                    H += Poly(rand(-1.0, 1.0), "<X" + std::to_string(i) + "X" + std::to_string(i+1) + ">");
+                }
+            } else {
+                for (int i=1; i<=numQubits; i++) {
+                    H += Poly(g, "<Z" + std::to_string(i) + ">");
+                }
+                for (int i=1; i<numQubits; i++) {
+                    H += Poly(1, "<X" + std::to_string(i) + "X" + std::to_string(i+1) + ">");
+                }
             }
 
             // The jump operators
@@ -422,6 +437,98 @@ int main(int argc, char* argv[]) {
             limbladian = -imag*H.commutator(rho);
             for (int i=0; i<numQubits; i++) {
                 if (i == 0 || i == numQubits-1) {
+                    limbladian += 0.5 * (2 * Gamma_k[i] * rho * Gamma_k[i].dagger() - Gamma_k[i].dagger() * Gamma_k[i] * rho - rho * Gamma_k[i].dagger() * Gamma_k[i]);
+                }
+            }
+            limbladian = Poly("<A0>") * limbladian;
+            limbladian.cycleToAndRemove('R', 1);
+            limbladian.reduce();
+
+        // The Limbladian from David but 2D TODO
+        } else if (argAsString == "--david2d" || argAsString == "--david2dr") {
+
+            // Parameters
+            double g = std::stod(argv[i+1]);
+            gridWidth = std::stoi(argv[i+2]);
+            gridHeight = std::stoi(argv[i+3]);
+            i+=3;
+            numQubits = gridWidth * gridHeight;
+            double gamma_h = 1.0;
+            double gamma_c = 0.5;
+
+            // Construct the objective as a polynomial
+            objective = Poly("<Z1>");
+            
+            // The Hamiltonian
+            // H = \sum_nn <X{i}X{j}> + g * \sum_i <Zi>
+            Poly H;
+            for (int i=1; i<=numQubits; i++) {
+                if (argAsString == "--david2dr") {
+                    H += Poly(rand(-1.0, 1.0), "<Z" + std::to_string(i) + ">");
+                } else {
+                    H += Poly(g, "<Z" + std::to_string(i) + ">");
+                }
+            }
+            for (int i=1; i<=numQubits; i++) {
+
+                // Get the x and y location
+                int xLoc = (i-1) % gridWidth;
+                int yLoc = (i-1) / gridWidth;
+                int thisInd = xLoc + yLoc*gridWidth + 1;
+
+                // The qubit to the right
+                if (xLoc < gridWidth-1) {
+                    int otherInd = xLoc+1 + yLoc*gridWidth + 1;
+                    if (argAsString == "--david2dr") {
+                        H += Poly(rand(-1.0, 1.0), "<X" + std::to_string(i) + "X" + std::to_string(otherInd) + ">");
+                    } else {
+                        H += Poly(1, "<X" + std::to_string(i) + "X" + std::to_string(otherInd) + ">");
+                    }
+                }
+
+                // The qubit below
+                if (yLoc < gridHeight-1) {
+                    int otherInd = xLoc + (yLoc+1)*gridWidth + 1;
+                    if (argAsString == "--david2dr") {
+                        H += Poly(rand(-1.0, 1.0), "<X" + std::to_string(i) + "X" + std::to_string(otherInd) + ">");
+                    } else {
+                        H += Poly(1, "<X" + std::to_string(i) + "X" + std::to_string(otherInd) + ">");
+                    }
+                }
+
+            }
+
+            // Output the Hamiltonian
+            if (verbosity >= 2) {
+                std::cout << "Hamiltonian: " << H << std::endl;
+            }
+
+            // The jump operators
+            std::vector<Poly> Gamma_k(numQubits);
+            for (int i=1; i<=numQubits; i++) {
+                Gamma_k[i-1] = Poly("<X" + std::to_string(i) + ">") - imag*Poly("<Y" + std::to_string(i) + ">");
+                Gamma_k[i-1] /= 2.0;
+                int xLoc = (i-1) % gridWidth;
+                if (xLoc == 0 && xLoc == gridWidth-1) {
+                    Gamma_k[i-1] *= (std::sqrt(gamma_h) + std::sqrt(gamma_c));
+                } else if (xLoc == 0) {
+                    Gamma_k[i-1] *= std::sqrt(gamma_h);
+                } else if (xLoc == gridWidth-1) {
+                    Gamma_k[i-1] *= std::sqrt(gamma_c);
+                }
+            }
+
+            // The full Limbladian
+            // -i[H, rho] + \sum_k 0.5 * (2*gamma_h * Gamma_k rho Gamma_k^dagger - Gamma_k^dagger Gamma_k rho - rho Gamma_k^dagger Gamma_k)
+            Poly rho("<R1>");
+            limbladian = -imag*H.commutator(rho);
+            for (int i=0; i<numQubits; i++) {
+                int xLoc = i % gridWidth;
+                int yLoc = i / gridWidth;
+                if (xLoc == 0 || xLoc == gridWidth-1) {
+                    if (verbosity >= 2) {
+                        std::cout << "Connecting " << (i+1) << " to the bath" << std::endl;
+                    }
                     limbladian += 0.5 * (2 * Gamma_k[i] * rho * Gamma_k[i].dagger() - Gamma_k[i].dagger() * Gamma_k[i] * rho - rho * Gamma_k[i].dagger() * Gamma_k[i]);
                 }
             }
@@ -534,7 +641,6 @@ int main(int argc, char* argv[]) {
             
             // If told to randomize
             if (argAsString == "--manyr") {
-                srand(std::hash<std::string>{}(seed));
                 for (int j=0; j<numQubits; j++) {
                     epsilons[j] = rand(epsilon_h, epsilon_c);
                 }
@@ -574,6 +680,7 @@ int main(int argc, char* argv[]) {
         // Set the seed
         } else if (argAsString == "-S") {
             seed = std::string(argv[i+1]);
+            srand(std::hash<std::string>{}(seed));
             i++;
 
         // If setting verbosity
@@ -608,31 +715,23 @@ int main(int argc, char* argv[]) {
         } else if (argAsString == "-G") {
             solver = "gurobi";
 
+        // If told to use no solver
+        } else if (argAsString == "-N") {
+            solver = "none";
+
         // If told to try removing constraints
         } else if (argAsString == "-R") {
             tryRemove = true;
+
+        // Add some number of extra constraints
+        } else if (argAsString == "-c") {
+            reductiveCons = std::stoi(argv[i+1]);
+            i++;
 
         // Output the help
         } else if (argAsString == "-h" || argAsString == "--help") {
             std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
             std::cout << "Options:" << std::endl;
-            std::cout << "  -O --obj <str>  Manually set the objective" << std::endl;
-            std::cout << "  -L <str>        Manually set the Limbladian" << std::endl;
-            std::cout << "  --objX          Use sigma_X as the objective" << std::endl;
-            std::cout << "  --objY          Use sigma_Y as the objective" << std::endl;
-            std::cout << "  --objZ          Use sigma_Z as the objective" << std::endl;
-            std::cout << "  --pauli <dbl> <dbl> <dbl>" << std::endl;
-            std::cout << "                  Use the Pauli Limbladian with coeffs" << std::endl;
-            std::cout << "  --two" << std::endl;
-            std::cout << "  --twov <dbl> <dbl>" << std::endl;
-            std::cout << "                  Use the two-body Limbladian" << std::endl;
-            std::cout << "  --many  <int>" << std::endl;
-            std::cout << "  --manyr <int>" << std::endl;
-            std::cout << "  --manyv <int> <dbl> <dbl>" << std::endl;
-            std::cout << "                  Use the many-body Limbladian" << std::endl;
-            std::cout << "  --2d <int> <int>" << std::endl;
-            std::cout << "                  Use the 2D Limbladian" << std::endl;
-            std::cout << "  --tensor <int>  Use the Limbladian from the tensor paper" << std::endl;
             std::cout << "  -m <int>        Level of the moment matrix" << std::endl;
             std::cout << "  -l <int>        Level of the moments to put in the Limbladian" << std::endl;
             std::cout << "  -e <mon>        Add an extra monomial to the top row of the moment matrix" << std::endl;
@@ -642,7 +741,28 @@ int main(int argc, char* argv[]) {
             std::cout << "  -A <int>        Try to generate the minimal moment matrix" << std::endl;
             std::cout << "  -R              Try removing random constraints" << std::endl;
             std::cout << "  -v <int>        Verbosity level" << std::endl;
-            std::cout << "  -G              use Gurobi as a solver instead of MOSEK" << std::endl;
+            std::cout << "  -G              Use Gurobi as a solver instead of MOSEK" << std::endl;
+            std::cout << "  -N              Don't solve after generating" << std::endl;
+            std::cout << "  -c <int>        Add some number of extra constraints to reduce the num of vars" << std::endl;
+            std::cout << "Objective options:" << std::endl;
+            std::cout << "  -O --obj <str>  Manually set the objective" << std::endl;
+            std::cout << "  --objX          Use avg sigma_X as the objective" << std::endl;
+            std::cout << "  --objY          Use avg sigma_Y as the objective" << std::endl;
+            std::cout << "  --objZ          Use avg sigma_Z as the objective" << std::endl;
+            std::cout << "Limbliadian options:" << std::endl;
+            std::cout << "  -L <str>        Manually set the Limbladian" << std::endl;
+            std::cout << "  --pauli <dbl> <dbl> <dbl>" << std::endl;
+            std::cout << "  --two" << std::endl;
+            std::cout << "  --twov <dbl> <dbl>" << std::endl;
+            std::cout << "  --many  <int>" << std::endl;
+            std::cout << "  --manyr <int>" << std::endl;
+            std::cout << "  --manyv <int> <dbl> <dbl>" << std::endl;
+            std::cout << "  --2d <int> <int>" << std::endl;
+            std::cout << "  --tensor <int>" << std::endl;
+            std::cout << "  --david <dbl> <int>" << std::endl;
+            std::cout << "  --davidr <dbl> <int>" << std::endl;
+            std::cout << "  --david2d <dbl> <int> <int>" << std::endl;
+            std::cout << "  --david2dr <dbl> <int> <int>" << std::endl;
             return 0;
 
         // If auto generating the moment matrix
@@ -656,13 +776,6 @@ int main(int argc, char* argv[]) {
             return 1;
 
         }
-    }
-
-    // If the seed isn't set
-    if (seed == "") {
-        srand(time(NULL));
-    } else {
-        srand(std::hash<std::string>{}(seed));
     }
 
     // Create the Limbladian applied to many different operators
@@ -715,11 +828,17 @@ int main(int argc, char* argv[]) {
     }
 
     // If asked to find the minimal set of linear constraints 
+    std::set<Mon> monomsUsed;
     if (findMinimal) {
 
         // If given zero, set to what seems to be the minimum needed
         if (findMinimalAmount == 0) {
-            findMinimalAmount = 2*numQubits*numQubits - numQubits;
+            if (gridHeight == 1) {
+                findMinimalAmount = 2*numQubits*numQubits - numQubits;
+            } else {
+                findMinimalAmount = std::pow(4, numQubits)/2 - 2;
+            }
+
             std::cout << "Auto setting constraint limit to: " << findMinimalAmount << std::endl;
         }
 
@@ -727,39 +846,35 @@ int main(int argc, char* argv[]) {
         if (findMinimalAmount > 0) {
 
             // Add constraints based on the monomials we already have
-            std::set<Mon> monomsUsed;
             std::set<Mon> monomsInConstraints;
-            std::vector<Mon> monomsInConstraintsVec;
+            std::vector<Mon> queue;
             for (auto& term : objective) {
                 if (!monomsInConstraints.count(term.first)) {
                     monomsInConstraints.insert(term.first);
-                    monomsInConstraintsVec.push_back(term.first);
+                    queue.push_back(term.first);
                 }
             }
             for (size_t i=0; i<variablesToPut.size(); i++) {
                 Mon monToAdd = variablesToPut[i].getKey();
                 if (!monomsInConstraints.count(monToAdd)) {
                     monomsInConstraints.insert(monToAdd);
-                    monomsInConstraintsVec.push_back(monToAdd);
+                    queue.push_back(monToAdd);
                 }
             }
+            int nextQueueLoc = 0;
             while (int(constraintsZero.size()) < findMinimalAmount) {
-                std::cout << constraintsZero.size() << " / " << findMinimalAmount << "\r" << std::flush;
+                double ratio = double(constraintsZero.size()) / monomsInConstraints.size();
+                std::cout << constraintsZero.size() << " / " << findMinimalAmount << " (" << ratio << ")\r" << std::flush;
 
                 // Find a monomial that hasn't been used
                 Mon monToAdd;
-                if (monomsUsed.size() < monomsInConstraints.size()) {
-                    for (auto& mon : monomsInConstraintsVec) {
-                        if (!monomsUsed.count(mon)) {
-                            monToAdd = mon;
-                            break;
-                        }
-                    }
+                if (nextQueueLoc < int(queue.size())) {
+                    monToAdd = queue[nextQueueLoc];
+                    nextQueueLoc++;
 
-                // Otherwise we're looping, need to break out of the cycle TODO
-                // -S 10 --manyr 15
+                // Otherwise we're looping, need to break out of the cycle
                 } else {
-                    for (auto& mon : monomsInConstraintsVec) {
+                    for (auto& mon : monomsInConstraints) {
                         if (mon.size() >= 2) {
                             Mon reducedMon = mon;
                             reducedMon.monomial.erase(reducedMon.monomial.begin());
@@ -769,17 +884,21 @@ int main(int argc, char* argv[]) {
                             }
                         }
                     }
+                    std::cout << std::endl;
                     std::cout << "Starting new cycle with monomial: " << monToAdd << std::endl;
                 }
 
                 // If we can't find anything else, break
                 if (monToAdd.size() == 0 && monomsUsed.count(monToAdd)) {
+                    std::cout << std::endl;
+                    std::cout << "Couldn't find any more monomials to add" << std::endl;
                     break;
                 }
 
                 // Put the monomial in the Limbladian
                 Mon toPut(monToAdd);
                 if (verbosity >= 3) {
+                    std::cout << std::endl;
                     std::cout << "Putting in monomial: " << toPut << std::endl;
                 }
                 std::pair<char,int> oldMon('A', 0);
@@ -793,7 +912,7 @@ int main(int argc, char* argv[]) {
                 for (auto& term : newConstraint) {
                     if (!monomsInConstraints.count(term.first)) {
                         monomsInConstraints.insert(term.first);
-                        monomsInConstraintsVec.push_back(term.first);
+                        queue.push_back(term.first);
                     }
                 }
 
@@ -817,14 +936,24 @@ int main(int argc, char* argv[]) {
         } else {
 
             // First try adding constraints until it's exact
-            std::set<Mon> monomsUsed;
             std::set<Mon> monomsInConstraints;
-            std::vector<Mon> monomsInCon = objective.monomials();
-            for (size_t i=0; i<monomsInCon.size(); i++) {
-                monomsInConstraints.insert(monomsInCon[i]);
+            std::vector<Mon> queue;
+            for (auto& term : objective) {
+                if (!monomsInConstraints.count(term.first)) {
+                    monomsInConstraints.insert(term.first);
+                    queue.push_back(term.first);
+                }
+            }
+            for (size_t i=0; i<variablesToPut.size(); i++) {
+                Mon monToAdd = variablesToPut[i].getKey();
+                if (!monomsInConstraints.count(monToAdd)) {
+                    monomsInConstraints.insert(monToAdd);
+                    queue.push_back(monToAdd);
+                }
             }
             constraintsZero.clear();
             int amountToTest = 50;
+            int nextQueueLoc = 0;
             for (int l=0; l<20; l++) {
 
                 // Add constraints based on the monomials we already have
@@ -832,10 +961,21 @@ int main(int argc, char* argv[]) {
 
                     // Find a monomial that hasn't been used
                     Mon monToAdd;
-                    for (auto& mon : monomsInConstraints) {
-                        if (monomsUsed.find(mon) == monomsUsed.end()) {
-                            monToAdd = mon;
-                            break;
+                    if (nextQueueLoc < int(queue.size())) {
+                        monToAdd = queue[nextQueueLoc];
+                        nextQueueLoc++;
+
+                    // Otherwise we're looping, need to break out of the cycle
+                    } else {
+                        for (auto& mon : monomsInConstraints) {
+                            if (mon.size() >= 2) {
+                                Mon reducedMon = mon;
+                                reducedMon.monomial.erase(reducedMon.monomial.begin());
+                                if (!monomsUsed.count(reducedMon)) {
+                                    monToAdd = reducedMon;
+                                    break;
+                                }
+                            }
                         }
                     }
 
@@ -849,9 +989,11 @@ int main(int argc, char* argv[]) {
                         constraintsZero.push_back(newConstraint); 
                     }
                     monomsUsed.insert(monToAdd);
-                    monomsInCon = newConstraint.monomials();
-                    for (size_t j=0; j<monomsInCon.size(); j++) {
-                        monomsInConstraints.insert(monomsInCon[j]);
+                    for (auto& term : newConstraint) {
+                        if (!monomsInConstraints.count(term.first)) {
+                            monomsInConstraints.insert(term.first);
+                            queue.push_back(term.first);
+                        }
                     }
 
                 }
@@ -862,7 +1004,7 @@ int main(int argc, char* argv[]) {
                 double upperBoundTemp = boundsTemp.second;
                 double diff = upperBoundTemp - lowerBoundTemp;
                 std::cout << "cons: " << amountToTest << ", diff: " << diff << std::endl;
-                if (diff < 1e-3) {
+                if (diff < 1e-5) {
                     break;
                 } else {
                     amountToTest *= 2;
@@ -889,7 +1031,7 @@ int main(int argc, char* argv[]) {
                 double upperBoundTemp = boundsTemp.second;
                 double diff = upperBoundTemp - lowerBoundTemp;
                 std::cout << "cons: " << toTest << ", diff: " << diff << std::endl;
-                if (diff < 1e-3) {
+                if (diff < 1e-5) {
                     maxNum = toTest;
                 } else {
                     minNum = toTest;
@@ -905,6 +1047,99 @@ int main(int argc, char* argv[]) {
             constraintsZero = constraintsZeroCopy;
 
         }
+        std::cout << std::endl;
+
+    }
+
+    // If adding some reductive constraints TODO
+    int newReductConsAdded = 0;
+    while (newReductConsAdded < reductiveCons) {
+        std::cout << newReductConsAdded << " / " << reductiveCons << "        \r" << std::flush;
+
+        // Add constraints based on the monomials we already have
+        std::set<Mon> monomsInConstraints;
+        std::vector<Mon> monomsInConstraintsVec;
+        for (auto& term : objective) {
+            if (!monomsInConstraints.count(term.first)) {
+                monomsInConstraints.insert(term.first);
+                monomsInConstraintsVec.push_back(term.first);
+            }
+        }
+        for (size_t i=0; i<constraintsZero.size(); i++) {
+            for (auto& term : constraintsZero[i]) {
+                if (!monomsInConstraints.count(term.first)) {
+                    monomsInConstraints.insert(term.first);
+                    monomsInConstraintsVec.push_back(term.first);
+                }
+            }
+        }
+        for (size_t i=0; i<variablesToPut.size(); i++) {
+            Mon monToAdd = variablesToPut[i].getKey();
+            if (!monomsInConstraints.count(monToAdd)) {
+                monomsInConstraints.insert(monToAdd);
+                monomsInConstraintsVec.push_back(monToAdd);
+            }
+        }
+
+        // Find a monomial that hasn't been used
+        Mon monToAdd;
+        if (monomsUsed.size() < monomsInConstraints.size()) {
+            for (auto& mon : monomsInConstraintsVec) {
+                if (!monomsUsed.count(mon)) {
+                    monToAdd = mon;
+                    break;
+                }
+            }
+        }
+
+        // If we can't find anything else, try a new cycle
+        if (monToAdd.size() == 0) {
+            for (auto& mon : monomsInConstraintsVec) {
+                if (mon.size() >= 2) {
+                    Mon reducedMon = mon;
+                    reducedMon.monomial.erase(reducedMon.monomial.begin());
+                    if (!monomsUsed.count(reducedMon)) {
+                        monToAdd = reducedMon;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // If still nothing, break
+        if (monToAdd.size() == 0 && monomsUsed.count(monToAdd)) {
+            break;
+        }
+
+        // Put the monomial in the Limbladian
+        Mon toPut(monToAdd);
+        std::pair<char,int> oldMon('A', 0);
+        Poly newConstraint = limbladian.replaced(oldMon, toPut);
+
+        // Check if the new constraint adds more variables
+        int numNewVars = 0;
+        for (auto& term : newConstraint) {
+            if (!monomsInConstraints.count(term.first)) {
+                numNewVars++;
+            }
+        }
+
+        // If it doesn't, add it
+        double currentRatio = double(constraintsZero.size()) / double(monomsInConstraints.size());
+        double newRatio = double(constraintsZero.size() + 1) / double(monomsInConstraints.size() + numNewVars);
+        if (newConstraint.size() > 0 && newRatio > currentRatio) {
+            constraintsZero.push_back(newConstraint);
+            for (auto& term : newConstraint) {
+                if (!monomsInConstraints.count(term.first)) {
+                    monomsInConstraints.insert(term.first);
+                    monomsInConstraintsVec.push_back(term.first);
+                }
+            }
+            newReductConsAdded++;
+        }
+
+        // Regardless, don't try to add it again
+        monomsUsed.insert(monToAdd);
 
     }
 
@@ -929,8 +1164,12 @@ int main(int argc, char* argv[]) {
                 constraintsZero.erase(constraintsZero.begin() + i);
 
                 // Get the bounds
-                //std::pair<double,double> boundsTemp = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity);
-                std::pair<double,double> boundsTemp = solveGurobi(objective, constraintsZero, verbosity);
+                std::pair<double,double> boundsTemp;
+                if (solver == "mosek") {
+                    boundsTemp = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity);
+                } else if (solver == "gurobi") {
+                    boundsTemp = solveGurobi(objective, constraintsZero, verbosity);
+                }
                 double lowerBoundTemp = boundsTemp.first;
                 double upperBoundTemp = boundsTemp.second;
                 double diff = upperBoundTemp - lowerBoundTemp;
@@ -1035,7 +1274,7 @@ int main(int argc, char* argv[]) {
     int numVars = variableSet.size();
     if (verbosity >= 1) {
         if (maxMatSize == 1) {
-            std::cout << "Solving LP with " << numCons << " constraints and " << numVars << " variables..." << std::endl;
+            std::cout << "Solving LP with " << numCons << " constraints and " << numVars << " variables (ratio: " << double(numCons)/numVars << ")..." << std::endl;
         } else {
             std::cout << "Solving SDP with " << numCons << " constraints, max moment mat size of " << maxMatSize << " and " << numVars << " variables..." << std::endl;
         }
