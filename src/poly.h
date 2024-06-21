@@ -24,6 +24,7 @@ public:
 
     // If initialized from a single coeff + monomial
     Poly(std::pair<std::complex<double>, Mon> pair);
+    Poly(std::pair<Mon, std::complex<double>> pair);
 
     // If initialized from a coeff and a monomial
     Poly(std::complex<double> coeff, Mon mon);
@@ -40,6 +41,10 @@ public:
     // When assigning manually with a vector
     Poly& operator=(const std::map<Mon, std::complex<double>>& poly);
 
+    // Check equality with a number
+    bool operator==(const std::complex<double>& other);
+    bool operator==(const double& other);
+
     // Checking equality of two polynomials
     bool operator==(const Poly& other);
     bool operator!=(const Poly& other);
@@ -49,6 +54,8 @@ public:
 
     // When summing in-place
     Poly& operator+=(const Poly& other);
+    Poly& operator+=(const std::complex<double>& other);
+    Poly& operator+=(const double& other);
 
     // When subtracting two polynomials
     Poly operator-(const Poly& other);
@@ -114,7 +121,8 @@ public:
     Poly reduced();
 
     // Remove any zero terms from this polynomial
-    void clean();
+    void clean(double tol = 1e-10);
+    Poly cleaned(double tol = 1e-10) const;
 
     // Pretty print
     friend std::ostream& operator<<(std::ostream& os, const Poly& p);
@@ -148,6 +156,9 @@ public:
     // Check if a monomial is in the polynomial
     bool contains(const Mon mon) const;
 
+    // Check if a char is in the polynomial
+    bool contains(const char letter) const;
+
     // Cycle each term such that a monomial is at the end
     void cycleTo(char variable, int index);
     void cycleToAndRemove(char variable, int index);
@@ -155,8 +166,15 @@ public:
     // Check if the polynomial is constant
     bool isConstant() const;
 
+    // Check if the polynomial is zero
+    bool isZero() const;
+
     // Apply a monomial map
     Poly applyMap(std::map<Mon, Mon> map);
 
 };
+
+// Monomial multiplied by a number is a poly
+Poly operator*(const Mon& mon, const std::complex<double>& coeff);
+Poly operator*(const std::complex<double>& coeff, const Mon& mon);
 

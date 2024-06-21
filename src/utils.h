@@ -7,6 +7,7 @@
 
 // Given a matrix and a variable list, return the matrix with the variables replaced
 Eigen::MatrixXcd replaceVariables(std::vector<std::vector<Poly>>& momentMatrix, const std::vector<Mon>& variables, const std::vector<std::complex<double>>& varVals);
+Eigen::MatrixXcd replaceVariables(std::vector<std::vector<Poly>>& momentMatrix, const std::map<Mon, std::complex<double>>& varVals);
 
 // Get the eigenvalues and vectors of a matrix after replacement
 void getEigens(std::vector<std::vector<Poly>>& momentMatrix, const std::vector<Mon>& variables, const std::vector<std::complex<double>>& varVals, std::vector<std::vector<std::complex<double>>>& eigenvectors, std::vector<std::complex<double>>& eigenvalues);
@@ -40,4 +41,13 @@ std::vector<Mon> toVector(std::set<Mon> s);
 
 // Generate random number between min and max
 double rand(double min, double max);
+
+// Convert a primal SDP problem to a dual problem
+void primalToDual(Poly& objective, std::vector<std::vector<std::vector<Poly>>>& momentMatrices, std::vector<Poly>& constraintsZero, std::vector<Poly>& constraintsPositive, bool variableObjective=false);
+
+// Convert from sparse to compressed column format
+void toCC(std::vector<int>& ARows, std::vector<int>& ACols, std::vector<double>& AVals, int numCols);
+
+// Solve a linear system with Eigen
+double solveEigen(Poly& objective, std::vector<Poly>& constraintsZero, int verbosity=1, int numCores=1);
 

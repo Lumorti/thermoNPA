@@ -5,6 +5,9 @@
 #include <set>
 #include <map>
 
+// Import OpenMP
+#include <omp.h>
+
 // Import Eigen
 #include <Eigen/Dense>
 #include <unsupported/Eigen/KroneckerProduct>
@@ -13,8 +16,8 @@
 #include "poly.h"
 #include "printing.h"
 #include "utils.h"
-#include "mosek.h"
-#include "gurobi.h"
+#include "optMOSEK.h"
+#include "optGurobi.h"
  
 // https://stackoverflow.com/questions/2647858/multiplying-complex-with-constant-in-c
 template <typename T>
@@ -49,16 +52,16 @@ int main(int argc, char* argv[]) {
 
     // Define the scenario
     int level = 0;
-    int limbladLevel = 1;
+    int limbladLevel = 0;
     int numQubits = 1;
     int gridWidth = 1;
     int gridHeight = 1;
     Poly objective("<Z1>");
     int verbosity = 1;
-    std::string solver = "mosek";
+    std::string solver = "auto";
     std::complex<double> knownIdeal = 0.0;
     bool idealIsKnown = false;
-    bool findMinimal = false;
+    bool findMinimal = true;
     bool tryRemove = false;
     int autoMomentAmount = 0;
     int findMinimalAmount = 0;
@@ -68,6 +71,9 @@ int main(int argc, char* argv[]) {
     std::vector<std::string> extraMonomials;
     std::vector<std::string> extraMonomialsLim;
     std::vector<Poly> constraintsZero;
+
+    // The max physical cores
+    int numCores = omp_get_max_threads();
 
     // Process command-line args
     for (int i=1; i<argc; i++) {
@@ -705,19 +711,22 @@ int main(int argc, char* argv[]) {
 
         // If trying to find the minimal set of linear constraints
         } else if (argAsString == "-M") {
-            level = 0;
-            limbladLevel = 0;
             findMinimal = true;
             findMinimalAmount = std::stoi(argv[i+1]);
             i++;
 
-        // If told to use Gurobi
-        } else if (argAsString == "-G") {
-            solver = "gurobi";
-
-        // If told to use no solver
-        } else if (argAsString == "-N") {
-            solver = "none";
+        // Which solver to use
+        } else if (argAsString == "-s") {
+            if (argv[i+1][0] == 'G') {
+                solver = "gurobi";
+            } else if (argv[i+1][0] == 'E') {
+                solver = "eigen";
+            } else if (argv[i+1][0] == 'M') {
+                solver = "mosek";
+            } else if (argv[i+1][0] == 'N') {
+                solver = "none";
+            }
+            i++;
 
         // If told to try removing constraints
         } else if (argAsString == "-R") {
@@ -726,6 +735,11 @@ int main(int argc, char* argv[]) {
         // Add some number of extra constraints
         } else if (argAsString == "-c") {
             reductiveCons = std::stoi(argv[i+1]);
+            i++;
+
+        // Setting the number of cores
+        } else if (argAsString == "-C") {
+            numCores = std::stoi(argv[i+1]);
             i++;
 
         // Output the help
@@ -741,9 +755,13 @@ int main(int argc, char* argv[]) {
             std::cout << "  -A <int>        Try to generate the minimal moment matrix" << std::endl;
             std::cout << "  -R              Try removing random constraints" << std::endl;
             std::cout << "  -v <int>        Verbosity level" << std::endl;
-            std::cout << "  -G              Use Gurobi as a solver instead of MOSEK" << std::endl;
-            std::cout << "  -N              Don't solve after generating" << std::endl;
+            std::cout << "  -C <int>        Number of cores to use" << std::endl;
             std::cout << "  -c <int>        Add some number of extra constraints to reduce the num of vars" << std::endl;
+            std::cout << "Solver options:" << std::endl;
+            std::cout << "  -s G            Use Gurobi as the solver" << std::endl;
+            std::cout << "  -s E            Use Eigen as the solver" << std::endl;
+            std::cout << "  -s M            Use MOSEK as the solver" << std::endl;
+            std::cout << "  -s N            Don't solve after generating" << std::endl;
             std::cout << "Objective options:" << std::endl;
             std::cout << "  -O --obj <str>  Manually set the objective" << std::endl;
             std::cout << "  --objX          Use avg sigma_X as the objective" << std::endl;
@@ -809,7 +827,7 @@ int main(int argc, char* argv[]) {
                 std::cout << "Variable to put: " << newPoly << std::endl;
                 std::cout << "New constraint: " << newConstraint << std::endl;
             }
-            if (newConstraint.size() > 0) {
+            if (!newConstraint.isZero()) {
                 constraintsZero.push_back(newConstraint);
             }
         }
@@ -836,7 +854,7 @@ int main(int argc, char* argv[]) {
             if (gridHeight == 1) {
                 findMinimalAmount = 2*numQubits*numQubits - numQubits;
             } else {
-                findMinimalAmount = std::pow(4, numQubits)/2 - 2;
+                findMinimalAmount = std::pow(4, numQubits)/2 - 1;
             }
 
             std::cout << "Auto setting constraint limit to: " << findMinimalAmount << std::endl;
@@ -861,10 +879,26 @@ int main(int argc, char* argv[]) {
                     queue.push_back(monToAdd);
                 }
             }
+            for (size_t i=0; i<momentMatrices.size(); i++) {
+                for (size_t j=0; j<momentMatrices[i].size(); j++) {
+                    for (size_t k=0; k<momentMatrices[i][j].size(); k++) {
+                        Mon monToAdd = momentMatrices[i][j][k].getKey();
+                        if (!monomsInConstraints.count(monToAdd)) {
+                            monomsInConstraints.insert(monToAdd);
+                            queue.push_back(monToAdd);
+                        }
+                    }
+                }
+            }
             int nextQueueLoc = 0;
             while (int(constraintsZero.size()) < findMinimalAmount) {
-                double ratio = double(constraintsZero.size()) / monomsInConstraints.size();
-                std::cout << constraintsZero.size() << " / " << findMinimalAmount << " (" << ratio << ")\r" << std::flush;
+                double ratio = double(constraintsZero.size()) / (monomsInConstraints.size()-1);
+                std::cout << constraintsZero.size() << " / " << findMinimalAmount << " (" << ratio << ")        \r" << std::flush;
+
+                // Stop if we're fully constrained
+                if (monomsInConstraints.size()-1 == constraintsZero.size() && constraintsZero.size() > 1) {
+                    break;
+                }
 
                 // Find a monomial that hasn't been used
                 Mon monToAdd;
@@ -905,7 +939,7 @@ int main(int argc, char* argv[]) {
                 Poly newConstraint = limbladian.replaced(oldMon, toPut);
 
                 // Add the constraint
-                if (newConstraint.size() > 0) {
+                if (!newConstraint.isZero()) {
                     constraintsZero.push_back(newConstraint); 
                 }
                 monomsUsed.insert(monToAdd);
@@ -985,7 +1019,7 @@ int main(int argc, char* argv[]) {
                     Poly newConstraint = limbladian.replaced(oldMon, toPut);
 
                     // Add the constraint
-                    if (newConstraint.size() > 0) {
+                    if (!newConstraint.isZero()) {
                         constraintsZero.push_back(newConstraint); 
                     }
                     monomsUsed.insert(monToAdd);
@@ -999,7 +1033,7 @@ int main(int argc, char* argv[]) {
                 }
 
                 // Run the SDP
-                std::pair<double,double> boundsTemp = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity);
+                std::pair<double,double> boundsTemp = boundMOSEK(objective, momentMatrices, constraintsZero, {}, verbosity);
                 double lowerBoundTemp = boundsTemp.first;
                 double upperBoundTemp = boundsTemp.second;
                 double diff = upperBoundTemp - lowerBoundTemp;
@@ -1026,7 +1060,7 @@ int main(int argc, char* argv[]) {
                 }
 
                 // Run the SDP
-                std::pair<double,double> boundsTemp = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity);
+                std::pair<double,double> boundsTemp = boundMOSEK(objective, momentMatrices, constraintsZero, {}, verbosity);
                 double lowerBoundTemp = boundsTemp.first;
                 double upperBoundTemp = boundsTemp.second;
                 double diff = upperBoundTemp - lowerBoundTemp;
@@ -1047,11 +1081,14 @@ int main(int argc, char* argv[]) {
             constraintsZero = constraintsZeroCopy;
 
         }
-        std::cout << std::endl;
+
+        // Final output
+        double ratio = double(constraintsZero.size()) / (monomsUsed.size()-1);
+        std::cout << constraintsZero.size() << " / " << findMinimalAmount << " (" << ratio << ")               " << std::endl;
 
     }
 
-    // If adding some reductive constraints TODO
+    // If adding some reductive constraints
     int newReductConsAdded = 0;
     while (newReductConsAdded < reductiveCons) {
         std::cout << newReductConsAdded << " / " << reductiveCons << "        \r" << std::flush;
@@ -1127,7 +1164,7 @@ int main(int argc, char* argv[]) {
         // If it doesn't, add it
         double currentRatio = double(constraintsZero.size()) / double(monomsInConstraints.size());
         double newRatio = double(constraintsZero.size() + 1) / double(monomsInConstraints.size() + numNewVars);
-        if (newConstraint.size() > 0 && newRatio > currentRatio) {
+        if (!newConstraint.isZero() && newRatio > currentRatio) {
             constraintsZero.push_back(newConstraint);
             for (auto& term : newConstraint) {
                 if (!monomsInConstraints.count(term.first)) {
@@ -1140,60 +1177,6 @@ int main(int argc, char* argv[]) {
 
         // Regardless, don't try to add it again
         monomsUsed.insert(monToAdd);
-
-    }
-
-    // If removing constraints
-    if (tryRemove) {
-
-        // Initial run
-        std::pair<double,double> boundsStart = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity);
-        double currentBoundDiff = boundsStart.second - boundsStart.first;
-        std::cout << "Original diff: " << currentBoundDiff << std::endl;
-        std::vector<Poly> constraintsZeroCopy = constraintsZero;
-
-        // Per pass
-        for (int l=0; l<100; l++) {
-            bool removedSomething = false;
-            
-            // Check each constraint
-            for (size_t i=0; i<constraintsZero.size(); i++) {
-
-                // Remove the constraint
-                constraintsZero = constraintsZeroCopy;
-                constraintsZero.erase(constraintsZero.begin() + i);
-
-                // Get the bounds
-                std::pair<double,double> boundsTemp;
-                if (solver == "mosek") {
-                    boundsTemp = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity);
-                } else if (solver == "gurobi") {
-                    boundsTemp = solveGurobi(objective, constraintsZero, verbosity);
-                }
-                double lowerBoundTemp = boundsTemp.first;
-                double upperBoundTemp = boundsTemp.second;
-                double diff = upperBoundTemp - lowerBoundTemp;
-                std::cout << "Removed " << i << ", diff: " << diff << std::endl;
-
-                // If it's better, remove it
-                if (diff <= currentBoundDiff + 1e-9) {
-                    std::cout << "Removing constraint " << i << std::endl;
-                    constraintsZeroCopy.erase(constraintsZeroCopy.begin() + i);
-                    removedSomething = true;
-                    break;
-                }
-
-            }
-
-            // If nothing was removed, break
-            if (!removedSomething) {
-                break;
-            }
-
-        }
-
-        std::cout << "Final constraints: " << constraintsZeroCopy.size() << std::endl;
-        constraintsZero = constraintsZeroCopy;
 
     }
 
@@ -1221,6 +1204,60 @@ int main(int argc, char* argv[]) {
                 largestMomentMatrix = momentMatrices[i].size();
             }
         }
+    }
+
+    // If removing constraints
+    if (tryRemove) {
+
+        // Initial run
+        std::pair<double,double> boundsStart = boundMOSEK(objective, momentMatrices, constraintsZero, {}, verbosity);
+        double currentBoundDiff = boundsStart.second - boundsStart.first;
+        std::cout << "Original diff: " << currentBoundDiff << std::endl;
+        std::vector<Poly> constraintsZeroCopy = constraintsZero;
+
+        // Per pass
+        for (int l=0; l<100; l++) {
+            bool removedSomething = false;
+            
+            // Check each constraint
+            for (size_t i=0; i<constraintsZero.size(); i++) {
+
+                // Remove the constraint
+                constraintsZero = constraintsZeroCopy;
+                constraintsZero.erase(constraintsZero.begin() + i);
+
+                // Get the bounds
+                std::pair<double,double> boundsTemp;
+                if (solver == "mosek" || solver == "auto") {
+                    boundsTemp = boundMOSEK(objective, momentMatrices, constraintsZero, {}, verbosity);
+                } else if (solver == "gurobi") {
+                    boundsTemp = boundGurobi(objective, constraintsZero, verbosity);
+                }
+                double lowerBoundTemp = boundsTemp.first;
+                double upperBoundTemp = boundsTemp.second;
+                double diff = upperBoundTemp - lowerBoundTemp;
+                std::cout << "Removed " << i << ", diff: " << diff << std::endl;
+
+                // If it's better, remove it
+                if (diff <= currentBoundDiff + 1e-9) {
+                    std::cout << "Removing constraint " << i << std::endl;
+                    constraintsZeroCopy.erase(constraintsZeroCopy.begin() + i);
+                    removedSomething = true;
+                    break;
+                }
+
+            }
+
+            // If nothing was removed, break
+            if (!removedSomething) {
+                break;
+            }
+
+        }
+
+        std::cout << "Final constraints: " << constraintsZeroCopy.size() << std::endl;
+        constraintsZero = constraintsZeroCopy;
+
     }
 
     // Output the problem
@@ -1271,21 +1308,41 @@ int main(int argc, char* argv[]) {
         addVariables(variableSet, constraintsZero[i]);
     }
     addVariables(variableSet, objective);
-    int numVars = variableSet.size();
-    if (verbosity >= 1) {
-        if (maxMatSize == 1) {
-            std::cout << "Solving LP with " << numCons << " constraints and " << numVars << " variables (ratio: " << double(numCons)/numVars << ")..." << std::endl;
+    int numVars = variableSet.size()-1;
+
+    // Auto detect the best solver
+    if (solver == "auto") {
+        if (maxMatSize > 1) {
+            solver = "mosek";
+        } else if (numCons == numVars) {
+            solver = "eigen";
         } else {
-            std::cout << "Solving SDP with " << numCons << " constraints, max moment mat size of " << maxMatSize << " and " << numVars << " variables..." << std::endl;
+            solver = "gurobi";
+        }
+    }
+
+    // Output what we're doing
+    if (verbosity >= 1) {
+        if (maxMatSize > 1 && solver == "mosek") {
+            std::cout << "Solving SDP using MOSEK with " << numCons << " constraints, max moment mat size of " << maxMatSize << " and " << numVars << " variables..." << std::endl;
+        } else if (solver == "eigen") {
+            std::cout << "Solving linear system using Eigen with " << numCons << " constraints and " << numVars << " variables..." << std::endl;
+        } else if (solver == "mosek") {
+            std::cout << "Solving LP using MOSEK with " << numCons << " constraints and " << numVars << " variables (ratio: " << double(numCons)/numVars << ")..." << std::endl;
+        } else if (solver == "gurobi") {
+            std::cout << "Solving LP using Gurobi with " << numCons << " constraints and " << numVars << " variables (ratio: " << double(numCons)/numVars << ")..." << std::endl;
         }
     }
 
     // Solve
     std::pair<double,double> bounds;
     if (solver == "mosek" || maxMatSize > 1) {
-        bounds = solveMOSEK(objective, momentMatrices, constraintsZero, verbosity);
+        bounds = boundMOSEK(objective, momentMatrices, constraintsZero, {}, verbosity);
     } else if (solver == "gurobi") {
-        bounds = solveGurobi(objective, constraintsZero, verbosity);
+        bounds = boundGurobi(objective, constraintsZero, verbosity);
+    } else if (solver == "eigen") {
+        double res = solveEigen(objective, constraintsZero, verbosity, numCores);
+        bounds = {res, res};
     }
     double lowerBound = bounds.first;
     double upperBound = bounds.second;

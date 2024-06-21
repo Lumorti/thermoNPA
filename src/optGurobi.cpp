@@ -1,13 +1,12 @@
-#include "gurobi.h"
+#include "optGurobi.h"
 #include "utils.h"
 #include "printing.h"
 #include <gurobi_c++.h>
 
 // Convert to Gurobi form and solve
-std::pair<double,double> solveGurobi(Poly obj, std::vector<Poly> constraintsZero, int verbosity) {
+std::pair<double,double> boundGurobi(Poly obj, std::vector<Poly> constraintsZero, int verbosity) {
 
     // Get the list of variables
-    int oneIndex = 0;
     std::set<Mon> variableSet;
     variableSet.insert(Mon());
     for (size_t i=0; i<constraintsZero.size(); i++) {

@@ -1,5 +1,6 @@
 #include "poly.h"
 #include <algorithm>
+#include <iostream>
 
 // Useful constants
 const std::complex<double> imag(0, 1);
@@ -19,13 +20,16 @@ Poly::Poly(Mon mon) {
 }
 
 // If initialized from a map
-Poly::Poly(std::map<Mon, std::complex<double>> poly) {
+Poly::Poly (std::map<Mon, std::complex<double>> poly) {
     polynomial = polynomial;
 }
 
 // If initialized from a single coeff + monomial
 Poly::Poly(std::pair<std::complex<double>, Mon> pair) {
     polynomial[pair.second] = pair.first;
+}
+Poly::Poly(std::pair<Mon, std::complex<double>> pair) {
+    polynomial[pair.first] = pair.second;
 }
 
 // If initialized from a coeff and a monomial
@@ -62,7 +66,7 @@ Poly::Poly(std::string asString) {
     for (size_t i=0; i<asString.size(); i++) {
 
         // If finished a monomial
-        if (i > 0 && asString[i] == '>') {
+        if (i > 0 && (asString[i] == '>' || ((asString[i] == '+' || asString[i] == '-') && asString[i-1] != '>'))) {
 
             // Ensure the coefficient is convertable
             if (currentCoefficient == "" || currentCoefficient == "+") {
@@ -128,6 +132,26 @@ bool Poly::operator!=(const Poly& other) {
     return polynomial != other.polynomial;
 }
 
+// Check equality with a number
+bool Poly::operator==(const std::complex<double>& other) {
+    if (!isConstant()) {
+        return false;
+    }
+    if (isZero() && other == std::complex<double>(0.0, 0.0)) {
+        return true;
+    }
+    return polynomial.begin()->second == other;
+}
+bool Poly::operator==(const double& other) {
+    if (!isConstant()) {
+        return false;
+    }
+    if (isZero() && other == 0.0) {
+        return true;
+    }
+    return polynomial.begin()->second == other;
+}
+
 // When summing two polynomials
 Poly Poly::operator+(const Poly& other) {
     Poly toReturn;
@@ -164,6 +188,22 @@ Poly& Poly::operator+=(const Poly& other) {
     }
     for (auto& mon : toRemove) {
         polynomial.erase(mon);
+    }
+    return *this;
+}
+
+// When summing in-place with a constant
+Poly& Poly::operator+=(const std::complex<double>& other) {
+    polynomial[Mon()] += other;
+    if (std::abs(polynomial[Mon()]) < zeroTol) {
+        polynomial.erase(Mon());
+    }
+    return *this;
+}
+Poly& Poly::operator+=(const double& other) {
+    polynomial[Mon()] += other;
+    if (std::abs(polynomial[Mon()]) < zeroTol) {
+        polynomial.erase(Mon());
     }
     return *this;
 }
@@ -293,8 +333,7 @@ const size_t Poly::size() const {
 
 // Allow bracket access
 const std::complex<double> Poly::operator[](Mon mon) const {
-    auto it = polynomial.find(mon);
-    return it != polynomial.end() ? it->second : std::complex<double>(0,0);
+    return polynomial.at(mon);
 }
 
 // Allow bracket access
@@ -360,9 +399,13 @@ Poly Poly::reduced() {
     std::vector<Mon> toRemove;
     for (auto& term : polynomial) {
         std::pair<std::complex<double>, Mon> reducedMonomial = term.first.reduce();
-        toReturn.polynomial[reducedMonomial.second] += term.second * reducedMonomial.first;
-        if (std::abs(toReturn.polynomial[reducedMonomial.second]) < zeroTol) {
-            toRemove.push_back(reducedMonomial.second);
+        if (toReturn.polynomial.find(reducedMonomial.second) == toReturn.polynomial.end()) {
+            toReturn.polynomial[reducedMonomial.second] = term.second * reducedMonomial.first;
+        } else {
+            toReturn.polynomial[reducedMonomial.second] += term.second * reducedMonomial.first;
+            if (std::abs(toReturn.polynomial[reducedMonomial.second]) < zeroTol) {
+                toRemove.push_back(reducedMonomial.second);
+            }
         }
     }
     for (auto& mon : toRemove) {
@@ -376,7 +419,13 @@ Poly Poly::reduced() {
 std::ostream& operator<<(std::ostream& os, const Poly& p) {
 
     // Check if it's zero
-    if (p.size() == 0 || (p.isConstant()&& std::abs(p[Mon()]) < zeroTol)) {
+    bool allZero = true;
+    for (auto& term : p.polynomial) {
+        if (std::abs(term.second) > zeroTol) {
+            allZero = false;
+        }
+    }
+    if (allZero) {
         os << "0";
         return os;
     }
@@ -435,43 +484,6 @@ std::ostream& operator<<(std::ostream& os, const Poly& p) {
     // Return the stream
     return os;
 
-}
-
-// Replace a monomial by a monomial in-place
-void Poly::replace(std::pair<char,int> mon, Mon replacement) {
-
-    // For each term in the polynomial
-    Poly pNew;
-    std::vector<Mon> toRemove;
-    for (auto& term : polynomial) {
-
-        // Start with the original
-        Mon newMon = term.first;
-
-        // Replace that monom
-        for (size_t j=0; j<newMon.size(); j++) {
-            if (newMon[j] == mon || (newMon[j].first == mon.first && mon.second == 0)) {
-                newMon.monomial.erase(newMon.begin()+j);
-                newMon.monomial.insert(newMon.begin()+j, replacement.monomial.begin(), replacement.monomial.end());
-                j += replacement.size();
-            }
-        }
-
-        // Add the new term
-        pNew[newMon] += term.second;
-
-    }
-
-    // Add the new terms
-    *this = pNew.reduced();
-
-}
-
-// Replace a monomial by a monomial
-Poly Poly::replaced(std::pair<char,int> mon, Mon replacement) {
-    Poly toReturn = *this;
-    toReturn.replace(mon, replacement);
-    return toReturn;
 }
 
 // Replace a monomial by a polynomial
@@ -544,16 +556,25 @@ void Poly::replace(std::pair<char,int> mon, Poly replacement) {
 }
 
 // Remove any zero terms from this polynomial
-void Poly::clean() {
+void Poly::clean(double tol) {
     std::vector<Mon> toRemove;
     for (auto& term : polynomial) {
-        if (std::abs(term.second) < zeroTol) {
+        if (std::abs(term.second) < tol) {
             toRemove.push_back(term.first);
         }
     }
     for (auto& mon : toRemove) {
         polynomial.erase(mon);
     }
+}
+Poly Poly::cleaned(double tol) const {
+    Poly toReturn;
+    for (auto& term : polynomial) {
+        if (std::abs(term.second) > tol) {
+            toReturn.polynomial[term.first] = term.second;
+        }
+    }
+    return toReturn;
 }
 
 // Replace a monomial by a polynomial
@@ -583,6 +604,43 @@ void Poly::replace(Mon mon, Poly replacement) {
 
 // Replace a monomial by a polynomial
 Poly Poly::replaced(Mon mon, Poly replacement) {
+    Poly toReturn = *this;
+    toReturn.replace(mon, replacement);
+    return toReturn;
+}
+
+// Replace a monomial by a monomial in-place
+void Poly::replace(std::pair<char,int> mon, Mon replacement) {
+
+    // For each term in the polynomial
+    Poly pNew;
+    std::vector<Mon> toRemove;
+    for (auto& term : polynomial) {
+
+        // Start with the original
+        Mon newMon = term.first;
+
+        // Replace that monom
+        for (size_t j=0; j<newMon.size(); j++) {
+            if (newMon[j] == mon || (newMon[j].first == mon.first && mon.second == 0)) {
+                newMon.monomial.erase(newMon.begin()+j);
+                newMon.monomial.insert(newMon.begin()+j, replacement.monomial.begin(), replacement.monomial.end());
+                j += replacement.size();
+            }
+        }
+
+        // Add the new term
+        pNew[newMon] += term.second;
+
+    }
+
+    // Add the new terms
+    *this = pNew.reduced();
+
+}
+
+// Replace a monomial by a monomial
+Poly Poly::replaced(std::pair<char,int> mon, Mon replacement) {
     Poly toReturn = *this;
     toReturn.replace(mon, replacement);
     return toReturn;
@@ -689,6 +747,16 @@ bool Poly::contains(const Mon mon) const {
     return polynomial.find(mon) != polynomial.end();
 }
 
+// Check if a polynomial has a char
+bool Poly::contains(const char letter) const {
+    for (auto& term : polynomial) {
+        if (term.first.contains(letter)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 // If asking for just the first monomial
 std::complex<double>& Poly::getValue() {
     return polynomial.begin()->second;
@@ -715,9 +783,12 @@ std::complex<double> Poly::eval(std::vector<std::pair<Mon, std::complex<double>>
 // Evaluate, given a list of variables and values
 std::complex<double> Poly::eval(std::map<Mon, std::complex<double>>& vals) {
     std::complex<double> toReturn = 0;
-    vals[Mon()] = 1;
     for (auto& term : polynomial) {
-        toReturn += term.second * vals[term.first];
+        if (term.first.isConstant()) {
+            toReturn += term.second;
+        } else {
+            toReturn += term.second * vals[term.first];
+        }
     }
     return toReturn;
 }
@@ -757,6 +828,11 @@ bool Poly::isConstant() const {
     return polynomial.size() == 0 || (polynomial.size() == 1 && polynomial.find(Mon()) != polynomial.end());
 }
 
+// Check if the polynomial is constant
+bool Poly::isZero() const {
+    return cleaned().size() == 0;
+}
+
 // Apply a monomial map
 Poly Poly::applyMap(std::map<Mon, Mon> map) {
     Poly toReturn;
@@ -786,5 +862,11 @@ Poly operator*(const Mon& mon, const Poly& p) {
     return toReturn;
 }
 
-
+// Mon multiplied by a complex number makes a poly
+Poly operator*(const Mon& mon, const std::complex<double>& coeff) {
+    return Poly(coeff, mon);
+}
+Poly operator*(const std::complex<double>& coeff, const Mon& mon) {
+    return Poly(coeff, mon);
+}
 
