@@ -3,6 +3,7 @@
 #include <vector>
 #include <complex>
 #include <set>
+#include <chrono>
 #include <map>
 
 // Import OpenMP
@@ -56,6 +57,7 @@ int main(int argc, char* argv[]) {
     int numQubits = 1;
     int gridWidth = 1;
     int gridHeight = 1;
+    double tol = 1e-7;
     Poly objective("<Z1>");
     int verbosity = 1;
     std::string solver = "auto";
@@ -114,6 +116,11 @@ int main(int argc, char* argv[]) {
             for (int i=1; i<=numQubits; i++) {
                 objective += Poly(1.0/numQubits, "<Z" + std::to_string(i) + ">");
             }
+
+        // Setting the tolerance
+        } else if (argAsString == "-t") {
+            tol = std::stod(argv[i+1]);
+            i++;
 
         // Pauli Limbladian
         } else if (argAsString == "--pauli") {
@@ -278,7 +285,7 @@ int main(int argc, char* argv[]) {
             limbladian += Poly(-0.5*gamma_c_minus, "<P2M2A0>");
             limbladian.convertToPaulis();
 
-        // 2D Limbladian test TODO
+        // 2D Limbladian test
         } else if (argAsString == "--2d") {
 
             // Defining quantities
@@ -396,7 +403,7 @@ int main(int argc, char* argv[]) {
             limbladian.clean();
             limbladian.convertToPaulis();
 
-        // The Limbladian from David TODO
+        // The Limbladian from David
         } else if (argAsString == "--david" || argAsString == "--davidr") {
 
             // Parameters
@@ -451,6 +458,9 @@ int main(int argc, char* argv[]) {
             limbladian.reduce();
 
         // The Limbladian from David but 2D TODO
+        // ./run --david2d 0.5 2 5 -M 0
+        // with map gen =  47 s   mem = 1.0%   val = -0.391376
+        // with hash gen = 41.1s  mem = 1.0%   val = -0.391376 
         } else if (argAsString == "--david2d" || argAsString == "--david2dr") {
 
             // Parameters
@@ -757,6 +767,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  -v <int>        Verbosity level" << std::endl;
             std::cout << "  -C <int>        Number of cores to use" << std::endl;
             std::cout << "  -c <int>        Add some number of extra constraints to reduce the num of vars" << std::endl;
+            std::cout << "  -t <dbl>        Set the tolerance (used in various places)" << std::endl;
             std::cout << "Solver options:" << std::endl;
             std::cout << "  -s G            Use Gurobi as the solver" << std::endl;
             std::cout << "  -s E            Use Eigen as the solver" << std::endl;
@@ -795,6 +806,9 @@ int main(int argc, char* argv[]) {
 
         }
     }
+
+    // Start a timer
+    std::chrono::steady_clock::time_point timeFinishedArgs = std::chrono::steady_clock::now();
 
     // Create the Limbladian applied to many different operators
     std::vector<std::vector<std::vector<Poly>>> momentMatrices = {};
@@ -856,7 +870,6 @@ int main(int argc, char* argv[]) {
             } else {
                 findMinimalAmount = std::pow(4, numQubits)/2 - 1;
             }
-
             std::cout << "Auto setting constraint limit to: " << findMinimalAmount << std::endl;
         }
 
@@ -866,6 +879,8 @@ int main(int argc, char* argv[]) {
             // Add constraints based on the monomials we already have
             std::set<Mon> monomsInConstraints;
             std::vector<Mon> queue;
+            queue.push_back(Mon());
+            monomsInConstraints.insert(Mon());
             for (auto& term : objective) {
                 if (!monomsInConstraints.count(term.first)) {
                     monomsInConstraints.insert(term.first);
@@ -896,7 +911,7 @@ int main(int argc, char* argv[]) {
                 std::cout << constraintsZero.size() << " / " << findMinimalAmount << " (" << ratio << ")        \r" << std::flush;
 
                 // Stop if we're fully constrained
-                if (monomsInConstraints.size()-1 == constraintsZero.size() && constraintsZero.size() > 1) {
+                if (monomsInConstraints.size()-1 == constraintsZero.size() && constraintsZero.size() > 2) {
                     break;
                 }
 
@@ -943,10 +958,14 @@ int main(int argc, char* argv[]) {
                     constraintsZero.push_back(newConstraint); 
                 }
                 monomsUsed.insert(monToAdd);
+                std::set<Mon> newTerms;
                 for (auto& term : newConstraint) {
-                    if (!monomsInConstraints.count(term.first)) {
-                        monomsInConstraints.insert(term.first);
-                        queue.push_back(term.first);
+                    newTerms.insert(term.first);
+                }
+                for (auto& term : newTerms) {
+                    if (!monomsInConstraints.count(term)) {
+                        monomsInConstraints.insert(term);
+                        queue.push_back(term);
                     }
                 }
 
@@ -972,6 +991,8 @@ int main(int argc, char* argv[]) {
             // First try adding constraints until it's exact
             std::set<Mon> monomsInConstraints;
             std::vector<Mon> queue;
+            queue.push_back(Mon());
+            monomsInConstraints.insert(Mon());
             for (auto& term : objective) {
                 if (!monomsInConstraints.count(term.first)) {
                     monomsInConstraints.insert(term.first);
@@ -1206,6 +1227,9 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    // Timing
+    std::chrono::steady_clock::time_point timeFinishedGeneration = std::chrono::steady_clock::now();
+
     // If removing constraints
     if (tryRemove) {
 
@@ -1239,7 +1263,7 @@ int main(int argc, char* argv[]) {
                 std::cout << "Removed " << i << ", diff: " << diff << std::endl;
 
                 // If it's better, remove it
-                if (diff <= currentBoundDiff + 1e-9) {
+                if (diff <= tol) {
                     std::cout << "Removing constraint " << i << std::endl;
                     constraintsZeroCopy.erase(constraintsZeroCopy.begin() + i);
                     removedSomething = true;
@@ -1353,6 +1377,15 @@ int main(int argc, char* argv[]) {
             std::cout << "Known ideal: " << knownIdeal << std::endl;
             std::cout << "Error: " << 100*(upperBound-lowerBound)/knownIdeal << "%" << std::endl;
         }
+    }
+
+    // Timing
+    std::chrono::steady_clock::time_point timeFinishedSolving = std::chrono::steady_clock::now();
+
+    // Output the timings
+    if (verbosity >= 1) { 
+        std::cout << "Time to generate: " << std::chrono::duration_cast<std::chrono::milliseconds>(timeFinishedGeneration - timeFinishedArgs).count() / 1000.0 << "s" << std::endl;
+        std::cout << "Time to solve: " << std::chrono::duration_cast<std::chrono::milliseconds>(timeFinishedSolving - timeFinishedGeneration).count() / 1000.0 << "s" << std::endl;
     }
 
     // Exit without errors

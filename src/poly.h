@@ -1,13 +1,19 @@
 #pragma once
-#include <map>
 #include "mon.h"
+#include "settings.h"
+#include <map>
+#include <unordered_map>
+
+// Whether to use a map or an unordered_map
+//typedef std::map<Mon, std::complex<double>> MapType;
+typedef std::unordered_map<Mon, std::complex<double>> MapType;
 
 // Non-commuting polynomial class
 class Poly {
 public:
 
     // Vars
-    std::map<Mon, std::complex<double>> polynomial;
+    MapType polynomial;
     int verbosity = 1;
 
     // If initialized from nothing
@@ -20,7 +26,7 @@ public:
     Poly(Mon mon);
 
     // If initialized from a vector
-    Poly (std::map<Mon, std::complex<double>> poly);
+    Poly (MapType poly);
 
     // If initialized from a single coeff + monomial
     Poly(std::pair<std::complex<double>, Mon> pair);
@@ -39,7 +45,7 @@ public:
     Poly(std::string asString);
 
     // When assigning manually with a vector
-    Poly& operator=(const std::map<Mon, std::complex<double>>& poly);
+    Poly& operator=(const MapType& poly);
 
     // Check equality with a number
     bool operator==(const std::complex<double>& other);
@@ -98,10 +104,10 @@ public:
     Mon getKey();
 
     // Iterators
-    std::map<Mon,std::complex<double>>::iterator begin() {return polynomial.begin();}
-    std::map<Mon,std::complex<double>>::iterator end()   {return polynomial.end();}
-    std::map<Mon,std::complex<double>>::const_iterator begin() const {return polynomial.begin();}
-    std::map<Mon,std::complex<double>>::const_iterator end() const {return polynomial.end();}
+    MapType::iterator begin() {return polynomial.begin();}
+    MapType::iterator end()   {return polynomial.end();}
+    MapType::const_iterator begin() const {return polynomial.begin();}
+    MapType::const_iterator end() const {return polynomial.end();}
 
     // Self-negative
     Poly operator-();

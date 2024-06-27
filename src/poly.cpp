@@ -20,7 +20,7 @@ Poly::Poly(Mon mon) {
 }
 
 // If initialized from a map
-Poly::Poly (std::map<Mon, std::complex<double>> poly) {
+Poly::Poly (MapType poly) {
     polynomial = polynomial;
 }
 
@@ -60,7 +60,7 @@ Poly::Poly(std::string asString) {
     asString = newString;
 
     // Iterate through the string
-    std::map<Mon, std::complex<double>> toReturn;
+    MapType toReturn;
     std::string currentCoefficient;
     std::string currentMonomial;
     for (size_t i=0; i<asString.size(); i++) {
@@ -119,7 +119,7 @@ Poly::Poly(std::string asString) {
 }
 
 // When assigning manually with a vector
-Poly& Poly::operator=(const std::map<Mon, std::complex<double>>& other) {
+Poly& Poly::operator=(const MapType& other) {
     polynomial = other;
     return *this;
 }
@@ -369,50 +369,26 @@ Poly Poly::dagger() const {
 }
 
 // Reduce each monomial and combine
-void Poly::reduce() {
-
-    // Apply the reduction to each term
-    std::vector<Mon> toRemove;
-    Poly toReturn;
-    for (auto& term : polynomial) {
-        std::pair<std::complex<double>, Mon> reducedMonomial = term.first.reduce();
-        if (toReturn.polynomial.find(reducedMonomial.second) == toReturn.polynomial.end()) {
-            toReturn.polynomial[reducedMonomial.second] = term.second * reducedMonomial.first;
-        } else {
-            toReturn.polynomial[reducedMonomial.second] += term.second * reducedMonomial.first;
-            if (std::abs(toReturn.polynomial[reducedMonomial.second]) < zeroTol) {
-                toRemove.push_back(reducedMonomial.second);
-            }
-        }
-    }
-    for (auto& mon : toRemove) {
-        toReturn.polynomial.erase(mon);
-    }
-    *this = toReturn;
-}
-
-// Reduce each monomial and combine
 Poly Poly::reduced() {
 
     // Apply the reduction to each term
     Poly toReturn;
-    std::vector<Mon> toRemove;
     for (auto& term : polynomial) {
         std::pair<std::complex<double>, Mon> reducedMonomial = term.first.reduce();
-        if (toReturn.polynomial.find(reducedMonomial.second) == toReturn.polynomial.end()) {
+        if (!toReturn.polynomial.count(reducedMonomial.second)) {
             toReturn.polynomial[reducedMonomial.second] = term.second * reducedMonomial.first;
         } else {
             toReturn.polynomial[reducedMonomial.second] += term.second * reducedMonomial.first;
-            if (std::abs(toReturn.polynomial[reducedMonomial.second]) < zeroTol) {
-                toRemove.push_back(reducedMonomial.second);
-            }
         }
     }
-    for (auto& mon : toRemove) {
-        toReturn.polynomial.erase(mon);
-    }
+    toReturn.clean();
     return toReturn;
 
+}
+
+// Reduce each monomial and combine
+void Poly::reduce() {
+    *this = reduced();
 }
 
 // Pretty print
@@ -430,8 +406,14 @@ std::ostream& operator<<(std::ostream& os, const Poly& p) {
         return os;
     }
 
-    // Iterate through the polynomial
+    // Put it in order
+    std::map<Mon, std::complex<double>> ordered;
     for (auto& term : p.polynomial) {
+        ordered[term.first] = term.second;
+    }
+
+    // Iterate through the polynomial
+    for (auto& term : ordered) {
         double realPart = term.second.real();
         double imagPart = term.second.imag();
         if (std::abs(realPart) > zeroTol || std::abs(imagPart) > zeroTol) {

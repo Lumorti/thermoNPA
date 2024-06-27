@@ -389,5 +389,17 @@ bool Mon::contains(char letter) const {
     return false;
 }
 
+// Hash function
+//template <>
+//struct std::hash<Mon> {
+    //std::size_t operator()(const Mon& m) const {
+        //std::size_t seed = 0;
+        //for (size_t i=0; i<m.size(); i++) {
+            //seed ^= std::hash<char>{}(m[i].first) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+            //seed ^= std::hash<int>{}(m[i].second) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+        //}
+        //return seed;
+    //}
+//};
 
     
