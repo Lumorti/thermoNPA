@@ -1,4 +1,5 @@
 #include "poly.h"
+#include "utils.h"
 #include <algorithm>
 #include <iostream>
 
@@ -206,6 +207,13 @@ Poly& Poly::operator+=(const double& other) {
         polynomial.erase(Mon());
     }
     return *this;
+}
+
+// Randomize a poly
+void Poly::randomize(double lower, double upper) {
+    for (auto& term : polynomial) {
+        term.second = rand(lower, upper);
+    }
 }
 
 // When subtracting two polynomials

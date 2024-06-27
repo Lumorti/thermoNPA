@@ -61,7 +61,7 @@ std::pair<double,double> boundGurobi(Poly obj, std::vector<Poly> constraintsZero
     }
 
     // Set the method (-1 is automatic, 2 is barrier)
-    model.set(GRB_IntParam_Method, 2);
+    model.set(GRB_IntParam_Method, -1);
 
     // Maximize objective
     model.setObjective(expr, GRB_MAXIMIZE);

@@ -86,6 +86,10 @@ public:
     // Check if contains a specific letter
     bool contains(char letter) const;
 
+    // Get the sub-monomial
+    Mon first(int n) const;
+    Mon last(int n) const;
+
 };
 
 // Hash function for monomials

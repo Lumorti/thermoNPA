@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
     std::string solver = "auto";
     std::complex<double> knownIdeal = 0.0;
     bool idealIsKnown = false;
-    bool findMinimal = true;
+    bool findMinimal = false;
     bool tryRemove = false;
     int autoMomentAmount = 0;
     int findMinimalAmount = 0;
@@ -419,20 +419,14 @@ int main(int argc, char* argv[]) {
             // The Hamiltonian
             // H = \sum_i <X{i}X{i+1}> + g * \sum_i <Zi>
             Poly H;
+            for (int i=1; i<=numQubits; i++) {
+                H += Poly(g, "<Z" + std::to_string(i) + ">");
+            }
+            for (int i=1; i<numQubits; i++) {
+                H += Poly(1, "<X" + std::to_string(i) + "X" + std::to_string(i+1) + ">");
+            }
             if (argAsString == "--davidr") {
-                for (int i=1; i<=numQubits; i++) {
-                    H += Poly(rand(-1.0, 1.0), "<Z" + std::to_string(i) + ">");
-                }
-                for (int i=1; i<numQubits; i++) {
-                    H += Poly(rand(-1.0, 1.0), "<X" + std::to_string(i) + "X" + std::to_string(i+1) + ">");
-                }
-            } else {
-                for (int i=1; i<=numQubits; i++) {
-                    H += Poly(g, "<Z" + std::to_string(i) + ">");
-                }
-                for (int i=1; i<numQubits; i++) {
-                    H += Poly(1, "<X" + std::to_string(i) + "X" + std::to_string(i+1) + ">");
-                }
+                H.randomize();
             }
 
             // The jump operators
@@ -457,10 +451,7 @@ int main(int argc, char* argv[]) {
             limbladian.cycleToAndRemove('R', 1);
             limbladian.reduce();
 
-        // The Limbladian from David but 2D TODO
-        // ./run --david2d 0.5 2 5 -M 0
-        // with map gen =  47 s   mem = 1.0%   val = -0.391376
-        // with hash gen = 41.1s  mem = 1.0%   val = -0.391376 
+        // The Limbladian from David but 2D
         } else if (argAsString == "--david2d" || argAsString == "--david2dr") {
 
             // Parameters
@@ -479,11 +470,7 @@ int main(int argc, char* argv[]) {
             // H = \sum_nn <X{i}X{j}> + g * \sum_i <Zi>
             Poly H;
             for (int i=1; i<=numQubits; i++) {
-                if (argAsString == "--david2dr") {
-                    H += Poly(rand(-1.0, 1.0), "<Z" + std::to_string(i) + ">");
-                } else {
-                    H += Poly(g, "<Z" + std::to_string(i) + ">");
-                }
+                H += Poly(g, "<Z" + std::to_string(i) + ">");
             }
             for (int i=1; i<=numQubits; i++) {
 
@@ -495,23 +482,20 @@ int main(int argc, char* argv[]) {
                 // The qubit to the right
                 if (xLoc < gridWidth-1) {
                     int otherInd = xLoc+1 + yLoc*gridWidth + 1;
-                    if (argAsString == "--david2dr") {
-                        H += Poly(rand(-1.0, 1.0), "<X" + std::to_string(i) + "X" + std::to_string(otherInd) + ">");
-                    } else {
-                        H += Poly(1, "<X" + std::to_string(i) + "X" + std::to_string(otherInd) + ">");
-                    }
+                    H += Poly(1, "<X" + std::to_string(i) + "X" + std::to_string(otherInd) + ">");
                 }
 
                 // The qubit below
                 if (yLoc < gridHeight-1) {
                     int otherInd = xLoc + (yLoc+1)*gridWidth + 1;
-                    if (argAsString == "--david2dr") {
-                        H += Poly(rand(-1.0, 1.0), "<X" + std::to_string(i) + "X" + std::to_string(otherInd) + ">");
-                    } else {
-                        H += Poly(1, "<X" + std::to_string(i) + "X" + std::to_string(otherInd) + ">");
-                    }
+                    H += Poly(1, "<X" + std::to_string(i) + "X" + std::to_string(otherInd) + ">");
                 }
 
+            }
+
+            // Randomize the Hamiltonian if asked to
+            if (argAsString == "--david2dr") {
+                H.randomize();
             }
 
             // Output the Hamiltonian
@@ -545,6 +529,69 @@ int main(int argc, char* argv[]) {
                     if (verbosity >= 2) {
                         std::cout << "Connecting " << (i+1) << " to the bath" << std::endl;
                     }
+                    limbladian += 0.5 * (2 * Gamma_k[i] * rho * Gamma_k[i].dagger() - Gamma_k[i].dagger() * Gamma_k[i] * rho - rho * Gamma_k[i].dagger() * Gamma_k[i]);
+                }
+            }
+            limbladian = Poly("<A0>") * limbladian;
+            limbladian.cycleToAndRemove('R', 1);
+            limbladian.reduce();
+
+        // A 1.5D chain TODO
+        } else if (argAsString == "--1.5d" || argAsString == "--1.5dr") {
+
+            // Parameters
+            double g = std::stod(argv[i+1]);
+            numQubits = std::stoi(argv[i+2]);
+            i+=2;
+            double gamma_h = 1.0;
+            double gamma_c = 0.5;
+
+            // Make sure it's odd
+            if (numQubits % 2 == 0) {
+                std::cout << "Error - Number of qubits must be odd" << std::endl;
+                return 1;
+            }
+
+            // Construct the objective as a polynomial
+            objective = Poly("<Z1>");
+
+            // The Hamiltonian
+            // H = \sum_i <X{i}X{i+1}> + g * \sum_i <Zi>
+            Poly H;
+            for (int i=1; i<=numQubits; i++) {
+                H += Poly(g, "<Z" + std::to_string(i) + ">");
+            }
+            for (int i=1; i<numQubits-1; i+=2) {
+                H += Poly(1, "<X" + std::to_string(i) + "X" + std::to_string(i+2) + ">");
+            }
+            for (int i=2; i<numQubits; i+=2) {
+                H += Poly(1, "<X" + std::to_string(i) + "X" + std::to_string(i-1) + ">");
+                H += Poly(1, "<X" + std::to_string(i) + "X" + std::to_string(i+1) + ">");
+            }
+            if (argAsString == "--1.5dr") {
+                H.randomize(-1, 1);
+            }
+
+            // Output the Hamiltonian
+            if (verbosity >= 2) {
+                std::cout << "Hamiltonian: " << H << std::endl;
+            }
+
+            // The jump operators
+            std::vector<Poly> Gamma_k(numQubits);
+            for (int i=1; i<=numQubits; i++) {
+                Gamma_k[i-1] = Poly("<X" + std::to_string(i) + ">") - imag*Poly("<Y" + std::to_string(i) + ">");
+                Gamma_k[i-1] /= 2.0;
+            }
+            Gamma_k[0] *= std::sqrt(gamma_h);
+            Gamma_k[numQubits-1] *= std::sqrt(gamma_c);
+
+            // The full Limbladian
+            // -i[H, rho] + \sum_k 0.5 * (2*gamma_h * Gamma_k rho Gamma_k^dagger - Gamma_k^dagger Gamma_k rho - rho Gamma_k^dagger Gamma_k)
+            Poly rho("<R1>");
+            limbladian = -imag*H.commutator(rho);
+            for (int i=0; i<numQubits; i++) {
+                if (i == 0 || i == numQubits-1) {
                     limbladian += 0.5 * (2 * Gamma_k[i] * rho * Gamma_k[i].dagger() - Gamma_k[i].dagger() * Gamma_k[i] * rho - rho * Gamma_k[i].dagger() * Gamma_k[i]);
                 }
             }
@@ -972,9 +1019,24 @@ int main(int argc, char* argv[]) {
             }
 
             // Generate the moment matrix from the monomsUsed TODO
+            // ./run --tensor 12 -M 1000 -A 50
+            // -0.929473  <  -0.405878      39.2103%
             if (autoMomentAmount > 0) {
+
                 std::vector<Poly> topRow = {Poly(1)};
                 int added = 0;
+
+                // Add the first used monoms to the top row
+                //for (auto& mon : monomsUsed) {
+                    //topRow.push_back(Poly(mon));
+                    //added++;
+                    //if (added >= autoMomentAmount) {
+                        //break;
+                    //}
+                //}
+                
+                // Add the first used monoms to the top row, checking they aren't already there
+                // TODO
                 for (auto& mon : monomsUsed) {
                     topRow.push_back(Poly(mon));
                     added++;
@@ -982,7 +1044,62 @@ int main(int argc, char* argv[]) {
                         break;
                     }
                 }
+
+                // Add the most common moments in the top row
+                //std::map<Mon,int> monomsUsedCount;
+                //for (auto& mon : monomsUsed) {
+                    //for (auto& poly : constraintsZero) {
+                        //if (poly.contains(mon)) {
+                            //monomsUsedCount[mon]++;
+                        //}
+                    //}
+                //}
+                //std::vector<Mon> monomsUsedSorted;
+                //for (auto& mon : monomsUsedCount) {
+                    //monomsUsedSorted.push_back(mon.first);
+                //}
+                //std::sort(monomsUsedSorted.begin(), monomsUsedSorted.end(), [&monomsUsedCount](Mon a, Mon b) {
+                    //return monomsUsedCount[a] > monomsUsedCount[b];
+                //});
+                //for (auto& mon : monomsUsedSorted) {
+                    //topRow.push_back(Poly(mon));
+                    //added++;
+                    //if (added >= autoMomentAmount) {
+                        //break;
+                    //}
+                //}
+
+                // Add first order moments to the top, split bigger ones
+                //for (auto& mon : monomsUsed) {
+                    //if (mon.size() <= 2) {
+                        //Poly toAdd = Poly(mon);
+                        //if (std::find(topRow.begin(), topRow.end(), toAdd) == topRow.end()) {
+                            //topRow.push_back(Poly(toAdd));
+                            //added++;
+                        //}
+                        //if (added >= autoMomentAmount) {
+                            //break;
+                        //}
+                    //} else {
+                        //int monSize = mon.size();
+                        //Poly toAdd1 = Poly(mon.first(monSize/2));
+                        //Poly toAdd2 = Poly(mon.last(monSize-(monSize/2)));
+                        //if (std::find(topRow.begin(), topRow.end(), toAdd1) == topRow.end()) {
+                            //topRow.push_back(Poly(toAdd1));
+                            //added++;
+                        //}
+                        //if (std::find(topRow.begin(), topRow.end(), toAdd2) == topRow.end()) {
+                            //topRow.push_back(Poly(toAdd2));
+                            //added++;
+                        //}
+                        //if (added >= autoMomentAmount) {
+                            //break;
+                        //}
+                    //}
+                //}
+
                 momentMatrices = {generateFromTopRow(topRow, verbosity)};
+
             }
 
         // If a value not given, binary search
@@ -1376,6 +1493,9 @@ int main(int argc, char* argv[]) {
         if (idealIsKnown) {
             std::cout << "Known ideal: " << knownIdeal << std::endl;
             std::cout << "Error: " << 100*(upperBound-lowerBound)/knownIdeal << "%" << std::endl;
+        } else if (upperBound * lowerBound > 0) {
+            knownIdeal = (upperBound + lowerBound) / 2;
+            std::cout << "Averaged: " << knownIdeal << " +/- " << 100*(upperBound-lowerBound)/std::abs(2*knownIdeal) << "%" << std::endl;
         }
     }
 

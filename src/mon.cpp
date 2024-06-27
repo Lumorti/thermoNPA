@@ -389,17 +389,21 @@ bool Mon::contains(char letter) const {
     return false;
 }
 
-// Hash function
-//template <>
-//struct std::hash<Mon> {
-    //std::size_t operator()(const Mon& m) const {
-        //std::size_t seed = 0;
-        //for (size_t i=0; i<m.size(); i++) {
-            //seed ^= std::hash<char>{}(m[i].first) + 0x9e3779b9 + (seed<<6) + (seed>>2);
-            //seed ^= std::hash<int>{}(m[i].second) + 0x9e3779b9 + (seed<<6) + (seed>>2);
-        //}
-        //return seed;
-    //}
-//};
+// Get the first n parts of the monomial
+Mon Mon::first(int n) const {
+    Mon toReturn;
+    for (int i=0; i<n; i++) {
+        toReturn.monomial.push_back(monomial[i]);
+    }
+    return toReturn;
+}
 
-    
+// Get the last n parts of the monomial
+Mon Mon::last(int n) const {
+    Mon toReturn;
+    for (int i=int(monomial.size())-n; i<int(monomial.size()); i++) {
+        toReturn.monomial.push_back(monomial[i]);
+    }
+    return toReturn;
+}
+   

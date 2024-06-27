@@ -75,6 +75,9 @@ public:
     // When multiplying in-place
     Poly& operator*=(const Poly& other);
 
+    // Randomise a poly
+    void randomize(double lower=-1, double upper=1);
+
     // When multiplying by a constant
     Poly operator*(const std::complex<double>& other);
     friend Poly operator*(const std::complex<double>& other, const Poly& p);
