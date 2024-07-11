@@ -346,6 +346,27 @@ void addVariables(std::set<Mon>& variables, std::vector<std::vector<Poly>> toAdd
 
 }
 
+// Add variables from a list of polynomials
+void addVariables(std::set<Mon>& variables, std::vector<Poly> toAdd) {
+
+    // Iterative through the matrix
+    for (size_t i=0; i<toAdd.size(); i++) {
+
+        // Iterate through the polynomial
+        for (auto& term : toAdd[i]) {
+            Mon currentMonomial(term.first);
+
+            // If it's not in the list, add it
+            if (!variables.count(currentMonomial)) {
+                variables.insert(currentMonomial);
+            }
+
+        }
+
+    }
+
+}
+
 // Add variables from a polynomial
 void addVariables(std::set<Mon>& variables, Poly toAdd) {
 

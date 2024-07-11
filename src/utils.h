@@ -27,6 +27,9 @@ std::vector<std::vector<std::vector<Poly>>> generateAllMomentMatrices(const Poly
 // Add variables from a moment matrix
 void addVariables(std::set<Mon>& variables, std::vector<std::vector<Poly>> toAdd);
 
+// Add variables from a list of polynomial
+void addVariables(std::set<Mon>& variables, std::vector<Poly> toAdd);
+
 // Add variables from a polynomial
 void addVariables(std::set<Mon>& variables, Poly toAdd);
 

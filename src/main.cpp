@@ -19,6 +19,7 @@
 #include "utils.h"
 #include "optMOSEK.h"
 #include "optGurobi.h"
+#include "optSCS.h"
  
 // https://stackoverflow.com/questions/2647858/multiplying-complex-with-constant-in-c
 template <typename T>
@@ -73,6 +74,7 @@ int main(int argc, char* argv[]) {
     std::vector<std::string> extraMonomials;
     std::vector<std::string> extraMonomialsLim;
     std::vector<Poly> constraintsZero;
+    std::vector<std::pair<std::vector<int>,std::vector<int>>> symmetries;
 
     // The max physical cores
     int numCores = omp_get_max_threads();
@@ -778,6 +780,8 @@ int main(int argc, char* argv[]) {
                 solver = "gurobi";
             } else if (argv[i+1][0] == 'E') {
                 solver = "eigen";
+            } else if (argv[i+1][0] == 'S') {
+                solver = "scs";
             } else if (argv[i+1][0] == 'M') {
                 solver = "mosek";
             } else if (argv[i+1][0] == 'N') {
@@ -799,6 +803,34 @@ int main(int argc, char* argv[]) {
             numCores = std::stoi(argv[i+1]);
             i++;
 
+        // If adding a symmetry
+        } else if (argAsString == "-y") {
+            std::vector<int> group1;
+            std::vector<int> group2;
+            std::string groupAsString1 = std::string(argv[i+1]);
+            std::string groupAsString2 = std::string(argv[i+2]);
+            i+=2;
+            std::string toConvert = "";
+            for (size_t j=0; j<groupAsString1.size(); j++) {
+                if (groupAsString1[j] != ',') {
+                    toConvert += groupAsString1[j];
+                }
+                if (groupAsString1[j] == ',' || j == groupAsString1.size()-1) {
+                    group1.push_back(std::stoi(toConvert));
+                    toConvert = "";
+                }
+            }
+            for (size_t j=0; j<groupAsString2.size(); j++) {
+                if (groupAsString2[j] != ',') {
+                    toConvert += groupAsString2[j];
+                }
+                if (groupAsString2[j] == ',' || j == groupAsString2.size()-1) {
+                    group2.push_back(std::stoi(toConvert));
+                    toConvert = "";
+                }
+            }
+            symmetries.push_back({group1, group2});
+
         // Output the help
         } else if (argAsString == "-h" || argAsString == "--help") {
             std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
@@ -815,10 +847,12 @@ int main(int argc, char* argv[]) {
             std::cout << "  -C <int>        Number of cores to use" << std::endl;
             std::cout << "  -c <int>        Add some number of extra constraints to reduce the num of vars" << std::endl;
             std::cout << "  -t <dbl>        Set the tolerance (used in various places)" << std::endl;
+            std::cout << "  -y <ints>       Add a symetry between two groups e.g. -y 1,2 3,4" << std::endl;
             std::cout << "Solver options:" << std::endl;
             std::cout << "  -s G            Use Gurobi as the solver" << std::endl;
             std::cout << "  -s E            Use Eigen as the solver" << std::endl;
             std::cout << "  -s M            Use MOSEK as the solver" << std::endl;
+            std::cout << "  -s S            Use SCS as the solver" << std::endl;
             std::cout << "  -s N            Don't solve after generating" << std::endl;
             std::cout << "Objective options:" << std::endl;
             std::cout << "  -O --obj <str>  Manually set the objective" << std::endl;
@@ -1023,20 +1057,15 @@ int main(int argc, char* argv[]) {
             // -0.929473  <  -0.405878      39.2103%
             if (autoMomentAmount > 0) {
 
-                std::vector<Poly> topRow = {Poly(1)};
-                int added = 0;
+                // Remove the first 10
+                //monomsUsed.erase(monomsUsed.begin(), monomsUsed.begin()+10);
+                //std::erase(monomsUsed, monomsUsed.begin(), monomsUsed.begin()+10);
+                // need to use advance
+                //monomsUsed.erase(monomsUsed.begin(), std::next(monomsUsed.begin(), 10));
 
                 // Add the first used monoms to the top row
-                //for (auto& mon : monomsUsed) {
-                    //topRow.push_back(Poly(mon));
-                    //added++;
-                    //if (added >= autoMomentAmount) {
-                        //break;
-                    //}
-                //}
-                
-                // Add the first used monoms to the top row, checking they aren't already there
-                // TODO
+                std::vector<Poly> topRow = {Poly(1)};
+                int added = 0;
                 for (auto& mon : monomsUsed) {
                     topRow.push_back(Poly(mon));
                     added++;
@@ -1044,6 +1073,25 @@ int main(int argc, char* argv[]) {
                         break;
                     }
                 }
+                
+                // Add the first used monoms to the top row, checking they aren't already there
+                //std::set<Mon> monomsInMatrix = {Mon()};
+                //for (auto& mon : monomsUsed) {
+                    //std::cout << "new monom: " << mon << std::endl;
+                    //if (!monomsInMatrix.count(mon)) {
+                        //std::cout << "adding" << std::endl;
+                        //topRow.push_back(Poly(mon));
+                        //std::vector<std::vector<Poly>> momentMatrixTemp = generateFromTopRow(topRow, verbosity);
+                        //std::cout << momentMatrixTemp << std::endl;
+                        //addVariables(monomsInMatrix, momentMatrixTemp);
+                        //added++;
+                        //if (added >= autoMomentAmount) {
+                            //break;
+                        //}
+                    //} else {
+                        //std::cout << "skipping" << std::endl;
+                    //}
+                //}
 
                 // Add the most common moments in the top row
                 //std::map<Mon,int> monomsUsedCount;
@@ -1344,6 +1392,79 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    // Add symmetries TODO
+    std::set<Mon> vars;
+    for (size_t i=0; i<momentMatrices.size(); i++) {
+        addVariables(vars, momentMatrices[i]);
+    }
+    addVariables(vars, constraintsZero);
+    std::map<Mon,Mon> symmetriesMap;
+    for (auto sym : symmetries) {
+        
+        // If verbose, output the symmetry
+        if (verbosity >= 1) {
+            std::cout << "Adding symmetry between " << sym.first << " and " << sym.second << std::endl;
+        }
+
+        // Handy dandy maps
+        std::map<int,int> from2to1;
+        std::map<int,int> from1to2;
+        for (size_t i=0; i<sym.first.size(); i++) {
+            from2to1[sym.second[i]] = sym.first[i];
+            from1to2[sym.first[i]] = sym.second[i];
+        }
+
+        // For each monomial used
+        for (auto& mon : vars) {
+
+            // Check if the monomial only contains things in the group
+            bool allInGroup = true;
+            for (auto& term : mon) {
+                if (!from1to2.count(term.second) && !from2to1.count(term.second)) {
+                    allInGroup = false;
+                    break;
+                }
+            }
+
+            // Try swapping and see if it's lexically smaller
+            if (allInGroup) {
+                Mon newMon;
+                for (auto& term : mon) {
+                    if (from1to2.count(term.second)) {
+                        newMon.monomial.push_back({term.first, from1to2[term.second]});
+                    } else {
+                        newMon.monomial.push_back({term.first, from2to1[term.second]});
+                    }
+                    
+                }
+                if (newMon < mon) {
+                    symmetriesMap[mon] = newMon;
+                    if (verbosity >= 3) {
+                        std::cout << mon << " -> " << newMon << std::endl;
+                    }
+                }
+            }
+
+        }
+
+    }
+
+    // Replace everything using symmetries
+    for (auto sym : symmetriesMap) {
+        constraintsZero.push_back(Poly(sym.first)-Poly(sym.second));
+    }
+    //for (size_t i=0; i<momentMatrices.size(); i++) {
+        //for (size_t j=0; j<momentMatrices[i].size(); j++) {
+            //for (size_t k=0; k<momentMatrices[i][j].size(); k++) {
+                //momentMatrices[i][j][k] = momentMatrices[i][j][k].applyMap(symmetriesMap);
+            //}
+        //}
+    //}
+    //for (size_t i=0; i<constraintsZero.size(); i++) {
+        //constraintsZero[i] = constraintsZero[i].applyMap(symmetriesMap);
+    //}
+    //objective = objective.applyMap(symmetriesMap);
+
     // Timing
     std::chrono::steady_clock::time_point timeFinishedGeneration = std::chrono::steady_clock::now();
 
@@ -1355,37 +1476,62 @@ int main(int argc, char* argv[]) {
         double currentBoundDiff = boundsStart.second - boundsStart.first;
         std::cout << "Original diff: " << currentBoundDiff << std::endl;
         std::vector<Poly> constraintsZeroCopy = constraintsZero;
+        std::vector<std::vector<std::vector<Poly>>> momentMatricesCopy = momentMatrices;
 
         // Per pass
         for (int l=0; l<100; l++) {
             bool removedSomething = false;
             
-            // Check each constraint
-            for (size_t i=0; i<constraintsZero.size(); i++) {
+            // Check each linear constraint
+            //for (size_t i=0; i<constraintsZero.size(); i++) {
 
-                // Remove the constraint
-                constraintsZero = constraintsZeroCopy;
-                constraintsZero.erase(constraintsZero.begin() + i);
+                //// Remove the constraint
+                //constraintsZero = constraintsZeroCopy;
+                //constraintsZero.erase(constraintsZero.begin() + i);
 
-                // Get the bounds
-                std::pair<double,double> boundsTemp;
-                if (solver == "mosek" || solver == "auto") {
+                //// Get the bounds
+                //std::pair<double,double> boundsTemp;
+                //boundsTemp = boundMOSEK(objective, momentMatrices, constraintsZero, {}, verbosity);
+                //double lowerBoundTemp = boundsTemp.first;
+                //double upperBoundTemp = boundsTemp.second;
+                //double diff = upperBoundTemp - lowerBoundTemp;
+                //std::cout << "Removed " << i << ", diff: " << diff << std::endl;
+
+                //// If it's better, remove it
+                //if (diff - currentBoundDiff <= tol) {
+                    //std::cout << "Removing constraint " << i << std::endl;
+                    //constraintsZeroCopy = constraintsZero;
+                    //removedSomething = true;
+                    //break;
+                //}
+
+            //}
+
+            // Check each column of the moment matrix
+            for (size_t i=0; i<momentMatrices[0].size(); i++) {
+
+                    // Remove the column
+                    momentMatrices = momentMatricesCopy;
+                    momentMatrices[0].erase(momentMatrices[0].begin() + i);
+                    for (size_t j=0; j<momentMatrices[0].size(); j++) {
+                        momentMatrices[0][j].erase(momentMatrices[0][j].begin() + i);
+                    }
+
+                    // Get the bounds
+                    std::pair<double,double> boundsTemp;
                     boundsTemp = boundMOSEK(objective, momentMatrices, constraintsZero, {}, verbosity);
-                } else if (solver == "gurobi") {
-                    boundsTemp = boundGurobi(objective, constraintsZero, verbosity);
-                }
-                double lowerBoundTemp = boundsTemp.first;
-                double upperBoundTemp = boundsTemp.second;
-                double diff = upperBoundTemp - lowerBoundTemp;
-                std::cout << "Removed " << i << ", diff: " << diff << std::endl;
+                    double lowerBoundTemp = boundsTemp.first;
+                    double upperBoundTemp = boundsTemp.second;
+                    double diff = upperBoundTemp - lowerBoundTemp;
+                    std::cout << "Removed row/col " << i << ", diff: " << diff << ", change: " << diff - currentBoundDiff << std::endl;
 
-                // If it's better, remove it
-                if (diff <= tol) {
-                    std::cout << "Removing constraint " << i << std::endl;
-                    constraintsZeroCopy.erase(constraintsZeroCopy.begin() + i);
-                    removedSomething = true;
-                    break;
-                }
+                    // If it's better, remove it
+                    if (diff - currentBoundDiff <= tol) {
+                        std::cout << "Removing row/col " << i << std::endl;
+                        momentMatricesCopy = momentMatrices;
+                        removedSomething = true;
+                        break;
+                    }
 
             }
 
@@ -1398,6 +1544,7 @@ int main(int argc, char* argv[]) {
 
         std::cout << "Final constraints: " << constraintsZeroCopy.size() << std::endl;
         constraintsZero = constraintsZeroCopy;
+        momentMatrices = momentMatricesCopy;
 
     }
 
@@ -1415,7 +1562,7 @@ int main(int argc, char* argv[]) {
         if (momentMatrices.size() > 0) {
             for (size_t i=0; i<momentMatrices.size(); i++) {
                 std::cout << "Moment matrix " << i  << " (" << momentMatrices[i].size() << "x" << momentMatrices[i].size() << "): " << std::endl;
-                if (momentMatrices[i].size() < 10 || verbosity >= 3) {
+                if (momentMatrices[i].size() < 20 || verbosity >= 3) {
                     std::cout << momentMatrices[i] << std::endl;
                 } else {
                     std::cout << " - Has size " << momentMatrices[i].size() << ", set verbosity 3 to show" << std::endl << std::endl;
@@ -1464,7 +1611,9 @@ int main(int argc, char* argv[]) {
 
     // Output what we're doing
     if (verbosity >= 1) {
-        if (maxMatSize > 1 && solver == "mosek") {
+        if (solver == "scs") {
+            std::cout << "Solving SDP using SCS with " << numCons << " constraints, max moment mat size of " << maxMatSize << " and " << numVars << " variables..." << std::endl;
+        } else if (maxMatSize > 1 && solver == "mosek") {
             std::cout << "Solving SDP using MOSEK with " << numCons << " constraints, max moment mat size of " << maxMatSize << " and " << numVars << " variables..." << std::endl;
         } else if (solver == "eigen") {
             std::cout << "Solving linear system using Eigen with " << numCons << " constraints and " << numVars << " variables..." << std::endl;
@@ -1477,7 +1626,9 @@ int main(int argc, char* argv[]) {
 
     // Solve
     std::pair<double,double> bounds;
-    if (solver == "mosek" || maxMatSize > 1) {
+    if (solver == "scs") {
+        bounds = boundSCS(objective, momentMatrices, constraintsZero, {}, verbosity);
+    } else if (solver == "mosek" || maxMatSize > 1) {
         bounds = boundMOSEK(objective, momentMatrices, constraintsZero, {}, verbosity);
     } else if (solver == "gurobi") {
         bounds = boundGurobi(objective, constraintsZero, verbosity);

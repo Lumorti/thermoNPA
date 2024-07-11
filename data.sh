@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # This script is used to generate the data for the example
 mkdir -p data
 > data/X1.dat
@@ -72,10 +71,5 @@ gnuplot -p -e "plot 'data/X1.dat' u 1:2 w l t 'X1 lower bound',
             'data/X5.dat' u 1:3 w l t 'X5 upper bound',
             'data/Y5.dat' u 1:3 w l t 'Y5 upper bound',
             'data/Z5.dat' u 1:3 w l t 'Z5 upper bound'"
-
-
-
- 
-
 
 
