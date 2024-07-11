@@ -832,6 +832,9 @@ int main(int argc, char* argv[]) {
             symmetries.push_back({group1, group2});
 
         // Output the help
+        // TODO heat current constraint
+        // TODO heat current objective
+        // TODO positive reconstructed density matrix
         } else if (argAsString == "-h" || argAsString == "--help") {
             std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
             std::cout << "Options:" << std::endl;
@@ -1052,16 +1055,10 @@ int main(int argc, char* argv[]) {
 
             }
 
-            // Generate the moment matrix from the monomsUsed TODO
+            // Generate the moment matrix from the monomsUsed
             // ./run --tensor 12 -M 1000 -A 50
             // -0.929473  <  -0.405878      39.2103%
             if (autoMomentAmount > 0) {
-
-                // Remove the first 10
-                //monomsUsed.erase(monomsUsed.begin(), monomsUsed.begin()+10);
-                //std::erase(monomsUsed, monomsUsed.begin(), monomsUsed.begin()+10);
-                // need to use advance
-                //monomsUsed.erase(monomsUsed.begin(), std::next(monomsUsed.begin(), 10));
 
                 // Add the first used monoms to the top row
                 std::vector<Poly> topRow = {Poly(1)};
@@ -1073,79 +1070,6 @@ int main(int argc, char* argv[]) {
                         break;
                     }
                 }
-                
-                // Add the first used monoms to the top row, checking they aren't already there
-                //std::set<Mon> monomsInMatrix = {Mon()};
-                //for (auto& mon : monomsUsed) {
-                    //std::cout << "new monom: " << mon << std::endl;
-                    //if (!monomsInMatrix.count(mon)) {
-                        //std::cout << "adding" << std::endl;
-                        //topRow.push_back(Poly(mon));
-                        //std::vector<std::vector<Poly>> momentMatrixTemp = generateFromTopRow(topRow, verbosity);
-                        //std::cout << momentMatrixTemp << std::endl;
-                        //addVariables(monomsInMatrix, momentMatrixTemp);
-                        //added++;
-                        //if (added >= autoMomentAmount) {
-                            //break;
-                        //}
-                    //} else {
-                        //std::cout << "skipping" << std::endl;
-                    //}
-                //}
-
-                // Add the most common moments in the top row
-                //std::map<Mon,int> monomsUsedCount;
-                //for (auto& mon : monomsUsed) {
-                    //for (auto& poly : constraintsZero) {
-                        //if (poly.contains(mon)) {
-                            //monomsUsedCount[mon]++;
-                        //}
-                    //}
-                //}
-                //std::vector<Mon> monomsUsedSorted;
-                //for (auto& mon : monomsUsedCount) {
-                    //monomsUsedSorted.push_back(mon.first);
-                //}
-                //std::sort(monomsUsedSorted.begin(), monomsUsedSorted.end(), [&monomsUsedCount](Mon a, Mon b) {
-                    //return monomsUsedCount[a] > monomsUsedCount[b];
-                //});
-                //for (auto& mon : monomsUsedSorted) {
-                    //topRow.push_back(Poly(mon));
-                    //added++;
-                    //if (added >= autoMomentAmount) {
-                        //break;
-                    //}
-                //}
-
-                // Add first order moments to the top, split bigger ones
-                //for (auto& mon : monomsUsed) {
-                    //if (mon.size() <= 2) {
-                        //Poly toAdd = Poly(mon);
-                        //if (std::find(topRow.begin(), topRow.end(), toAdd) == topRow.end()) {
-                            //topRow.push_back(Poly(toAdd));
-                            //added++;
-                        //}
-                        //if (added >= autoMomentAmount) {
-                            //break;
-                        //}
-                    //} else {
-                        //int monSize = mon.size();
-                        //Poly toAdd1 = Poly(mon.first(monSize/2));
-                        //Poly toAdd2 = Poly(mon.last(monSize-(monSize/2)));
-                        //if (std::find(topRow.begin(), topRow.end(), toAdd1) == topRow.end()) {
-                            //topRow.push_back(Poly(toAdd1));
-                            //added++;
-                        //}
-                        //if (std::find(topRow.begin(), topRow.end(), toAdd2) == topRow.end()) {
-                            //topRow.push_back(Poly(toAdd2));
-                            //added++;
-                        //}
-                        //if (added >= autoMomentAmount) {
-                            //break;
-                        //}
-                    //}
-                //}
-
                 momentMatrices = {generateFromTopRow(topRow, verbosity)};
 
             }
@@ -1392,7 +1316,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // Add symmetries TODO
+    // Add symmetries
     std::set<Mon> vars;
     for (size_t i=0; i<momentMatrices.size(); i++) {
         addVariables(vars, momentMatrices[i]);
@@ -1449,21 +1373,10 @@ int main(int argc, char* argv[]) {
 
     }
 
-    // Replace everything using symmetries
+    // Add symmetry constraints
     for (auto sym : symmetriesMap) {
         constraintsZero.push_back(Poly(sym.first)-Poly(sym.second));
     }
-    //for (size_t i=0; i<momentMatrices.size(); i++) {
-        //for (size_t j=0; j<momentMatrices[i].size(); j++) {
-            //for (size_t k=0; k<momentMatrices[i][j].size(); k++) {
-                //momentMatrices[i][j][k] = momentMatrices[i][j][k].applyMap(symmetriesMap);
-            //}
-        //}
-    //}
-    //for (size_t i=0; i<constraintsZero.size(); i++) {
-        //constraintsZero[i] = constraintsZero[i].applyMap(symmetriesMap);
-    //}
-    //objective = objective.applyMap(symmetriesMap);
 
     // Timing
     std::chrono::steady_clock::time_point timeFinishedGeneration = std::chrono::steady_clock::now();
@@ -1483,29 +1396,29 @@ int main(int argc, char* argv[]) {
             bool removedSomething = false;
             
             // Check each linear constraint
-            //for (size_t i=0; i<constraintsZero.size(); i++) {
+            for (size_t i=0; i<constraintsZero.size(); i++) {
 
-                //// Remove the constraint
-                //constraintsZero = constraintsZeroCopy;
-                //constraintsZero.erase(constraintsZero.begin() + i);
+                // Remove the constraint
+                constraintsZero = constraintsZeroCopy;
+                constraintsZero.erase(constraintsZero.begin() + i);
 
-                //// Get the bounds
-                //std::pair<double,double> boundsTemp;
-                //boundsTemp = boundMOSEK(objective, momentMatrices, constraintsZero, {}, verbosity);
-                //double lowerBoundTemp = boundsTemp.first;
-                //double upperBoundTemp = boundsTemp.second;
-                //double diff = upperBoundTemp - lowerBoundTemp;
-                //std::cout << "Removed " << i << ", diff: " << diff << std::endl;
+                // Get the bounds
+                std::pair<double,double> boundsTemp;
+                boundsTemp = boundMOSEK(objective, momentMatrices, constraintsZero, {}, verbosity);
+                double lowerBoundTemp = boundsTemp.first;
+                double upperBoundTemp = boundsTemp.second;
+                double diff = upperBoundTemp - lowerBoundTemp;
+                std::cout << "Removed " << i << ", diff: " << diff << std::endl;
 
-                //// If it's better, remove it
-                //if (diff - currentBoundDiff <= tol) {
-                    //std::cout << "Removing constraint " << i << std::endl;
-                    //constraintsZeroCopy = constraintsZero;
-                    //removedSomething = true;
-                    //break;
-                //}
+                // If it's better, remove it
+                if (diff - currentBoundDiff <= tol) {
+                    std::cout << "Removing constraint " << i << std::endl;
+                    constraintsZeroCopy = constraintsZero;
+                    removedSomething = true;
+                    break;
+                }
 
-            //}
+            }
 
             // Check each column of the moment matrix
             for (size_t i=0; i<momentMatrices[0].size(); i++) {
