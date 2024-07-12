@@ -11,6 +11,7 @@
 
 // Import Eigen
 #include <Eigen/Dense>
+#include <Eigen/Sparse>
 #include <unsupported/Eigen/KroneckerProduct>
 
 // Local files
@@ -66,6 +67,9 @@ int main(int argc, char* argv[]) {
     bool idealIsKnown = false;
     bool findMinimal = false;
     bool tryRemove = false;
+    int reconLevel = 0;
+    int minReconSize = 0;
+    int maxReconSize = 0;
     int autoMomentAmount = 0;
     int findMinimalAmount = 0;
     int reductiveCons = 0;
@@ -538,7 +542,7 @@ int main(int argc, char* argv[]) {
             limbladian.cycleToAndRemove('R', 1);
             limbladian.reduce();
 
-        // A 1.5D chain TODO
+        // A 1.5D chain
         } else if (argAsString == "--1.5d" || argAsString == "--1.5dr") {
 
             // Parameters
@@ -831,10 +835,21 @@ int main(int argc, char* argv[]) {
             }
             symmetries.push_back({group1, group2});
 
+        // Heat current objective TODO
+        } else if (argAsString == "--objHC") {
+            int qubit1 = std::stoi(argv[i+1]);
+            int qubit2 = std::stoi(argv[i+2]);
+            i += 2;
+
+        // Reconstruction constraints
+        } else if (argAsString == "-r") {
+            reconLevel = std::stoi(argv[i+1]);
+            minReconSize = std::stoi(argv[i+2]);
+            maxReconSize = std::stoi(argv[i+3]);
+            i+=3;
+
         // Output the help
         // TODO heat current constraint
-        // TODO heat current objective
-        // TODO positive reconstructed density matrix
         } else if (argAsString == "-h" || argAsString == "--help") {
             std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
             std::cout << "Options:" << std::endl;
@@ -845,6 +860,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  -S <str>        Seed for the random number generator" << std::endl;
             std::cout << "  -M <int>        Try to generate the minimal set of linear constraints" << std::endl;
             std::cout << "  -A <int>        Try to generate the minimal moment matrix" << std::endl;
+            std::cout << "  -r <int> * 3    Insist that the reconstructed density matrix be positive" << std::endl;
             std::cout << "  -R              Try removing random constraints" << std::endl;
             std::cout << "  -v <int>        Verbosity level" << std::endl;
             std::cout << "  -C <int>        Number of cores to use" << std::endl;
@@ -862,6 +878,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  --objX          Use avg sigma_X as the objective" << std::endl;
             std::cout << "  --objY          Use avg sigma_Y as the objective" << std::endl;
             std::cout << "  --objZ          Use avg sigma_Z as the objective" << std::endl;
+            std::cout << "  --objHC <ints>  Heat current between two sites" << std::endl;
             std::cout << "Limbliadian options:" << std::endl;
             std::cout << "  -L <str>        Manually set the Limbladian" << std::endl;
             std::cout << "  --pauli <dbl> <dbl> <dbl>" << std::endl;
@@ -895,6 +912,7 @@ int main(int argc, char* argv[]) {
     std::chrono::steady_clock::time_point timeFinishedArgs = std::chrono::steady_clock::now();
 
     // Create the Limbladian applied to many different operators
+    std::set<Mon> monomsUsed;
     std::vector<std::vector<std::vector<Poly>>> momentMatrices = {};
     std::vector<Mon> variables = {};
     for (int i=0; i<numQubits; i++) {
@@ -915,20 +933,19 @@ int main(int argc, char* argv[]) {
         std::cout << std::endl;
         std::cout << "Original Limbladian: " << limbladian << std::endl;
     }
-    if (!findMinimal) {
-        for (size_t i=0; i<variablesToPut.size(); i++) {
-            std::pair<char,int> oldMon('A', 0);
-            Mon newPoly(variablesToPut[i].getKey());
-            Poly newConstraint = limbladian.replaced(oldMon, newPoly);
-            if (verbosity >= 3) {
-                std::cout << std::endl;
-                std::cout << "Variable to put: " << newPoly << std::endl;
-                std::cout << "New constraint: " << newConstraint << std::endl;
-            }
-            if (!newConstraint.isZero()) {
-                constraintsZero.push_back(newConstraint);
-            }
+    for (size_t i=0; i<variablesToPut.size(); i++) {
+        std::pair<char,int> oldMon('A', 0);
+        Mon newPoly(variablesToPut[i].getKey());
+        Poly newConstraint = limbladian.replaced(oldMon, newPoly);
+        if (verbosity >= 3) {
+            std::cout << std::endl;
+            std::cout << "Variable to put: " << newPoly << std::endl;
+            std::cout << "New constraint: " << newConstraint << std::endl;
         }
+        if (!newConstraint.isZero()) {
+            constraintsZero.push_back(newConstraint);
+        }
+        monomsUsed.insert(variablesToPut[i].getKey());
     }
 
     // Reduce the constraints as much as possible
@@ -944,7 +961,6 @@ int main(int argc, char* argv[]) {
     }
 
     // If asked to find the minimal set of linear constraints 
-    std::set<Mon> monomsUsed;
     if (findMinimal) {
 
         // If given zero, set to what seems to be the minimum needed
@@ -976,6 +992,14 @@ int main(int argc, char* argv[]) {
                 if (!monomsInConstraints.count(monToAdd)) {
                     monomsInConstraints.insert(monToAdd);
                     queue.push_back(monToAdd);
+                }
+            }
+            for (size_t i=0; i<constraintsZero.size(); i++) {
+                for (auto& term : constraintsZero[i]) {
+                    if (!monomsInConstraints.count(term.first)) {
+                        monomsInConstraints.insert(term.first);
+                        queue.push_back(term.first);
+                    }
                 }
             }
             for (size_t i=0; i<momentMatrices.size(); i++) {
@@ -1055,24 +1079,7 @@ int main(int argc, char* argv[]) {
 
             }
 
-            // Generate the moment matrix from the monomsUsed
-            // ./run --tensor 12 -M 1000 -A 50
-            // -0.929473  <  -0.405878      39.2103%
-            if (autoMomentAmount > 0) {
-
-                // Add the first used monoms to the top row
-                std::vector<Poly> topRow = {Poly(1)};
-                int added = 0;
-                for (auto& mon : monomsUsed) {
-                    topRow.push_back(Poly(mon));
-                    added++;
-                    if (added >= autoMomentAmount) {
-                        break;
-                    }
-                }
-                momentMatrices = {generateFromTopRow(topRow, verbosity)};
-
-            }
+            
 
         // If a value not given, binary search
         } else {
@@ -1195,6 +1202,25 @@ int main(int argc, char* argv[]) {
         // Final output
         double ratio = double(constraintsZero.size()) / (monomsUsed.size()-1);
         std::cout << constraintsZero.size() << " / " << findMinimalAmount << " (" << ratio << ")               " << std::endl;
+
+    }
+
+    // Generate the moment matrix from the monomsUsed
+    // ./run --tensor 12 -M 1000 -A 50
+    // -0.929473  <  -0.405878      39.2103%
+    if (autoMomentAmount > 0) {
+
+        // Add the first used monoms to the top row
+        std::vector<Poly> topRow = {Poly(1)};
+        int added = 0;
+        for (auto& mon : monomsUsed) {
+            topRow.push_back(Poly(mon));
+            added++;
+            if (added >= autoMomentAmount) {
+                break;
+            }
+        }
+        momentMatrices.push_back(generateFromTopRow(topRow, verbosity));
 
     }
 
@@ -1378,6 +1404,607 @@ int main(int argc, char* argv[]) {
         constraintsZero.push_back(Poly(sym.first)-Poly(sym.second));
     }
 
+    // Add constraints that the reconstructed density matrix is positive TODO
+    if (reconLevel != 0) {
+
+        // Pauli matrices
+        Eigen::SparseMatrix<std::complex<double>> pauliI(2,2);
+        pauliI.insert(0,0) = 1;
+        pauliI.insert(1,1) = 1;
+        pauliI.makeCompressed();
+        Eigen::SparseMatrix<std::complex<double>> pauliX(2,2);
+        pauliX.insert(0,1) = 1;
+        pauliX.insert(1,0) = 1;
+        pauliX.makeCompressed();
+        Eigen::SparseMatrix<std::complex<double>> pauliY(2,2);
+        pauliY.insert(0,1) = std::complex<double>(0,-1);
+        pauliY.insert(1,0) = std::complex<double>(0,1);
+        pauliY.makeCompressed();
+        Eigen::SparseMatrix<std::complex<double>> pauliZ(2,2);
+        pauliZ.insert(0,0) = 1;
+        pauliZ.insert(1,1) = -1;
+        pauliZ.makeCompressed();
+        std::map<int, std::string> letterMap = {{0, "I"}, {1, "X"}, {2, "Y"}, {3, "Z"}};
+        std::map<std::vector<int>, Eigen::SparseMatrix<std::complex<double>>> pauliMap;
+        for (int i=0; i<4; i++) {
+            std::vector<int> key = {i};
+            if (i == 0) {
+                pauliMap[key] = pauliI;
+            } else if (i == 1) {
+                pauliMap[key] = pauliX;
+            } else if (i == 2) {
+                pauliMap[key] = pauliY;
+            } else if (i == 3) {
+                pauliMap[key] = pauliZ;
+            }
+        }
+        for (int i=0; i<4; i++) {
+            for (int j=0; j<4; j++) {
+                std::vector<int> key = {i,j};
+                pauliMap[key] = kroneckerProduct(pauliMap[{i}], pauliMap[{j}]);
+            }
+        }
+        for (int i=0; i<4; i++) {
+            for (int j=0; j<4; j++) {
+                for (int k=0; k<4; k++) {
+                    std::vector<int> key = {i,j,k};
+                    pauliMap[key] = kroneckerProduct(pauliMap[{i,j}], pauliMap[{k}]);
+                }
+            }
+        }
+        for (int i=0; i<4; i++) {
+            for (int j=0; j<4; j++) {
+                for (int k=0; k<4; k++) {
+                    for (int l=0; l<4; l++) {
+                        std::vector<int> key = {i,j,k,l};
+                        pauliMap[key] = kroneckerProduct(pauliMap[{i,j,k}], pauliMap[{l}]);
+                    }
+                }
+            }
+        }
+        for (int i=0; i<4; i++) {
+            for (int j=0; j<4; j++) {
+                for (int k=0; k<4; k++) {
+                    for (int l=0; l<4; l++) {
+                        for (int m=0; m<4; m++) {
+                            std::vector<int> key = {i,j,k,l,m};
+                            pauliMap[key] = kroneckerProduct(pauliMap[{i,j,k,l}], pauliMap[{m}]);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Single-body terms
+        if (reconLevel <= -1) {
+
+            // For each qubit
+            for (int i=0; i<numQubits; i++) {
+                int matSize = std::pow(2, -reconLevel);
+                std::vector<std::vector<Poly>> rho1(matSize, std::vector<Poly>(matSize));
+
+                // For each Pauli matrix
+                for (int l=0; l<4; l++) {
+                    Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[{l}];
+
+                    // For each element of said matrix
+                    for (int k=0; k<mat.outerSize(); ++k) {
+                        for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(mat,k); it; ++it) {
+                            std::complex<double> val = it.value();
+                            int j = it.row();
+                            std::string monString = "<";
+                            if (l > 0) {
+                                monString += letterMap[l] + std::to_string(i+1);
+                            }
+                            monString += ">";
+                            if (monString.size() > 2) {
+                                rho1[j][k] += 0.5 * val * Mon(monString);
+                            } else {
+                                rho1[j][k] += 0.5 * val;
+                            }
+                        }
+                    }
+
+                }
+
+                // Add the matrix to the list of mats that should be positive
+                momentMatrices.push_back(rho1);
+
+            }
+        }
+
+        // Two-body terms
+        if (reconLevel <= -2) {
+
+            // For each selection of qubits
+            for (int i=0; i<numQubits; i++) {
+                for (int i2=i+1; i2<numQubits; i2++) {
+                    int matSize = std::pow(2, -reconLevel);
+                    std::vector<std::vector<Poly>> rho2(matSize, std::vector<Poly>(matSize));
+
+                    // For each Pauli matrix
+                    for (int l=0; l<4; l++) {
+                        for (int l2=0; l2<4; l2++) {
+                        Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[{l,l2}];
+
+                            // For each element of said matrix
+                            for (int k=0; k<mat.outerSize(); ++k) {
+                                for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(mat,k); it; ++it) {
+                                    std::complex<double> val = it.value();
+                                    int j = it.row();
+                                    std::string monString = "<";
+                                    if (l > 0) {
+                                        monString += letterMap[l] + std::to_string(i+1);
+                                    }
+                                    if (l2 > 0) {
+                                        monString += letterMap[l2] + std::to_string(i2+1);
+                                    }
+                                    monString += ">";
+                                    if (monString.size() > 2) {
+                                        rho2[j][k] += 0.5 * val * Mon(monString);
+                                    } else {
+                                        rho2[j][k] += 0.5 * val;
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+
+                    // Add the matrix to the list of mats that should be positive
+                    momentMatrices.push_back(rho2);
+
+                }
+            }
+
+        }
+
+        // Three-body terms
+        if (reconLevel <= -3) {
+
+            // For each selection of qubits
+            for (int i=0; i<numQubits; i++) {
+                for (int i2=i+1; i2<numQubits; i2++) {
+                    for (int i3=i2+1; i3<numQubits; i3++) {
+                        int matSize = std::pow(2, -reconLevel);
+                        std::vector<std::vector<Poly>> rho3(matSize, std::vector<Poly>(matSize));
+
+                        // For each Pauli matrix
+                        for (int l=0; l<4; l++) {
+                            for (int l2=0; l2<4; l2++) {
+                                for (int l3=0; l3<4; l3++) {
+
+                                    // For each element of said matrix
+                                    Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[{l,l2,l3}];
+                                    for (int k=0; k<mat.outerSize(); ++k) {
+                                        for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(mat,k); it; ++it) {
+                                            std::complex<double> val = it.value();
+                                            int j = it.row();
+                                            std::string monString = "<";
+                                            if (l > 0) {
+                                                monString += letterMap[l] + std::to_string(i+1);
+                                            }
+                                            if (l2 > 0) {
+                                                monString += letterMap[l2] + std::to_string(i2+1);
+                                            }
+                                            if (l3 > 0) {
+                                                monString += letterMap[l3] + std::to_string(i3+1);
+                                            }
+                                            monString += ">";
+                                            if (monString.size() > 2) {
+                                                rho3[j][k] += 0.5 * val * Mon(monString);
+                                            } else {
+                                                rho3[j][k] += 0.5 * val;
+                                            }
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+
+                        // Add the matrix to the list of mats that should be positive
+                        momentMatrices.push_back(rho3);
+
+                    }
+                }   
+            }
+
+        }
+
+        // Four body terms
+        if (reconLevel <= -4) {
+
+            // For each selection of qubits
+            for (int i=0; i<numQubits; i++) {
+                for (int i2=i+1; i2<numQubits; i2++) {
+                    for (int i3=i2+1; i3<numQubits; i3++) {
+                        for (int i4=i3+1; i4<numQubits; i4++) {
+                            int matSize = std::pow(2, -reconLevel);
+                            std::vector<std::vector<Poly>> rho4(matSize, std::vector<Poly>(matSize));
+
+                            // For each Pauli matrix
+                            for (int l=0; l<4; l++) {
+                                for (int l2=0; l2<4; l2++) {
+                                    for (int l3=0; l3<4; l3++) {
+                                        for (int l4=0; l4<4; l4++) {
+
+                                            // For each element of said matrix
+                                            Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[{l,l2,l3,l4}];
+                                            for (int k=0; k<mat.outerSize(); ++k) {
+                                                for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(mat,k); it; ++it) {
+                                                    std::complex<double> val = it.value();
+                                                    int j = it.row();
+                                                    std::string monString = "<";
+                                                    if (l > 0) {
+                                                        monString += letterMap[l] + std::to_string(i+1);
+                                                    }
+                                                    if (l2 > 0) {
+                                                        monString += letterMap[l2] + std::to_string(i2+1);
+                                                    }
+                                                    if (l3 > 0) {
+                                                        monString += letterMap[l3] + std::to_string(i3+1);
+                                                    }
+                                                    if (l4 > 0) {
+                                                        monString += letterMap[l4] + std::to_string(i4+1);
+                                                    }
+                                                    monString += ">";
+                                                    if (monString.size() > 2) {
+                                                        rho4[j][k] += 0.5 * val * Mon(monString);
+                                                    } else {
+                                                        rho4[j][k] += 0.5 * val;
+                                                    }
+                                                }
+                                            }
+
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Add the matrix to the list of mats that should be positive
+                            momentMatrices.push_back(rho4);
+
+                        }
+                    }
+                }
+            }
+        }
+
+        // Five body terms
+        if (reconLevel <= -5) {
+
+            // For each selection of qubits
+            for (int i=0; i<numQubits; i++) {
+                for (int i2=i+1; i2<numQubits; i2++) {
+                    for (int i3=i2+1; i3<numQubits; i3++) {
+                        for (int i4=i3+1; i4<numQubits; i4++) {
+                            for (int i5=i4+1; i5<numQubits; i5++) {
+                                int matSize = std::pow(2, -reconLevel);
+                                std::vector<std::vector<Poly>> rho5(matSize, std::vector<Poly>(matSize));
+
+                                // For each Pauli matrix
+                                for (int l=0; l<4; l++) {
+                                    for (int l2=0; l2<4; l2++) {
+                                        for (int l3=0; l3<4; l3++) {
+                                            for (int l4=0; l4<4; l4++) {
+                                                for (int l5=0; l5<4; l5++) {
+
+                                                    // For each element of said matrix
+                                                    Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[{l,l2,l3,l4,l5}];
+                                                    for (int k=0; k<mat.outerSize(); ++k) {
+                                                        for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(mat,k); it; ++it) {
+                                                            std::complex<double> val = it.value();
+                                                            int j = it.row();
+                                                            std::string monString = "<";
+                                                            if (l > 0) {
+                                                                monString += letterMap[l] + std::to_string(i+1);
+                                                            }
+                                                            if (l2 > 0) {
+                                                                monString += letterMap[l2] + std::to_string(i2+1);
+                                                            }
+                                                            if (l3 > 0) {
+                                                                monString += letterMap[l3] + std::to_string(i3+1);
+                                                            }
+                                                            if (l4 > 0) {
+                                                                monString += letterMap[l4] + std::to_string(i4+1);
+                                                            }
+                                                            if (l5 > 0) {
+                                                                monString += letterMap[l5] + std::to_string(i5+1);
+                                                            }
+                                                            monString += ">";
+                                                            if (monString.size() > 2) {
+                                                                rho5[j][k] += 0.5 * val * Mon(monString);
+                                                            } else {
+                                                                rho5[j][k] += 0.5 * val;
+                                                            }
+                                                        }
+                                                    }
+                                                    
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Add the matrix to the list of mats that should be positive
+                                momentMatrices.push_back(rho5);
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Auto recon cons TODO
+        if (reconLevel > 0) {
+
+            // For each used monomial
+            std::set<std::set<int>> combinationsUsed;
+            for (auto mon : monomsUsed) {
+                if (momentMatrices.size() >= reconLevel) {
+                    break;
+                }
+
+                // Make sure it's a new combination
+                std::set<int> qubitsUsed;
+                for (auto term : mon) {
+                    qubitsUsed.insert(term.second);
+                }
+                if (combinationsUsed.count(qubitsUsed)) {
+                    continue;
+                }
+                combinationsUsed.insert(qubitsUsed);
+
+                // Bound the max size
+                if (mon.size() < minReconSize) {
+                    continue;
+                }
+                if (mon.size() > maxReconSize) {
+                    continue;
+                }
+
+                // Single-body terms
+                if (mon.size() == 1) {
+
+                    // Same as above but for the monomial
+                    int i = mon.monomial[0].second;
+                    int matSize = std::pow(2, mon.size());
+                    std::vector<std::vector<Poly>> rho(matSize, std::vector<Poly>(matSize));
+                    double coeff = std::pow(0.5, mon.size());
+
+                    // For each Pauli matrix
+                    for (int l=0; l<4; l++) {
+                        Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[{l}];
+
+                        // For each element of said matrix
+                        for (int k=0; k<mat.outerSize(); ++k) {
+                            for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(mat,k); it; ++it) {
+                                std::complex<double> val = it.value();
+                                int j = it.row();
+                                std::string monString = "<";
+                                if (l > 0) {
+                                    monString += letterMap[l] + std::to_string(i+1);
+                                }
+                                monString += ">";
+                                if (monString.size() > 2) {
+                                    rho[j][k] += coeff * val * Mon(monString);
+                                } else {
+                                    rho[j][k] += coeff * val;
+                                }
+                            }
+                        }
+
+                    }
+
+                    // Add the matrix to the list of mats that should be positive
+                    momentMatrices.push_back(rho);
+
+                // Two-body terms
+                } else if (mon.size() == 2) {
+                    int i = mon.monomial[0].second;
+                    int i2 = mon.monomial[1].second;
+                    int matSize = std::pow(2, mon.size());
+                    double coeff = std::pow(0.5, mon.size());
+                    std::vector<std::vector<Poly>> rho(matSize, std::vector<Poly>(matSize));
+
+                    // For each Pauli matrix
+                    for (int l=0; l<4; l++) {
+                        for (int l2=0; l2<4; l2++) {
+                        Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[{l,l2}];
+
+                            // For each element of said matrix
+                            for (int k=0; k<mat.outerSize(); ++k) {
+                                for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(mat,k); it; ++it) {
+                                    std::complex<double> val = it.value();
+                                    int j = it.row();
+                                    std::string monString = "<";
+                                    if (l > 0) {
+                                        monString += letterMap[l] + std::to_string(i+1);
+                                    }
+                                    if (l2 > 0) {
+                                        monString += letterMap[l2] + std::to_string(i2+1);
+                                    }
+                                    monString += ">";
+                                    if (monString.size() > 2) {
+                                        rho[j][k] += coeff * val * Mon(monString);
+                                    } else {
+                                        rho[j][k] += coeff * val;
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+
+                    // Add the matrix to the list of mats that should be positive
+                    momentMatrices.push_back(rho);
+
+                // Three-body terms
+                } else if (mon.size() == 3) {
+                    int i = mon.monomial[0].second;
+                    int i2 = mon.monomial[1].second;
+                    int i3 = mon.monomial[2].second;
+                    int matSize = std::pow(2, mon.size());
+                    double coeff = std::pow(0.5, mon.size());
+                    std::vector<std::vector<Poly>> rho(matSize, std::vector<Poly>(matSize));
+
+                    // For each Pauli matrix
+                    for (int l=0; l<4; l++) {
+                        for (int l2=0; l2<4; l2++) {
+                            for (int l3=0; l3<4; l3++) {
+
+                                // For each element of said matrix
+                                Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[{l,l2,l3}];
+                                for (int k=0; k<mat.outerSize(); ++k) {
+                                    for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(mat,k); it; ++it) {
+                                        std::complex<double> val = it.value();
+                                        int j = it.row();
+                                        std::string monString = "<";
+                                        if (l > 0) {
+                                            monString += letterMap[l] + std::to_string(i+1);
+                                        }
+                                        if (l2 > 0) {
+                                            monString += letterMap[l2] + std::to_string(i2+1);
+                                        }
+                                        if (l3 > 0) {
+                                            monString += letterMap[l3] + std::to_string(i3+1);
+                                        }
+                                        monString += ">";
+                                        if (monString.size() > 2) {
+                                            rho[j][k] += coeff * val * Mon(monString);
+                                        } else {
+                                            rho[j][k] += coeff * val;
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+
+                    // Add the matrix to the list of mats that should be positive
+                    momentMatrices.push_back(rho);
+
+                // Four body terms
+                } else if (mon.size() == 4) {
+                    int i = mon.monomial[0].second;
+                    int i2 = mon.monomial[1].second;
+                    int i3 = mon.monomial[2].second;
+                    int i4 = mon.monomial[3].second;
+                    int matSize = std::pow(2, mon.size());
+                    double coeff = std::pow(0.5, mon.size());
+                    std::vector<std::vector<Poly>> rho(matSize, std::vector<Poly>(matSize));
+
+                    // For each Pauli matrix
+                    for (int l=0; l<4; l++) {
+                        for (int l2=0; l2<4; l2++) {
+                            for (int l3=0; l3<4; l3++) {
+                                for (int l4=0; l4<4; l4++) {
+
+                                    // For each element of said matrix
+                                    Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[{l,l2,l3,l4}];
+                                    for (int k=0; k<mat.outerSize(); ++k) {
+                                        for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(mat,k); it; ++it) {
+                                            std::complex<double> val = it.value();
+                                            int j = it.row();
+                                            std::string monString = "<";
+                                            if (l > 0) {
+                                                monString += letterMap[l] + std::to_string(i+1);
+                                            }
+                                            if (l2 > 0) {
+                                                monString += letterMap[l2] + std::to_string(i2+1);
+                                            }
+                                            if (l3 > 0) {
+                                                monString += letterMap[l3] + std::to_string(i3+1);
+                                            }
+                                            if (l4 > 0) {
+                                                monString += letterMap[l4] + std::to_string(i4+1);
+                                            }
+                                            monString += ">";
+                                            if (monString.size() > 2) {
+                                                rho[j][k] += coeff * val * Mon(monString);
+                                            } else {
+                                                rho[j][k] += coeff * val;
+                                            }
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+
+                    // Add the matrix to the list of mats that should be positive
+                    momentMatrices.push_back(rho);
+
+                // Five body terms
+                } else if (mon.size() == 5) {
+                    int i = mon.monomial[0].second;
+                    int i2 = mon.monomial[1].second;
+                    int i3 = mon.monomial[2].second;
+                    int i4 = mon.monomial[3].second;
+                    int i5 = mon.monomial[4].second;
+                    int matSize = std::pow(2, mon.size());
+                    std::vector<std::vector<Poly>> rho(matSize, std::vector<Poly>(matSize));
+                    double coeff = std::pow(0.5, mon.size());
+
+                    // For each Pauli matrix
+                    for (int l=0; l<4; l++) {
+                        for (int l2=0; l2<4; l2++) {
+                            for (int l3=0; l3<4; l3++) {
+                                for (int l4=0; l4<4; l4++) {
+                                    for (int l5=0; l5<4; l5++) {
+
+                                        // For each element of said matrix
+                                        Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[{l,l2,l3,l4}];
+                                        for (int k=0; k<mat.outerSize(); ++k) {
+                                            for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(mat,k); it; ++it) {
+                                                std::complex<double> val = it.value();
+                                                int j = it.row();
+                                                std::string monString = "<";
+                                                if (l > 0) {
+                                                    monString += letterMap[l] + std::to_string(i+1);
+                                                }
+                                                if (l2 > 0) {
+                                                    monString += letterMap[l2] + std::to_string(i2+1);
+                                                }
+                                                if (l3 > 0) {
+                                                    monString += letterMap[l3] + std::to_string(i3+1);
+                                                }
+                                                if (l4 > 0) {
+                                                    monString += letterMap[l4] + std::to_string(i4+1);
+                                                }
+                                                if (l5 > 0) {
+                                                    monString += letterMap[l5] + std::to_string(i5+1);
+                                                }
+                                                monString += ">";
+                                                if (monString.size() > 2) {
+                                                    rho[j][k] += coeff * val * Mon(monString);
+                                                } else {
+                                                    rho[j][k] += coeff * val;
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Add the matrix to the list of mats that should be positive
+                    momentMatrices.push_back(rho);
+
+                }
+
+            }
+            
+        }
+
+    }
+
     // Timing
     std::chrono::steady_clock::time_point timeFinishedGeneration = std::chrono::steady_clock::now();
 
@@ -1500,6 +2127,7 @@ int main(int argc, char* argv[]) {
         }
     }
     int numCons = constraintsZero.size();
+    int numMats = momentMatrices.size();
     std::set<Mon> variableSet;
     variableSet.insert(Mon());
     for (size_t i=0; i<momentMatrices.size(); i++) {
@@ -1525,9 +2153,9 @@ int main(int argc, char* argv[]) {
     // Output what we're doing
     if (verbosity >= 1) {
         if (solver == "scs") {
-            std::cout << "Solving SDP using SCS with " << numCons << " constraints, max moment mat size of " << maxMatSize << " and " << numVars << " variables..." << std::endl;
+            std::cout << "Solving SDP using SCS with " << numCons << " constraints, " << numMats << " moment mats with a max size of " << maxMatSize << " and " << numVars << " variables..." << std::endl;
         } else if (maxMatSize > 1 && solver == "mosek") {
-            std::cout << "Solving SDP using MOSEK with " << numCons << " constraints, max moment mat size of " << maxMatSize << " and " << numVars << " variables..." << std::endl;
+            std::cout << "Solving SDP using MOSEK with " << numCons << " constraints, " << numMats << " moment mats with a max size of " << maxMatSize << " and " << numVars << " variables..." << std::endl;
         } else if (solver == "eigen") {
             std::cout << "Solving linear system using Eigen with " << numCons << " constraints and " << numVars << " variables..." << std::endl;
         } else if (solver == "mosek") {
