@@ -1476,7 +1476,7 @@ int main(int argc, char* argv[]) {
         }
 
         // Single-body terms
-        if (reconLevel <= -1) {
+        if (reconLevel == -1) {
 
             // For each qubit
             for (int i=0; i<numQubits; i++) {
@@ -1514,7 +1514,7 @@ int main(int argc, char* argv[]) {
         }
 
         // Two-body terms
-        if (reconLevel <= -2) {
+        if (reconLevel == -2) {
 
             // For each selection of qubits
             for (int i=0; i<numQubits; i++) {
@@ -1560,7 +1560,7 @@ int main(int argc, char* argv[]) {
         }
 
         // Three-body terms
-        if (reconLevel <= -3) {
+        if (reconLevel == -3) {
 
             // For each selection of qubits
             for (int i=0; i<numQubits; i++) {
@@ -1613,7 +1613,7 @@ int main(int argc, char* argv[]) {
         }
 
         // Four body terms
-        if (reconLevel <= -4) {
+        if (reconLevel == -4) {
 
             // For each selection of qubits
             for (int i=0; i<numQubits; i++) {
@@ -1672,7 +1672,7 @@ int main(int argc, char* argv[]) {
         }
 
         // Five body terms
-        if (reconLevel <= -5) {
+        if (reconLevel == -5) {
 
             // For each selection of qubits
             for (int i=0; i<numQubits; i++) {
