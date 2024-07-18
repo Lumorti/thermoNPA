@@ -630,55 +630,38 @@ double solveEigen(Poly& objective, std::vector<Poly>& constraintsZero, int verbo
         std::cout << denseA << std::endl;
         std::cout << "b:" << std::endl;
         std::cout << b << std::endl;
+        // calcualte the rank of the augmented matrix
+        Eigen::MatrixXd aug(denseA.rows(), denseA.cols()+1);
+        aug << denseA, b;
+        Eigen::FullPivLU<Eigen::MatrixXd> lu(aug);
+        std::cout << "Rank of augmented matrix: " << lu.rank() << std::endl;
     }
 
     // Solve the system
-    //Eigen::SparseLU<Eigen::SparseMatrix<double>, Eigen::COLAMDOrdering<int>> solver;
-    //std::cout << "Analyzing pattern..." << std::endl;
-    //solver.analyzePattern(A); 
-    //std::cout << "Factoring matrix..." << std::endl;
-    //solver.factorize(A); 
-    //if (solver.info() != Eigen::Success) {
-        //std::cout << "ERROR - Failed to factorize matrix" << std::endl;
-    //}
-    //std::cout << "Solving..." << std::endl;
-    //Eigen::VectorXd x = solver.solve(b);
-
-    // Solve the system
-    //Eigen::SparseQR<Eigen::SparseMatrix<double>, Eigen::COLAMDOrdering<int>> solver;
-    //std::cout << "Analyzing pattern..." << std::endl;
-    //solver.analyzePattern(A); 
-    //std::cout << "Factoring matrix..." << std::endl;
-    //solver.factorize(A); 
-    //if (solver.info() != Eigen::Success) {
-        //std::cout << "ERROR - Failed to factorize matrix" << std::endl;
-    //}
-    //std::cout << "Solving..." << std::endl;
-    //Eigen::VectorXd x = solver.solve(b);
-    
     omp_set_num_threads(numCores);
     Eigen::setNbThreads(numCores);
-
-    // Solve the system
-    //Eigen::BiCGSTAB<Eigen::SparseMatrix<double>, Eigen::IncompleteLUT<double>> solver;
-    //solver.setMaxIterations(1000);
-    //solver.compute(A);
-    //Eigen::VectorXd x = solver.solve(b);
-    //std::cout << "Num iterations:  " << solver.iterations() << std::endl;
-    //std::cout << "Estimated error: " << solver.error()      << std::endl;
-
-    // Solve the system
     Eigen::LeastSquaresConjugateGradient<Eigen::SparseMatrix<double>> solver;
     solver.compute(A);
     Eigen::VectorXd x = solver.solve(b);
     std::cout << "Num iterations:  " << solver.iterations() << std::endl;
     std::cout << "Estimated error: " << solver.error()      << std::endl;
+    
+    // If verbose, output all variables
+    if (verbosity >= 3) {
+        for (size_t i=0; i<variables.size(); i++) {
+            std::cout << variables[i] << " = " << x[i] << std::endl;
+        }
+    }
 
     // Compute the objective
     std::cout << "Computing objective..." << std::endl;
     double objVal = 0;
     for (auto& term : objective) {
-        objVal += std::real(term.second) * x[variableLocs[term.first]];
+        if (term.first.isConstant()) {
+            objVal += std::real(term.second);
+        } else {
+            objVal += std::real(term.second) * x[variableLocs[term.first]];
+        }
     }
 
     return objVal;
