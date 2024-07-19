@@ -515,7 +515,7 @@ int main(int argc, char* argv[]) {
                 Gamma_k[i-1] = Poly("<X" + std::to_string(i) + ">") - imag*Poly("<Y" + std::to_string(i) + ">");
                 Gamma_k[i-1] /= 2.0;
                 int xLoc = (i-1) % gridWidth;
-                if (xLoc == 0 && xLoc == gridWidth-1) {
+                if (xLoc != 0 && xLoc != gridWidth-1) {
                     Gamma_k[i-1] *= (std::sqrt(gamma_h) + std::sqrt(gamma_c));
                 } else if (xLoc == 0) {
                     Gamma_k[i-1] *= std::sqrt(gamma_h);
