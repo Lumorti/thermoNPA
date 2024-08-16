@@ -47,6 +47,41 @@ COMPLEX_OPS(/)
 // Useful constants
 const std::complex<double> imag(0, 1);
 
+// Partial trace of a density matrix
+// Here we have a matrix of size 2^N x 2^N, and we want to trace out the siteInd-th qubit
+// the site index is zero-based
+std::vector<std::vector<Poly>> partialTrace(std::vector<std::vector<Poly>> mat, int siteInd) {
+
+
+    // Get the size of the matrix
+    int size = mat.size();
+    int newSize = size / 2;
+    siteInd = std::log2(size) - siteInd - 1;
+
+    // Initialize the new matrix
+    std::vector<std::vector<Poly>> newMat(newSize, std::vector<Poly>(newSize, Poly()));
+
+    // Perform partial trace
+    for (int i = 0; i < newSize; ++i) {                                                         
+        for (int j = 0; j < newSize; ++j) {                                                     
+            int i1 = i / (1 << siteInd);
+            int i2 = i % (1 << siteInd);
+            int j1 = j / (1 << siteInd);
+            int j2 = j % (1 << siteInd);
+            
+            for (int k = 0; k < 2; ++k) {
+                int row = (i1 << (siteInd + 1)) | (k << siteInd) | i2;
+                int col = (j1 << (siteInd + 1)) | (k << siteInd) | j2;
+                newMat[i][j] += mat[row][col] / 2;
+            }
+        }                                                                                       
+    }
+
+    // Return the new matrix
+    return newMat;
+
+}
+
 // Generic entry function
 int main(int argc, char* argv[]) {
 
@@ -55,7 +90,7 @@ int main(int argc, char* argv[]) {
 
     // Define the scenario
     int level = 0;
-    int limbladLevel = 0;
+    int lindbladLevel = 0;
     int numQubits = 1;
     int gridWidth = 1;
     int gridHeight = 1;
@@ -67,14 +102,13 @@ int main(int argc, char* argv[]) {
     bool idealIsKnown = false;
     bool findMinimal = false;
     bool tryRemove = false;
+    bool traceCons = false;
     int reconLevel = 0;
-    int minReconSize = 0;
-    int maxReconSize = 0;
     int autoMomentAmount = 0;
     int findMinimalAmount = 0;
     int reductiveCons = 0;
     std::string seed = "";
-    Poly limbladian("<X1A0X1>+<Y1A0Y1>-<A0>");
+    Poly lindbladian("<X1A0X1>+<Y1A0Y1>-<A0>");
     std::vector<std::string> extraMonomials;
     std::vector<std::string> extraMonomialsLim;
     std::vector<Poly> constraintsZero;
@@ -97,9 +131,9 @@ int main(int argc, char* argv[]) {
             objective = Poly(std::string(argv[i+1]));
             i++;
 
-        // Manually set the Limbladian
+        // Manually set the Lindbladian
         } else if (argAsString == "-L") {
-            limbladian = Poly(std::string(argv[i+1]));
+            lindbladian = Poly(std::string(argv[i+1]));
             i++;
 
         // Pauli X objective
@@ -128,7 +162,7 @@ int main(int argc, char* argv[]) {
             tol = std::stod(argv[i+1]);
             i++;
 
-        // Pauli Limbladian
+        // Pauli Lindbladian
         } else if (argAsString == "--pauli") {
             if (i+3 >= argc) {
                 std::cout << "Not enough arguments for --pauli" << std::endl;
@@ -146,10 +180,10 @@ int main(int argc, char* argv[]) {
             pauliString += "+" + std::to_string(coeff2) + "<Y1A0Y1>";
             pauliString += "+" + std::to_string(coeff3) + "<Z1A0Z1>";
             pauliString += "-" + std::to_string(coeff1+coeff2+coeff3) + "<A0>";
-            limbladian = Poly(pauliString);
+            lindbladian = Poly(pauliString);
             i += 3;
 
-        // Two-body Limbladian
+        // Two-body Lindbladian
         } else if (argAsString == "--two" || argAsString == "--twov") {
 
             // Defining quantities
@@ -268,30 +302,30 @@ int main(int argc, char* argv[]) {
             objective.convertToPaulis();
             
             // Construct the Limbadlian as a polynomial from plus/minus
-            limbladian = Poly();
-            limbladian += Poly(-epsilon_h*imag, "<A0P1M1>");
-            limbladian += Poly(-epsilon_c*imag, "<A0P2M2>");
-            limbladian += Poly(-g*imag, "<A0P1M2>");
-            limbladian += Poly(-g*imag, "<A0M1P2>");
-            limbladian += Poly(epsilon_h*imag, "<P1M1A0>");
-            limbladian += Poly(epsilon_c*imag, "<P2M2A0>");
-            limbladian += Poly(g*imag, "<P1M2A0>");
-            limbladian += Poly(g*imag, "<M1P2A0>");
-            limbladian += Poly(gamma_h_plus, "<M1A0P1>");
-            limbladian += Poly(-0.5*gamma_h_plus, "<A0M1P1>");
-            limbladian += Poly(-0.5*gamma_h_plus, "<M1P1A0>");
-            limbladian += Poly(gamma_h_minus, "<P1A0M1>");
-            limbladian += Poly(-0.5*gamma_h_minus, "<A0P1M1>");
-            limbladian += Poly(-0.5*gamma_h_minus, "<P1M1A0>");
-            limbladian += Poly(gamma_c_plus, "<M2A0P2>");
-            limbladian += Poly(-0.5*gamma_c_plus, "<A0M2P2>");
-            limbladian += Poly(-0.5*gamma_c_plus, "<M2P2A0>");
-            limbladian += Poly(gamma_c_minus, "<P2A0M2>");
-            limbladian += Poly(-0.5*gamma_c_minus, "<A0P2M2>");
-            limbladian += Poly(-0.5*gamma_c_minus, "<P2M2A0>");
-            limbladian.convertToPaulis();
+            lindbladian = Poly();
+            lindbladian += Poly(-epsilon_h*imag, "<A0P1M1>");
+            lindbladian += Poly(-epsilon_c*imag, "<A0P2M2>");
+            lindbladian += Poly(-g*imag, "<A0P1M2>");
+            lindbladian += Poly(-g*imag, "<A0M1P2>");
+            lindbladian += Poly(epsilon_h*imag, "<P1M1A0>");
+            lindbladian += Poly(epsilon_c*imag, "<P2M2A0>");
+            lindbladian += Poly(g*imag, "<P1M2A0>");
+            lindbladian += Poly(g*imag, "<M1P2A0>");
+            lindbladian += Poly(gamma_h_plus, "<M1A0P1>");
+            lindbladian += Poly(-0.5*gamma_h_plus, "<A0M1P1>");
+            lindbladian += Poly(-0.5*gamma_h_plus, "<M1P1A0>");
+            lindbladian += Poly(gamma_h_minus, "<P1A0M1>");
+            lindbladian += Poly(-0.5*gamma_h_minus, "<A0P1M1>");
+            lindbladian += Poly(-0.5*gamma_h_minus, "<P1M1A0>");
+            lindbladian += Poly(gamma_c_plus, "<M2A0P2>");
+            lindbladian += Poly(-0.5*gamma_c_plus, "<A0M2P2>");
+            lindbladian += Poly(-0.5*gamma_c_plus, "<M2P2A0>");
+            lindbladian += Poly(gamma_c_minus, "<P2A0M2>");
+            lindbladian += Poly(-0.5*gamma_c_minus, "<A0P2M2>");
+            lindbladian += Poly(-0.5*gamma_c_minus, "<P2M2A0>");
+            lindbladian.convertToPaulis();
 
-        // 2D Limbladian test
+        // 2D Lindbladian test
         } else if (argAsString == "--2d") {
 
             // Defining quantities
@@ -382,34 +416,34 @@ int main(int argc, char* argv[]) {
             }
             
             // Construct the Limbadlian as a polynomial from plus/minus
-            limbladian = Poly();
+            lindbladian = Poly();
             for (int i=1; i<=numQubits; i++) {
-                limbladian += Poly(-imag*epsilons[i-1], "<A0P" + std::to_string(i) + "M" + std::to_string(i) + ">");
-                limbladian += Poly(imag*epsilons[i-1], "<P" + std::to_string(i) + "M" + std::to_string(i) + "A0>");
+                lindbladian += Poly(-imag*epsilons[i-1], "<A0P" + std::to_string(i) + "M" + std::to_string(i) + ">");
+                lindbladian += Poly(imag*epsilons[i-1], "<P" + std::to_string(i) + "M" + std::to_string(i) + "A0>");
             }
             for (int i=1; i<=numQubits; i++) {
                 for (int j=i+1; j<=numQubits; j++) {
                     double coeff = gs[i-1][j-1];
-                    limbladian += Poly(-imag*coeff, "<A0P" + std::to_string(i) + "M" + std::to_string(j) + ">");
-                    limbladian += Poly(-imag*coeff, "<A0M" + std::to_string(i) + "P" + std::to_string(j) + ">");
-                    limbladian += Poly(imag*coeff, "<P" + std::to_string(i) + "M" + std::to_string(j) + "A0>");
-                    limbladian += Poly(imag*coeff, "<M" + std::to_string(i) + "P" + std::to_string(j) + "A0>");
+                    lindbladian += Poly(-imag*coeff, "<A0P" + std::to_string(i) + "M" + std::to_string(j) + ">");
+                    lindbladian += Poly(-imag*coeff, "<A0M" + std::to_string(i) + "P" + std::to_string(j) + ">");
+                    lindbladian += Poly(imag*coeff, "<P" + std::to_string(i) + "M" + std::to_string(j) + "A0>");
+                    lindbladian += Poly(imag*coeff, "<M" + std::to_string(i) + "P" + std::to_string(j) + "A0>");
                 }
             }
             for (int i=1; i<=numQubits; i++) {
                 double coeffPlus = gamma_plus[i-1];
                 double coeffMinus = gamma_minus[i-1];
-                limbladian += Poly(coeffPlus, "<M" + std::to_string(i) + "A0P" + std::to_string(i) + ">");
-                limbladian += Poly(-0.5*coeffPlus, "<A0M" + std::to_string(i) + "P" + std::to_string(i) + ">");
-                limbladian += Poly(-0.5*coeffPlus, "<M" + std::to_string(i) + "P" + std::to_string(i) + "A0>");
-                limbladian += Poly(coeffMinus, "<P" + std::to_string(i) + "A0M" + std::to_string(i) + ">");
-                limbladian += Poly(-0.5*coeffMinus, "<A0P" + std::to_string(i) + "M" + std::to_string(i) + ">");
-                limbladian += Poly(-0.5*coeffMinus, "<P" + std::to_string(i) + "M" + std::to_string(i) + "A0>");
+                lindbladian += Poly(coeffPlus, "<M" + std::to_string(i) + "A0P" + std::to_string(i) + ">");
+                lindbladian += Poly(-0.5*coeffPlus, "<A0M" + std::to_string(i) + "P" + std::to_string(i) + ">");
+                lindbladian += Poly(-0.5*coeffPlus, "<M" + std::to_string(i) + "P" + std::to_string(i) + "A0>");
+                lindbladian += Poly(coeffMinus, "<P" + std::to_string(i) + "A0M" + std::to_string(i) + ">");
+                lindbladian += Poly(-0.5*coeffMinus, "<A0P" + std::to_string(i) + "M" + std::to_string(i) + ">");
+                lindbladian += Poly(-0.5*coeffMinus, "<P" + std::to_string(i) + "M" + std::to_string(i) + "A0>");
             }
-            limbladian.clean();
-            limbladian.convertToPaulis();
+            lindbladian.clean();
+            lindbladian.convertToPaulis();
 
-        // The Limbladian from David
+        // The Lindbladian from David
         } else if (argAsString == "--david" || argAsString == "--davidr") {
 
             // Parameters
@@ -444,20 +478,20 @@ int main(int argc, char* argv[]) {
             Gamma_k[0] *= std::sqrt(gamma_h);
             Gamma_k[numQubits-1] *= std::sqrt(gamma_c);
 
-            // The full Limbladian
+            // The full Lindbladian
             // -i[H, rho] + \sum_k 0.5 * (2*gamma_h * Gamma_k rho Gamma_k^dagger - Gamma_k^dagger Gamma_k rho - rho Gamma_k^dagger Gamma_k)
             Poly rho("<R1>");
-            limbladian = -imag*H.commutator(rho);
+            lindbladian = -imag*H.commutator(rho);
             for (int i=0; i<numQubits; i++) {
                 if (i == 0 || i == numQubits-1) {
-                    limbladian += 0.5 * (2 * Gamma_k[i] * rho * Gamma_k[i].dagger() - Gamma_k[i].dagger() * Gamma_k[i] * rho - rho * Gamma_k[i].dagger() * Gamma_k[i]);
+                    lindbladian += 0.5 * (2 * Gamma_k[i] * rho * Gamma_k[i].dagger() - Gamma_k[i].dagger() * Gamma_k[i] * rho - rho * Gamma_k[i].dagger() * Gamma_k[i]);
                 }
             }
-            limbladian = Poly("<A0>") * limbladian;
-            limbladian.cycleToAndRemove('R', 1);
-            limbladian.reduce();
+            lindbladian = Poly("<A0>") * lindbladian;
+            lindbladian.cycleToAndRemove('R', 1);
+            lindbladian.reduce();
 
-        // The Limbladian from David but 2D
+        // The Lindbladian from David but 2D
         } else if (argAsString == "--david2d" || argAsString == "--david2dr") {
 
             // Parameters
@@ -524,10 +558,10 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            // The full Limbladian
+            // The full Lindbladian
             // -i[H, rho] + \sum_k 0.5 * (2*gamma_h * Gamma_k rho Gamma_k^dagger - Gamma_k^dagger Gamma_k rho - rho Gamma_k^dagger Gamma_k)
             Poly rho("<R1>");
-            limbladian = -imag*H.commutator(rho);
+            lindbladian = -imag*H.commutator(rho);
             for (int i=0; i<numQubits; i++) {
                 int xLoc = i % gridWidth;
                 int yLoc = i / gridWidth;
@@ -535,12 +569,12 @@ int main(int argc, char* argv[]) {
                     if (verbosity >= 2) {
                         std::cout << "Connecting " << (i+1) << " to the bath" << std::endl;
                     }
-                    limbladian += 0.5 * (2 * Gamma_k[i] * rho * Gamma_k[i].dagger() - Gamma_k[i].dagger() * Gamma_k[i] * rho - rho * Gamma_k[i].dagger() * Gamma_k[i]);
+                    lindbladian += 0.5 * (2 * Gamma_k[i] * rho * Gamma_k[i].dagger() - Gamma_k[i].dagger() * Gamma_k[i] * rho - rho * Gamma_k[i].dagger() * Gamma_k[i]);
                 }
             }
-            limbladian = Poly("<A0>") * limbladian;
-            limbladian.cycleToAndRemove('R', 1);
-            limbladian.reduce();
+            lindbladian = Poly("<A0>") * lindbladian;
+            lindbladian.cycleToAndRemove('R', 1);
+            lindbladian.reduce();
 
         // A 1.5D chain
         } else if (argAsString == "--1.5d" || argAsString == "--1.5dr") {
@@ -592,20 +626,20 @@ int main(int argc, char* argv[]) {
             Gamma_k[0] *= std::sqrt(gamma_h);
             Gamma_k[numQubits-1] *= std::sqrt(gamma_c);
 
-            // The full Limbladian
+            // The full Lindbladian
             // -i[H, rho] + \sum_k 0.5 * (2*gamma_h * Gamma_k rho Gamma_k^dagger - Gamma_k^dagger Gamma_k rho - rho Gamma_k^dagger Gamma_k)
             Poly rho("<R1>");
-            limbladian = -imag*H.commutator(rho);
+            lindbladian = -imag*H.commutator(rho);
             for (int i=0; i<numQubits; i++) {
                 if (i == 0 || i == numQubits-1) {
-                    limbladian += 0.5 * (2 * Gamma_k[i] * rho * Gamma_k[i].dagger() - Gamma_k[i].dagger() * Gamma_k[i] * rho - rho * Gamma_k[i].dagger() * Gamma_k[i]);
+                    lindbladian += 0.5 * (2 * Gamma_k[i] * rho * Gamma_k[i].dagger() - Gamma_k[i].dagger() * Gamma_k[i] * rho - rho * Gamma_k[i].dagger() * Gamma_k[i]);
                 }
             }
-            limbladian = Poly("<A0>") * limbladian;
-            limbladian.cycleToAndRemove('R', 1);
-            limbladian.reduce();
+            lindbladian = Poly("<A0>") * lindbladian;
+            lindbladian.cycleToAndRemove('R', 1);
+            lindbladian.reduce();
 
-        // The Limbladian from the tensor paper
+        // The Lindbladian from the tensor paper
         } else if (argAsString == "--tensor") {
 
             // Defining quantities
@@ -636,17 +670,17 @@ int main(int argc, char* argv[]) {
                 Gamma_k[i-1] *= std::sqrt(gamma_minus)/2.0;
             }
 
-            // The full Limbladian
+            // The full Lindbladian
             // -i[H, rho] + \sum_k Gamma_k rho Gamma_k^dagger - 0.5 {Gamma_k^dagger Gamma_k, rho}
             Poly rho("<R1>");
-            limbladian = -imag*H.commutator(rho);
+            lindbladian = -imag*H.commutator(rho);
             for (int i=0; i<numQubits; i++) {
-                limbladian += Gamma_k[i] * rho * Gamma_k[i].dagger();
-                limbladian -= 0.5 * (Gamma_k[i].dagger() * Gamma_k[i]).anticommutator(rho);
+                lindbladian += Gamma_k[i] * rho * Gamma_k[i].dagger();
+                lindbladian -= 0.5 * (Gamma_k[i].dagger() * Gamma_k[i]).anticommutator(rho);
             }
-            limbladian = Poly("<A0>") * limbladian;
-            limbladian.cycleToAndRemove('R', 1);
-            limbladian.reduce();
+            lindbladian = Poly("<A0>") * lindbladian;
+            lindbladian.cycleToAndRemove('R', 1);
+            lindbladian.reduce();
 
             // Objective is just the average magnetization
             objective = Poly();
@@ -661,11 +695,11 @@ int main(int argc, char* argv[]) {
                 for (int i=0; i<numQubits; i++) {
                     std::cout << "  " << Gamma_k[i] << std::endl;
                 }
-                std::cout << "Limbladian: " << limbladian << std::endl;
+                std::cout << "Lindbladian: " << lindbladian << std::endl;
                 std::cout << "Objective: " << objective << std::endl;
             }
 
-        // Many-body Limbladian
+        // Many-body Lindbladian
         } else if (argAsString == "--many" || argAsString == "--manyv" || argAsString == "--manyr") {
 
             // Defining quantities
@@ -725,26 +759,26 @@ int main(int argc, char* argv[]) {
             }
             
             // Construct the Limbadlian as a polynomial from plus/minus
-            limbladian = Poly();
+            lindbladian = Poly();
             for (int i=1; i<=numQubits; i++) {
-                limbladian += Poly(-imag*epsilons[i-1], "<A0P" + std::to_string(i) + "M" + std::to_string(i) + ">");
-                limbladian += Poly(imag*epsilons[i-1], "<P" + std::to_string(i) + "M" + std::to_string(i) + "A0>");
+                lindbladian += Poly(-imag*epsilons[i-1], "<A0P" + std::to_string(i) + "M" + std::to_string(i) + ">");
+                lindbladian += Poly(imag*epsilons[i-1], "<P" + std::to_string(i) + "M" + std::to_string(i) + "A0>");
             }
             for (int i=1; i<=numQubits-1; i++) {
-                limbladian += Poly(-imag*gs[i], "<A0P" + std::to_string(i) + "M" + std::to_string(i+1) + ">");
-                limbladian += Poly(-imag*gs[i], "<A0M" + std::to_string(i) + "P" + std::to_string(i+1) + ">");
-                limbladian += Poly(imag*gs[i], "<P" + std::to_string(i) + "M" + std::to_string(i+1) + "A0>");
-                limbladian += Poly(imag*gs[i], "<M" + std::to_string(i) + "P" + std::to_string(i+1) + "A0>");
+                lindbladian += Poly(-imag*gs[i], "<A0P" + std::to_string(i) + "M" + std::to_string(i+1) + ">");
+                lindbladian += Poly(-imag*gs[i], "<A0M" + std::to_string(i) + "P" + std::to_string(i+1) + ">");
+                lindbladian += Poly(imag*gs[i], "<P" + std::to_string(i) + "M" + std::to_string(i+1) + "A0>");
+                lindbladian += Poly(imag*gs[i], "<M" + std::to_string(i) + "P" + std::to_string(i+1) + "A0>");
             }
             for (int i : {1, numQubits}) {
-                limbladian += Poly(gamma_plus[i-1], "<M" + std::to_string(i) + "A0P" + std::to_string(i) + ">");
-                limbladian += Poly(-0.5*gamma_plus[i-1], "<A0M" + std::to_string(i) + "P" + std::to_string(i) + ">");
-                limbladian += Poly(-0.5*gamma_plus[i-1], "<M" + std::to_string(i) + "P" + std::to_string(i) + "A0>");
-                limbladian += Poly(gamma_minus[i-1], "<P" + std::to_string(i) + "A0M" + std::to_string(i) + ">");
-                limbladian += Poly(-0.5*gamma_minus[i-1], "<A0P" + std::to_string(i) + "M" + std::to_string(i) + ">");
-                limbladian += Poly(-0.5*gamma_minus[i-1], "<P" + std::to_string(i) + "M" + std::to_string(i) + "A0>");
+                lindbladian += Poly(gamma_plus[i-1], "<M" + std::to_string(i) + "A0P" + std::to_string(i) + ">");
+                lindbladian += Poly(-0.5*gamma_plus[i-1], "<A0M" + std::to_string(i) + "P" + std::to_string(i) + ">");
+                lindbladian += Poly(-0.5*gamma_plus[i-1], "<M" + std::to_string(i) + "P" + std::to_string(i) + "A0>");
+                lindbladian += Poly(gamma_minus[i-1], "<P" + std::to_string(i) + "A0M" + std::to_string(i) + ">");
+                lindbladian += Poly(-0.5*gamma_minus[i-1], "<A0P" + std::to_string(i) + "M" + std::to_string(i) + ">");
+                lindbladian += Poly(-0.5*gamma_minus[i-1], "<P" + std::to_string(i) + "M" + std::to_string(i) + "A0>");
             }
-            limbladian.convertToPaulis();
+            lindbladian.convertToPaulis();
 
         // Set the seed
         } else if (argAsString == "-S") {
@@ -757,9 +791,9 @@ int main(int argc, char* argv[]) {
             verbosity = std::stoi(argv[i+1]);
             i++;
 
-        // If setting the level of the Limbladian
+        // If setting the level of the Lindbladian
         } else if (argAsString == "-l") {
-            limbladLevel = std::stoi(argv[i+1]);
+            lindbladLevel = std::stoi(argv[i+1]);
             i++;
 
         // If adding an extra monomial to the top row
@@ -767,7 +801,7 @@ int main(int argc, char* argv[]) {
             extraMonomials.push_back(std::string(argv[i+1]));
             i++;
 
-        // If adding an extra monomial to the list of Limbladian replacements
+        // If adding an extra monomial to the list of Lindbladian replacements
         } else if (argAsString == "-E") {
             extraMonomialsLim.push_back(std::string(argv[i+1]));
             i++;
@@ -844,9 +878,11 @@ int main(int argc, char* argv[]) {
         // Reconstruction constraints
         } else if (argAsString == "-r") {
             reconLevel = std::stoi(argv[i+1]);
-            minReconSize = std::stoi(argv[i+2]);
-            maxReconSize = std::stoi(argv[i+3]);
-            i+=3;
+            i+=1;
+
+        // Tracing out constraints
+        } else if (argAsString == "-T") {
+            traceCons = true;
 
         // Output the help
         // TODO heat current constraint
@@ -854,9 +890,9 @@ int main(int argc, char* argv[]) {
             std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
             std::cout << "Options:" << std::endl;
             std::cout << "  -m <int>        Level of the moment matrix" << std::endl;
-            std::cout << "  -l <int>        Level of the moments to put in the Limbladian" << std::endl;
+            std::cout << "  -l <int>        Level of the moments to put in the Lindbladian" << std::endl;
             std::cout << "  -e <mon>        Add an extra monomial to the top row of the moment matrix" << std::endl;
-            std::cout << "  -E <mon>        Add an extra monomial to the list of Limbladian replacements" << std::endl;
+            std::cout << "  -E <mon>        Add an extra monomial to the list of Lindbladian replacements" << std::endl;
             std::cout << "  -S <str>        Seed for the random number generator" << std::endl;
             std::cout << "  -M <int>        Try to generate the minimal set of linear constraints" << std::endl;
             std::cout << "  -A <int>        Try to generate the minimal moment matrix" << std::endl;
@@ -867,6 +903,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  -c <int>        Add some number of extra constraints to reduce the num of vars" << std::endl;
             std::cout << "  -t <dbl>        Set the tolerance (used in various places)" << std::endl;
             std::cout << "  -y <ints>       Add a symetry between two groups e.g. -y 1,2 3,4" << std::endl;
+            std::cout << "  -T              Add tracing-out constraints between density mats" << std::endl;
             std::cout << "Solver options:" << std::endl;
             std::cout << "  -s G            Use Gurobi as the solver" << std::endl;
             std::cout << "  -s E            Use Eigen as the solver" << std::endl;
@@ -880,7 +917,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  --objZ          Use avg sigma_Z as the objective" << std::endl;
             std::cout << "  --objHC <ints>  Heat current between two sites" << std::endl;
             std::cout << "Limbliadian options:" << std::endl;
-            std::cout << "  -L <str>        Manually set the Limbladian" << std::endl;
+            std::cout << "  -L <str>        Manually set the Lindbladian" << std::endl;
             std::cout << "  --pauli <dbl> <dbl> <dbl>" << std::endl;
             std::cout << "  --two" << std::endl;
             std::cout << "  --twov <dbl> <dbl>" << std::endl;
@@ -911,7 +948,7 @@ int main(int argc, char* argv[]) {
     // Start a timer
     std::chrono::steady_clock::time_point timeFinishedArgs = std::chrono::steady_clock::now();
 
-    // Create the Limbladian applied to many different operators
+    // Create the Lindbladian applied to many different operators
     std::set<Mon> monomsUsed;
     std::vector<std::vector<std::vector<Poly>>> momentMatrices = {};
     std::vector<Mon> variables = {};
@@ -920,23 +957,23 @@ int main(int argc, char* argv[]) {
         variables.push_back(Mon("<Y" + std::to_string(i+1) + ">"));
         variables.push_back(Mon("<Z" + std::to_string(i+1) + ">"));
     }
-    std::vector<Poly> variablesToPut = generateMonomials(variables, limbladLevel, verbosity);
+    std::vector<Poly> variablesToPut = generateMonomials(variables, lindbladLevel, verbosity);
     for (size_t i=0; i<extraMonomialsLim.size(); i++) {
         variablesToPut.push_back(Poly(extraMonomialsLim[i]));
     }
     if (verbosity >= 2) {
         std::cout << std::endl;
-        std::cout << "Variables to put in Limbladian: " << std::endl;
+        std::cout << "Variables to put in Lindbladian: " << std::endl;
         for (size_t i=0; i<variablesToPut.size(); i++) {
             std::cout << variablesToPut[i] << std::endl;
         }
         std::cout << std::endl;
-        std::cout << "Original Limbladian: " << limbladian << std::endl;
+        std::cout << "Original Lindbladian: " << lindbladian << std::endl;
     }
     for (size_t i=0; i<variablesToPut.size(); i++) {
         std::pair<char,int> oldMon('A', 0);
         Mon newPoly(variablesToPut[i].getKey());
-        Poly newConstraint = limbladian.replaced(oldMon, newPoly);
+        Poly newConstraint = lindbladian.replaced(oldMon, newPoly);
         if (verbosity >= 3) {
             std::cout << std::endl;
             std::cout << "Variable to put: " << newPoly << std::endl;
@@ -1052,14 +1089,14 @@ int main(int argc, char* argv[]) {
                     break;
                 }
 
-                // Put the monomial in the Limbladian
+                // Put the monomial in the Lindbladian
                 Mon toPut(monToAdd);
                 if (verbosity >= 3) {
                     std::cout << std::endl;
                     std::cout << "Putting in monomial: " << toPut << std::endl;
                 }
                 std::pair<char,int> oldMon('A', 0);
-                Poly newConstraint = limbladian.replaced(oldMon, toPut);
+                Poly newConstraint = lindbladian.replaced(oldMon, toPut);
 
                 // Add the constraint
                 if (!newConstraint.isZero()) {
@@ -1130,10 +1167,10 @@ int main(int argc, char* argv[]) {
                         }
                     }
 
-                    // Put the monomial in the Limbladian
+                    // Put the monomial in the Lindbladian
                     Mon toPut(monToAdd);
                     std::pair<char,int> oldMon('A', 0);
-                    Poly newConstraint = limbladian.replaced(oldMon, toPut);
+                    Poly newConstraint = lindbladian.replaced(oldMon, toPut);
 
                     // Add the constraint
                     if (!newConstraint.isZero()) {
@@ -1284,10 +1321,10 @@ int main(int argc, char* argv[]) {
             break;
         }
 
-        // Put the monomial in the Limbladian
+        // Put the monomial in the Lindbladian
         Mon toPut(monToAdd);
         std::pair<char,int> oldMon('A', 0);
-        Poly newConstraint = limbladian.replaced(oldMon, toPut);
+        Poly newConstraint = lindbladian.replaced(oldMon, toPut);
 
         // Check if the new constraint adds more variables
         int numNewVars = 0;
@@ -1404,7 +1441,7 @@ int main(int argc, char* argv[]) {
         constraintsZero.push_back(Poly(sym.first)-Poly(sym.second));
     }
 
-    // Add constraints that the reconstructed density matrix is positive TODO
+    // Add constraints that the reconstructed density matrix is positive
     if (reconLevel != 0) {
 
         // Pauli matrices
@@ -1475,12 +1512,15 @@ int main(int argc, char* argv[]) {
             }
         }
 
+        // Keep track of what all the various density mats are
+        std::map<std::vector<int>, int> sitesToInd;
+
         // Single-body terms
-        if (reconLevel == -1) {
+        if (reconLevel >= 1) {
 
             // For each qubit
             for (int i=0; i<numQubits; i++) {
-                int matSize = std::pow(2, -reconLevel);
+                int matSize = std::pow(2, 1);
                 std::vector<std::vector<Poly>> rho1(matSize, std::vector<Poly>(matSize));
 
                 // For each Pauli matrix
@@ -1509,17 +1549,18 @@ int main(int argc, char* argv[]) {
 
                 // Add the matrix to the list of mats that should be positive
                 momentMatrices.push_back(rho1);
+                sitesToInd[{i}] = momentMatrices.size()-1;
 
             }
         }
 
         // Two-body terms
-        if (reconLevel == -2) {
+        if (reconLevel >= 2) {
 
             // For each selection of qubits
             for (int i=0; i<numQubits; i++) {
                 for (int i2=i+1; i2<numQubits; i2++) {
-                    int matSize = std::pow(2, -reconLevel);
+                    int matSize = std::pow(2, 2);
                     std::vector<std::vector<Poly>> rho2(matSize, std::vector<Poly>(matSize));
 
                     // For each Pauli matrix
@@ -1553,6 +1594,7 @@ int main(int argc, char* argv[]) {
 
                     // Add the matrix to the list of mats that should be positive
                     momentMatrices.push_back(rho2);
+                    sitesToInd[{i,i2}] = momentMatrices.size()-1;
 
                 }
             }
@@ -1560,13 +1602,13 @@ int main(int argc, char* argv[]) {
         }
 
         // Three-body terms
-        if (reconLevel == -3) {
+        if (reconLevel >= 3) {
 
             // For each selection of qubits
             for (int i=0; i<numQubits; i++) {
                 for (int i2=i+1; i2<numQubits; i2++) {
                     for (int i3=i2+1; i3<numQubits; i3++) {
-                        int matSize = std::pow(2, -reconLevel);
+                        int matSize = std::pow(2, 3);
                         std::vector<std::vector<Poly>> rho3(matSize, std::vector<Poly>(matSize));
 
                         // For each Pauli matrix
@@ -1605,6 +1647,7 @@ int main(int argc, char* argv[]) {
 
                         // Add the matrix to the list of mats that should be positive
                         momentMatrices.push_back(rho3);
+                        sitesToInd[{i,i2,i3}] = momentMatrices.size()-1;
 
                     }
                 }   
@@ -1613,14 +1656,14 @@ int main(int argc, char* argv[]) {
         }
 
         // Four body terms
-        if (reconLevel == -4) {
+        if (reconLevel >= 4) {
 
             // For each selection of qubits
             for (int i=0; i<numQubits; i++) {
                 for (int i2=i+1; i2<numQubits; i2++) {
                     for (int i3=i2+1; i3<numQubits; i3++) {
                         for (int i4=i3+1; i4<numQubits; i4++) {
-                            int matSize = std::pow(2, -reconLevel);
+                            int matSize = std::pow(2, 4);
                             std::vector<std::vector<Poly>> rho4(matSize, std::vector<Poly>(matSize));
 
                             // For each Pauli matrix
@@ -1664,6 +1707,7 @@ int main(int argc, char* argv[]) {
 
                             // Add the matrix to the list of mats that should be positive
                             momentMatrices.push_back(rho4);
+                            sitesToInd[{i,i2,i3,i4}] = momentMatrices.size()-1;
 
                         }
                     }
@@ -1672,7 +1716,7 @@ int main(int argc, char* argv[]) {
         }
 
         // Five body terms
-        if (reconLevel == -5) {
+        if (reconLevel >= 5) {
 
             // For each selection of qubits
             for (int i=0; i<numQubits; i++) {
@@ -1680,7 +1724,7 @@ int main(int argc, char* argv[]) {
                     for (int i3=i2+1; i3<numQubits; i3++) {
                         for (int i4=i3+1; i4<numQubits; i4++) {
                             for (int i5=i4+1; i5<numQubits; i5++) {
-                                int matSize = std::pow(2, -reconLevel);
+                                int matSize = std::pow(2, 5);
                                 std::vector<std::vector<Poly>> rho5(matSize, std::vector<Poly>(matSize));
 
                                 // For each Pauli matrix
@@ -1729,6 +1773,7 @@ int main(int argc, char* argv[]) {
 
                                 // Add the matrix to the list of mats that should be positive
                                 momentMatrices.push_back(rho5);
+                                sitesToInd[{i,i2,i3,i4,i5}] = momentMatrices.size()-1;
 
                             }
                         }
@@ -1737,270 +1782,52 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        // Auto recon cons TODO
-        if (reconLevel > 0) {
+        // Add trace out constraints TODO
+        if (traceCons) {
 
-            // For each used monomial
-            std::set<std::set<int>> combinationsUsed;
-            for (auto mon : monomsUsed) {
-                if (momentMatrices.size() >= reconLevel) {
-                    break;
-                }
+            // output all indices 
+            for (auto& site : sitesToInd) {
+                std::cout << site.first << " -> " << site.second << std::endl;
+            }
 
-                // Make sure it's a new combination
-                std::set<int> qubitsUsed;
-                for (auto term : mon) {
-                    qubitsUsed.insert(term.second);
-                }
-                if (combinationsUsed.count(qubitsUsed)) {
-                    continue;
-                }
-                combinationsUsed.insert(qubitsUsed);
+            std::vector<std::pair<std::vector<int>, int>> thingsToDo;
 
-                // Bound the max size
-                if (mon.size() < minReconSize) {
-                    continue;
-                }
-                if (mon.size() > maxReconSize) {
-                    continue;
-                }
-
-                // Single-body terms
-                if (mon.size() == 1) {
-
-                    // Same as above but for the monomial
-                    int i = mon.monomial[0].second;
-                    int matSize = std::pow(2, mon.size());
-                    std::vector<std::vector<Poly>> rho(matSize, std::vector<Poly>(matSize));
-                    double coeff = std::pow(0.5, mon.size());
-
-                    // For each Pauli matrix
-                    for (int l=0; l<4; l++) {
-                        Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[{l}];
-
-                        // For each element of said matrix
-                        for (int k=0; k<mat.outerSize(); ++k) {
-                            for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(mat,k); it; ++it) {
-                                std::complex<double> val = it.value();
-                                int j = it.row();
-                                std::string monString = "<";
-                                if (l > 0) {
-                                    monString += letterMap[l] + std::to_string(i+1);
-                                }
-                                monString += ">";
-                                if (monString.size() > 2) {
-                                    rho[j][k] += coeff * val * Mon(monString);
-                                } else {
-                                    rho[j][k] += coeff * val;
-                                }
-                            }
-                        }
-
-                    }
-
-                    // Add the matrix to the list of mats that should be positive
-                    momentMatrices.push_back(rho);
-
-                // Two-body terms
-                } else if (mon.size() == 2) {
-                    int i = mon.monomial[0].second;
-                    int i2 = mon.monomial[1].second;
-                    int matSize = std::pow(2, mon.size());
-                    double coeff = std::pow(0.5, mon.size());
-                    std::vector<std::vector<Poly>> rho(matSize, std::vector<Poly>(matSize));
-
-                    // For each Pauli matrix
-                    for (int l=0; l<4; l++) {
-                        for (int l2=0; l2<4; l2++) {
-                        Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[{l,l2}];
-
-                            // For each element of said matrix
-                            for (int k=0; k<mat.outerSize(); ++k) {
-                                for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(mat,k); it; ++it) {
-                                    std::complex<double> val = it.value();
-                                    int j = it.row();
-                                    std::string monString = "<";
-                                    if (l > 0) {
-                                        monString += letterMap[l] + std::to_string(i+1);
-                                    }
-                                    if (l2 > 0) {
-                                        monString += letterMap[l2] + std::to_string(i2+1);
-                                    }
-                                    monString += ">";
-                                    if (monString.size() > 2) {
-                                        rho[j][k] += coeff * val * Mon(monString);
-                                    } else {
-                                        rho[j][k] += coeff * val;
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-
-                    // Add the matrix to the list of mats that should be positive
-                    momentMatrices.push_back(rho);
-
-                // Three-body terms
-                } else if (mon.size() == 3) {
-                    int i = mon.monomial[0].second;
-                    int i2 = mon.monomial[1].second;
-                    int i3 = mon.monomial[2].second;
-                    int matSize = std::pow(2, mon.size());
-                    double coeff = std::pow(0.5, mon.size());
-                    std::vector<std::vector<Poly>> rho(matSize, std::vector<Poly>(matSize));
-
-                    // For each Pauli matrix
-                    for (int l=0; l<4; l++) {
-                        for (int l2=0; l2<4; l2++) {
-                            for (int l3=0; l3<4; l3++) {
-
-                                // For each element of said matrix
-                                Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[{l,l2,l3}];
-                                for (int k=0; k<mat.outerSize(); ++k) {
-                                    for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(mat,k); it; ++it) {
-                                        std::complex<double> val = it.value();
-                                        int j = it.row();
-                                        std::string monString = "<";
-                                        if (l > 0) {
-                                            monString += letterMap[l] + std::to_string(i+1);
-                                        }
-                                        if (l2 > 0) {
-                                            monString += letterMap[l2] + std::to_string(i2+1);
-                                        }
-                                        if (l3 > 0) {
-                                            monString += letterMap[l3] + std::to_string(i3+1);
-                                        }
-                                        monString += ">";
-                                        if (monString.size() > 2) {
-                                            rho[j][k] += coeff * val * Mon(monString);
-                                        } else {
-                                            rho[j][k] += coeff * val;
-                                        }
-                                    }
-                                }
-
+            if (reconLevel >= 3) {
+                for (int i=0; i<numQubits; i++) {
+                    for (int i2=i+1; i2<numQubits; i2++) {
+                        for (int i3=i2+1; i3<numQubits; i3++) {
+                            std::vector<int> sites = {i,i2,i3};
+                            for (int k=0; k<sites.size(); k++) {
+                                thingsToDo.push_back({sites, k});
                             }
                         }
                     }
+                }
+            }
 
-                    // Add the matrix to the list of mats that should be positive
-                    momentMatrices.push_back(rho);
+            for (auto& thing : thingsToDo) {
 
-                // Four body terms
-                } else if (mon.size() == 4) {
-                    int i = mon.monomial[0].second;
-                    int i2 = mon.monomial[1].second;
-                    int i3 = mon.monomial[2].second;
-                    int i4 = mon.monomial[3].second;
-                    int matSize = std::pow(2, mon.size());
-                    double coeff = std::pow(0.5, mon.size());
-                    std::vector<std::vector<Poly>> rho(matSize, std::vector<Poly>(matSize));
+                std::cout << "Tracing out " << thing.first << " at " << thing.second << std::endl;
 
-                    // For each Pauli matrix
-                    for (int l=0; l<4; l++) {
-                        for (int l2=0; l2<4; l2++) {
-                            for (int l3=0; l3<4; l3++) {
-                                for (int l4=0; l4<4; l4++) {
-
-                                    // For each element of said matrix
-                                    Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[{l,l2,l3,l4}];
-                                    for (int k=0; k<mat.outerSize(); ++k) {
-                                        for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(mat,k); it; ++it) {
-                                            std::complex<double> val = it.value();
-                                            int j = it.row();
-                                            std::string monString = "<";
-                                            if (l > 0) {
-                                                monString += letterMap[l] + std::to_string(i+1);
-                                            }
-                                            if (l2 > 0) {
-                                                monString += letterMap[l2] + std::to_string(i2+1);
-                                            }
-                                            if (l3 > 0) {
-                                                monString += letterMap[l3] + std::to_string(i3+1);
-                                            }
-                                            if (l4 > 0) {
-                                                monString += letterMap[l4] + std::to_string(i4+1);
-                                            }
-                                            monString += ">";
-                                            if (monString.size() > 2) {
-                                                rho[j][k] += coeff * val * Mon(monString);
-                                            } else {
-                                                rho[j][k] += coeff * val;
-                                            }
-                                        }
-                                    }
-
-                                }
-                            }
-                        }
+                std::vector<int> fullSites = thing.first;
+                int toTrace = thing.second;
+                std::vector<int> reducedSites;
+                for (int i=0; i<fullSites.size(); i++) {
+                    if (i != toTrace) {
+                        reducedSites.push_back(fullSites[i]);
                     }
-
-                    // Add the matrix to the list of mats that should be positive
-                    momentMatrices.push_back(rho);
-
-                // Five body terms
-                } else if (mon.size() == 5) {
-                    int i = mon.monomial[0].second;
-                    int i2 = mon.monomial[1].second;
-                    int i3 = mon.monomial[2].second;
-                    int i4 = mon.monomial[3].second;
-                    int i5 = mon.monomial[4].second;
-                    int matSize = std::pow(2, mon.size());
-                    std::vector<std::vector<Poly>> rho(matSize, std::vector<Poly>(matSize));
-                    double coeff = std::pow(0.5, mon.size());
-
-                    // For each Pauli matrix
-                    for (int l=0; l<4; l++) {
-                        for (int l2=0; l2<4; l2++) {
-                            for (int l3=0; l3<4; l3++) {
-                                for (int l4=0; l4<4; l4++) {
-                                    for (int l5=0; l5<4; l5++) {
-
-                                        // For each element of said matrix
-                                        Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[{l,l2,l3,l4}];
-                                        for (int k=0; k<mat.outerSize(); ++k) {
-                                            for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(mat,k); it; ++it) {
-                                                std::complex<double> val = it.value();
-                                                int j = it.row();
-                                                std::string monString = "<";
-                                                if (l > 0) {
-                                                    monString += letterMap[l] + std::to_string(i+1);
-                                                }
-                                                if (l2 > 0) {
-                                                    monString += letterMap[l2] + std::to_string(i2+1);
-                                                }
-                                                if (l3 > 0) {
-                                                    monString += letterMap[l3] + std::to_string(i3+1);
-                                                }
-                                                if (l4 > 0) {
-                                                    monString += letterMap[l4] + std::to_string(i4+1);
-                                                }
-                                                if (l5 > 0) {
-                                                    monString += letterMap[l5] + std::to_string(i5+1);
-                                                }
-                                                monString += ">";
-                                                if (monString.size() > 2) {
-                                                    rho[j][k] += coeff * val * Mon(monString);
-                                                } else {
-                                                    rho[j][k] += coeff * val;
-                                                }
-                                            }
-                                        }
-
-                                    }
-                                }
-                            }
-                        }
+                }
+                
+                std::vector<std::vector<Poly>> mat12 = momentMatrices[sitesToInd[reducedSites]];
+                std::vector<std::vector<Poly>> mat12T = partialTrace(momentMatrices[sitesToInd[fullSites]], toTrace);
+                for (int i=0; i<mat12.size(); i++) {
+                    for (int j=0; j<mat12.size(); j++) {
+                        constraintsZero.push_back(mat12[i][j] - mat12T[i][j]);
                     }
-
-                    // Add the matrix to the list of mats that should be positive
-                    momentMatrices.push_back(rho);
-
                 }
 
             }
-            
+
         }
 
     }
