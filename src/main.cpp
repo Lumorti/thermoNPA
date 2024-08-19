@@ -1804,6 +1804,36 @@ int main(int argc, char* argv[]) {
                     }
                 }
             }
+            if (reconLevel >= 4) {
+                for (int i=0; i<numQubits; i++) {
+                    for (int i2=i+1; i2<numQubits; i2++) {
+                        for (int i3=i2+1; i3<numQubits; i3++) {
+                            for (int i4=i3+1; i4<numQubits; i4++) {
+                                std::vector<int> sites = {i,i2,i3,i4};
+                                for (int k=0; k<sites.size(); k++) {
+                                    thingsToDo.push_back({sites, k});
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (reconLevel >= 5) {
+                for (int i=0; i<numQubits; i++) {
+                    for (int i2=i+1; i2<numQubits; i2++) {
+                        for (int i3=i2+1; i3<numQubits; i3++) {
+                            for (int i4=i3+1; i4<numQubits; i4++) {
+                                for (int i5=i4+1; i5<numQubits; i5++) {
+                                    std::vector<int> sites = {i,i2,i3,i4,i5};
+                                    for (int k=0; k<sites.size(); k++) {
+                                        thingsToDo.push_back({sites, k});
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             for (auto& thing : thingsToDo) {
 
