@@ -68,11 +68,10 @@ std::vector<std::vector<Poly>> partialTrace(std::vector<std::vector<Poly>> mat, 
             int i2 = i % (1 << siteInd);
             int j1 = j / (1 << siteInd);
             int j2 = j % (1 << siteInd);
-            
             for (int k = 0; k < 2; ++k) {
                 int row = (i1 << (siteInd + 1)) | (k << siteInd) | i2;
                 int col = (j1 << (siteInd + 1)) | (k << siteInd) | j2;
-                newMat[i][j] += mat[row][col] / 2;
+                newMat[i][j] += mat[row][col];
             }
         }                                                                                       
     }
@@ -1522,6 +1521,7 @@ int main(int argc, char* argv[]) {
             for (int i=0; i<numQubits; i++) {
                 int matSize = std::pow(2, 1);
                 std::vector<std::vector<Poly>> rho1(matSize, std::vector<Poly>(matSize));
+                double scaling = std::pow(2, -1);
 
                 // For each Pauli matrix
                 for (int l=0; l<4; l++) {
@@ -1538,9 +1538,9 @@ int main(int argc, char* argv[]) {
                             }
                             monString += ">";
                             if (monString.size() > 2) {
-                                rho1[j][k] += 0.5 * val * Mon(monString);
+                                rho1[j][k] += scaling * val * Mon(monString);
                             } else {
-                                rho1[j][k] += 0.5 * val;
+                                rho1[j][k] += scaling * val;
                             }
                         }
                     }
@@ -1562,6 +1562,7 @@ int main(int argc, char* argv[]) {
                 for (int i2=i+1; i2<numQubits; i2++) {
                     int matSize = std::pow(2, 2);
                     std::vector<std::vector<Poly>> rho2(matSize, std::vector<Poly>(matSize));
+                    double scaling = std::pow(2, -2);
 
                     // For each Pauli matrix
                     for (int l=0; l<4; l++) {
@@ -1582,9 +1583,9 @@ int main(int argc, char* argv[]) {
                                     }
                                     monString += ">";
                                     if (monString.size() > 2) {
-                                        rho2[j][k] += 0.5 * val * Mon(monString);
+                                        rho2[j][k] += scaling * val * Mon(monString);
                                     } else {
-                                        rho2[j][k] += 0.5 * val;
+                                        rho2[j][k] += scaling * val;
                                     }
                                 }
                             }
@@ -1610,6 +1611,7 @@ int main(int argc, char* argv[]) {
                     for (int i3=i2+1; i3<numQubits; i3++) {
                         int matSize = std::pow(2, 3);
                         std::vector<std::vector<Poly>> rho3(matSize, std::vector<Poly>(matSize));
+                        double scaling = std::pow(2, -3);
 
                         // For each Pauli matrix
                         for (int l=0; l<4; l++) {
@@ -1634,9 +1636,9 @@ int main(int argc, char* argv[]) {
                                             }
                                             monString += ">";
                                             if (monString.size() > 2) {
-                                                rho3[j][k] += 0.5 * val * Mon(monString);
+                                                rho3[j][k] += scaling * val * Mon(monString);
                                             } else {
-                                                rho3[j][k] += 0.5 * val;
+                                                rho3[j][k] += scaling * val;
                                             }
                                         }
                                     }
@@ -1648,6 +1650,14 @@ int main(int argc, char* argv[]) {
                         // Add the matrix to the list of mats that should be positive
                         momentMatrices.push_back(rho3);
                         sitesToInd[{i,i2,i3}] = momentMatrices.size()-1;
+
+                        // Also add the constrain that the trace is 1 TODO
+                        //Poly traceConstraint;
+                        //for (int j=0; j<matSize; j++) {
+                            //traceConstraint += rho3[j][j];
+                        //}
+                        //traceConstraint -= Poly(1);
+                        //constraintsZero.push_back(traceConstraint);
 
                     }
                 }   
@@ -1665,6 +1675,7 @@ int main(int argc, char* argv[]) {
                         for (int i4=i3+1; i4<numQubits; i4++) {
                             int matSize = std::pow(2, 4);
                             std::vector<std::vector<Poly>> rho4(matSize, std::vector<Poly>(matSize));
+                            double scaling = std::pow(2, -4);
 
                             // For each Pauli matrix
                             for (int l=0; l<4; l++) {
@@ -1693,9 +1704,9 @@ int main(int argc, char* argv[]) {
                                                     }
                                                     monString += ">";
                                                     if (monString.size() > 2) {
-                                                        rho4[j][k] += 0.5 * val * Mon(monString);
+                                                        rho4[j][k] += scaling * val * Mon(monString);
                                                     } else {
-                                                        rho4[j][k] += 0.5 * val;
+                                                        rho4[j][k] += scaling * val;
                                                     }
                                                 }
                                             }
@@ -1726,6 +1737,7 @@ int main(int argc, char* argv[]) {
                             for (int i5=i4+1; i5<numQubits; i5++) {
                                 int matSize = std::pow(2, 5);
                                 std::vector<std::vector<Poly>> rho5(matSize, std::vector<Poly>(matSize));
+                                double scaling = std::pow(2, -5);
 
                                 // For each Pauli matrix
                                 for (int l=0; l<4; l++) {
@@ -1758,9 +1770,9 @@ int main(int argc, char* argv[]) {
                                                             }
                                                             monString += ">";
                                                             if (monString.size() > 2) {
-                                                                rho5[j][k] += 0.5 * val * Mon(monString);
+                                                                rho5[j][k] += scaling * val * Mon(monString);
                                                             } else {
-                                                                rho5[j][k] += 0.5 * val;
+                                                                rho5[j][k] += scaling * val;
                                                             }
                                                         }
                                                     }
