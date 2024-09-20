@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <complex>
+#include <unordered_set>
 #include <set>
 #include <chrono>
 #include <map>
@@ -902,6 +903,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  -c <int>        Add some number of extra constraints to reduce the num of vars" << std::endl;
             std::cout << "  -t <dbl>        Set the tolerance (used in various places)" << std::endl;
             std::cout << "  -y <ints>       Add a symetry between two groups e.g. -y 1,2 3,4" << std::endl;
+            std::cout << "  -Y              Assume full symmetry between all qubits" << std::endl;
             std::cout << "  -T              Add tracing-out constraints between density mats" << std::endl;
             std::cout << "Solver options:" << std::endl;
             std::cout << "  -s G            Use Gurobi as the solver" << std::endl;
@@ -931,6 +933,14 @@ int main(int argc, char* argv[]) {
             std::cout << "  --david2dr <dbl> <int> <int>" << std::endl;
             return 0;
 
+        /// If using all symmetries
+        } else if (argAsString == "-Y") {
+            for (int i=1; i<=numQubits; i++) {
+                for (int j=i+1; j<=numQubits; j++) {
+                    symmetries.push_back({{i}, {j}});
+                }
+            }
+
         // If auto generating the moment matrix
         } else if (argAsString == "-A") {
             autoMomentAmount = std::stoi(argv[i+1]);
@@ -949,6 +959,7 @@ int main(int argc, char* argv[]) {
 
     // Create the Lindbladian applied to many different operators
     std::set<Mon> monomsUsed;
+    std::vector<Mon> monomsUsedVec;
     std::vector<std::vector<std::vector<Poly>>> momentMatrices = {};
     std::vector<Mon> variables = {};
     for (int i=0; i<numQubits; i++) {
@@ -982,6 +993,7 @@ int main(int argc, char* argv[]) {
             constraintsZero.push_back(newConstraint);
         }
         monomsUsed.insert(variablesToPut[i].getKey());
+        monomsUsedVec.push_back(variablesToPut[i].getKey());
     }
 
     // Reduce the constraints as much as possible
@@ -1102,6 +1114,7 @@ int main(int argc, char* argv[]) {
                     constraintsZero.push_back(newConstraint); 
                 }
                 monomsUsed.insert(monToAdd);
+                monomsUsedVec.push_back(monToAdd);
                 std::set<Mon> newTerms;
                 for (auto& term : newConstraint) {
                     newTerms.insert(term.first);
@@ -1176,6 +1189,7 @@ int main(int argc, char* argv[]) {
                         constraintsZero.push_back(newConstraint); 
                     }
                     monomsUsed.insert(monToAdd);
+                    monomsUsedVec.push_back(monToAdd);
                     for (auto& term : newConstraint) {
                         if (!monomsInConstraints.count(term.first)) {
                             monomsInConstraints.insert(term.first);
@@ -1246,7 +1260,51 @@ int main(int argc, char* argv[]) {
     // -0.929473  <  -0.405878      39.2103%
     if (autoMomentAmount > 0) {
 
-        // Add the first used monoms to the top row
+        //std::cout << "Original Lindbladian: " << lindbladian << std::endl;
+        //std::cout << std::endl;
+        //std::vector<Mon> bestMonoms;
+        //std::set<Mon> bestMonomsSet;
+        //for (int j=1; j<5; j++) {
+            //for (auto objTerm : objective) {
+
+                //// Determine moments from L(L(L(L)))
+                //Mon toPut = Mon(objTerm.first);
+                //std::pair<char,int> oldMon('A', 0);
+                //std::cout << toPut << std::endl;
+                //Poly expandedLindbladian = lindbladian.replaced(oldMon, toPut);
+
+                //std::cout << "Expanded Lindbladian: " << expandedLindbladian << std::endl;
+                //std::cout << std::endl;
+
+                //int timesToApply = j;
+                //for (int i=0; i<timesToApply; i++) {
+                    //Poly newLindbladian;
+                    //for (auto term : expandedLindbladian) {
+                        //Mon toPut = term.first;
+                        //std::pair<char,int> oldMon('A', 0);
+                        //newLindbladian += term.second * lindbladian.replaced(oldMon, toPut);
+                    //}
+                    //std::cout << "New Lindbladian: " << newLindbladian << std::endl;
+                    //std::cout << std::endl;
+                    //expandedLindbladian = newLindbladian;
+                //}
+
+                //// Add terms from the expanded Lindbladian
+                //for (auto term : expandedLindbladian) {
+                    //if (!bestMonomsSet.count(term.first)) {
+                        //bestMonoms.push_back(term.first);
+                        //bestMonomsSet.insert(term.first);
+                    //}
+                //}
+
+            //}
+        //}
+        //std::cout << "Best monomials: " << std::endl;
+        //for (size_t i=0; i<bestMonoms.size(); i++) {
+            //std::cout << bestMonoms[i] << std::endl;
+        //}
+
+        // Add the first used monoms to the top row TODO
         std::vector<Poly> topRow = {Poly(1)};
         int added = 0;
         for (auto& mon : monomsUsed) {
@@ -1349,6 +1407,7 @@ int main(int argc, char* argv[]) {
 
         // Regardless, don't try to add it again
         monomsUsed.insert(monToAdd);
+        monomsUsedVec.push_back(monToAdd);
 
     }
 
@@ -1651,7 +1710,7 @@ int main(int argc, char* argv[]) {
                         momentMatrices.push_back(rho3);
                         sitesToInd[{i,i2,i3}] = momentMatrices.size()-1;
 
-                        // Also add the constrain that the trace is 1 TODO
+                        // Also add the constrain that the trace is 1
                         //Poly traceConstraint;
                         //for (int j=0; j<matSize; j++) {
                             //traceConstraint += rho3[j][j];
@@ -1794,7 +1853,7 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        // Add trace out constraints TODO
+        // Add trace out constraints
         if (traceCons) {
 
             // output all indices 
