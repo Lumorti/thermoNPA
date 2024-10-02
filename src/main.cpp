@@ -109,6 +109,9 @@ int main(int argc, char* argv[]) {
     int reductiveCons = 0;
     std::string seed = "";
     Poly lindbladian("<X1A0X1>+<Y1A0Y1>-<A0>");
+    std::vector<std::vector<Poly>> hamiltonianInter;
+    Poly lindbladianHot;
+    Poly lindbladianCold;
     std::vector<std::string> extraMonomials;
     std::vector<std::string> extraMonomialsLim;
     std::vector<Poly> constraintsZero;
@@ -324,6 +327,29 @@ int main(int argc, char* argv[]) {
             lindbladian += Poly(-0.5*gamma_c_minus, "<A0P2M2>");
             lindbladian += Poly(-0.5*gamma_c_minus, "<P2M2A0>");
             lindbladian.convertToPaulis();
+
+            // Note the local and non-local Hamiltonians in case we need them later TODO
+            hamiltonianInter = std::vector<std::vector<Poly>>(2, std::vector<Poly>(2, Poly()));
+            hamiltonianInter[0][0] = Poly(epsilon_h, "<P1M1>");
+            hamiltonianInter[0][1] = Poly(g, "<P1M2>") + Poly(g, "<M1P2>");
+            hamiltonianInter[1][0] = hamiltonianInter[0][1];
+            hamiltonianInter[1][1] = Poly(epsilon_c, "<P2M2>");
+            lindbladianHot = Poly();
+            lindbladianHot += Poly(gamma_h_plus, "<M1A0P1>");
+            lindbladianHot += Poly(-0.5*gamma_h_plus, "<A0M1P1>");
+            lindbladianHot += Poly(-0.5*gamma_h_plus, "<M1P1A0>");
+            lindbladianHot += Poly(gamma_h_minus, "<P1A0M1>");
+            lindbladianHot += Poly(-0.5*gamma_h_minus, "<A0P1M1>");
+            lindbladianHot += Poly(-0.5*gamma_h_minus, "<P1M1A0>");
+            lindbladianHot.convertToPaulis();
+            lindbladianCold = Poly();
+            lindbladianCold += Poly(gamma_c_plus, "<M2A0P2>");
+            lindbladianCold += Poly(-0.5*gamma_c_plus, "<A0M2P2>");
+            lindbladianCold += Poly(-0.5*gamma_c_plus, "<M2P2A0>");
+            lindbladianCold += Poly(gamma_c_minus, "<P2A0M2>");
+            lindbladianCold += Poly(-0.5*gamma_c_minus, "<A0P2M2>");
+            lindbladianCold += Poly(-0.5*gamma_c_minus, "<P2M2A0>");
+            lindbladianCold.convertToPaulis();
 
         // 2D Lindbladian test
         } else if (argAsString == "--2d") {
@@ -699,6 +725,26 @@ int main(int argc, char* argv[]) {
                 std::cout << "Objective: " << objective << std::endl;
             }
 
+            // Note the local and non-local Hamiltonians in case we need them later TODO
+            hamiltonianInter = std::vector<std::vector<Poly>>(numQubits, std::vector<Poly>(numQubits, Poly()));
+            for (int i=0; i<numQubits; i++) {
+                hamiltonianInter[i][i] = Poly(h, "<X" + std::to_string(i+1) + ">");
+            }
+            for (int i=0; i<numQubits-1; i++) {
+                hamiltonianInter[i][i+1] = Poly(J, "<Z" + std::to_string(i+1) + "Z" + std::to_string(i+2) + ">");
+                hamiltonianInter[i+1][i] = hamiltonianInter[i][i+1];
+            }
+            hamiltonianInter[numQubits-1][0] = Poly(J, "<Z" + std::to_string(numQubits) + "Z1>");
+            hamiltonianInter[0][numQubits-1] = hamiltonianInter[numQubits-1][0];
+            lindbladianHot = Poly();
+            for (int i=0; i<numQubits; i++) {
+                lindbladianHot += Gamma_k[i] * rho * Gamma_k[i].dagger();
+                lindbladianHot -= 0.5 * (Gamma_k[i].dagger() * Gamma_k[i]).anticommutator(rho);
+            }
+            lindbladianHot = Poly("<A0>") * lindbladian;
+            lindbladianHot.cycleToAndRemove('R', 1);
+            lindbladianHot.reduce();
+
         // Many-body Lindbladian
         } else if (argAsString == "--many" || argAsString == "--manyv" || argAsString == "--manyr") {
 
@@ -779,6 +825,36 @@ int main(int argc, char* argv[]) {
                 lindbladian += Poly(-0.5*gamma_minus[i-1], "<P" + std::to_string(i) + "M" + std::to_string(i) + "A0>");
             }
             lindbladian.convertToPaulis();
+
+            // Note the local and non-local Hamiltonians in case we need them later TODO
+            hamiltonianInter = std::vector<std::vector<Poly>>(numQubits, std::vector<Poly>(numQubits, Poly()));
+            for (int j=0; j<numQubits; j++) {
+                hamiltonianInter[j][j] = Poly(epsilons[j], "<P" + std::to_string(j+1) + "M" + std::to_string(j+1) + ">");
+            }
+            for (int j=0; j<numQubits-1; j++) {
+                hamiltonianInter[j][j+1] = Poly(gs[j], "<P" + std::to_string(j+1) + "M" + std::to_string(j+2) + ">") + Poly(gs[j], "<M" + std::to_string(j+1) + "P" + std::to_string(j+2) + ">");
+                hamiltonianInter[j+1][j] = hamiltonianInter[j][j+1];
+            }
+            lindbladianHot = Poly();
+            for (int i : {1}) {
+                lindbladianHot += Poly(gamma_plus[i-1], "<M" + std::to_string(i) + "A0P" + std::to_string(i) + ">");
+                lindbladianHot += Poly(-0.5*gamma_plus[i-1], "<A0M" + std::to_string(i) + "P" + std::to_string(i) + ">");
+                lindbladianHot += Poly(-0.5*gamma_plus[i-1], "<M" + std::to_string(i) + "P" + std::to_string(i) + "A0>");
+                lindbladianHot += Poly(gamma_minus[i-1], "<P" + std::to_string(i) + "A0M" + std::to_string(i) + ">");
+                lindbladianHot += Poly(-0.5*gamma_minus[i-1], "<A0P" + std::to_string(i) + "M" + std::to_string(i) + ">");
+                lindbladianHot += Poly(-0.5*gamma_minus[i-1], "<P" + std::to_string(i) + "M" + std::to_string(i) + "A0>");
+            }
+            lindbladianHot.convertToPaulis();
+            lindbladianCold = Poly();
+            for (int i : {numQubits}) {
+                lindbladianCold += Poly(gamma_plus[i-1], "<M" + std::to_string(i) + "A0P" + std::to_string(i) + ">");
+                lindbladianCold += Poly(-0.5*gamma_plus[i-1], "<A0M" + std::to_string(i) + "P" + std::to_string(i) + ">");
+                lindbladianCold += Poly(-0.5*gamma_plus[i-1], "<M" + std::to_string(i) + "P" + std::to_string(i) + "A0>");
+                lindbladianCold += Poly(gamma_minus[i-1], "<P" + std::to_string(i) + "A0M" + std::to_string(i) + ">");
+                lindbladianCold += Poly(-0.5*gamma_minus[i-1], "<A0P" + std::to_string(i) + "M" + std::to_string(i) + ">");
+                lindbladianCold += Poly(-0.5*gamma_minus[i-1], "<P" + std::to_string(i) + "M" + std::to_string(i) + "A0>");
+            }
+            lindbladianCold.convertToPaulis();
 
         // Set the seed
         } else if (argAsString == "-S") {
@@ -869,11 +945,85 @@ int main(int argc, char* argv[]) {
             }
             symmetries.push_back({group1, group2});
 
-        // Heat current objective TODO
+        // Heat current objective
         } else if (argAsString == "--objHC") {
-            int qubit1 = std::stoi(argv[i+1]);
-            int qubit2 = std::stoi(argv[i+2]);
-            i += 2;
+
+            // Determine which spins we're dealing with
+            std::vector<int> spinsToUse;
+            while (i+1 < argc && argv[i+1][0] != '-') {
+                if (argv[i+1][0] == 'H') {
+                    spinsToUse.push_back(-1);
+                    if (lindbladianHot.size() == 0) {
+                        std::cout << "Error - list of spins connected to the hot bath not defined" << std::endl;
+                        return 1;
+                    }
+                } else if (argv[i+1][0] == 'C') {
+                    spinsToUse.push_back(-2);
+                    if (lindbladianCold.size() == 0) {
+                        std::cout << "Error - list of spins connected to the hot bath not defined" << std::endl;
+                        return 1;
+                    }
+                } else {
+                    spinsToUse.push_back(std::stoi(argv[i+1]));
+                }
+                i++;
+            }
+
+            // Make sure we know the Hamiltonian
+            if (hamiltonianInter.size() == 0) {
+                std::cout << "Error - hamiltonian not explicitly defined" << std::endl;
+                return 1;
+            }
+
+            // The full Hamiltonian
+            Poly hamiltonianFull;
+            for (int j=0; j<numQubits; j++) {
+                for (int k=j; k<numQubits; k++) {
+                    hamiltonianFull += hamiltonianInter[j][k];
+                }
+            }
+
+            // Determine the objective for each of these TODO
+            std::vector<Poly> objPerSpin(spinsToUse.size());
+            for (size_t j=0; j<spinsToUse.size(); j++) {
+
+                // If it's the hot bath, we need all the contributions from the hot spins
+                if (spinsToUse[j] == -1) {
+                    std::pair<char,int> oldMon('A', 0);
+                    Poly newPoly = hamiltonianFull;
+                    objPerSpin[j] = lindbladianHot.replaced(oldMon, newPoly);
+
+                // If it's the cold bath, we need all the contributions from the cold spins
+                } else if (spinsToUse[j] == -2) {
+                    std::pair<char,int> oldMon('A', 0);
+                    Poly newPoly = hamiltonianFull;
+                    objPerSpin[j] = lindbladianCold.replaced(oldMon, newPoly);
+
+                // Otherwise we use J_i = -i[H, H_i]
+                } else {
+                    int spin = spinsToUse[j]-1;
+                    objPerSpin[j] = -imag * hamiltonianFull.commutator(hamiltonianInter[spin][spin]);
+
+                }
+
+                if (verbosity >= 2) {
+                    std::cout << "obj per spin " << j << " = " << objPerSpin[j] << std::endl;
+                }
+
+            }
+
+            // Objective is the first minus the rest
+            objective = objPerSpin[0];
+            for (size_t j=1; j<objPerSpin.size(); j++) {
+                objective -= objPerSpin[j];
+            }
+            if (verbosity >= 2) {
+                std::cout << "overall obj = " << objective << std::endl;
+            }
+            objective.convertToPaulis();
+            if (verbosity >= 2) {
+                std::cout << "as Paulis = " << objective << std::endl;
+            }
 
         // Reconstruction constraints
         } else if (argAsString == "-r") {
@@ -885,7 +1035,6 @@ int main(int argc, char* argv[]) {
             traceCons = true;
 
         // Output the help
-        // TODO heat current constraint
         } else if (argAsString == "-h" || argAsString == "--help") {
             std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
             std::cout << "Options:" << std::endl;
@@ -896,7 +1045,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  -S <str>        Seed for the random number generator" << std::endl;
             std::cout << "  -M <int>        Try to generate the minimal set of linear constraints" << std::endl;
             std::cout << "  -A <int>        Try to generate the minimal moment matrix" << std::endl;
-            std::cout << "  -r <int> * 3    Insist that the reconstructed density matrix be positive" << std::endl;
+            std::cout << "  -r <int>        Insist that the reconstructed density matrix be positive" << std::endl;
             std::cout << "  -R              Try removing random constraints" << std::endl;
             std::cout << "  -v <int>        Verbosity level" << std::endl;
             std::cout << "  -C <int>        Number of cores to use" << std::endl;
@@ -916,8 +1065,9 @@ int main(int argc, char* argv[]) {
             std::cout << "  --objX          Use avg sigma_X as the objective" << std::endl;
             std::cout << "  --objY          Use avg sigma_Y as the objective" << std::endl;
             std::cout << "  --objZ          Use avg sigma_Z as the objective" << std::endl;
-            std::cout << "  --objHC <ints>  Heat current between two sites" << std::endl;
-            std::cout << "Limbliadian options:" << std::endl;
+            std::cout << "  --objHC <ints>  Heat current of one or more sites" << std::endl;
+            std::cout << "                  One can also replace with H or C for the baths" << std::endl;
+            std::cout << "Limbliadian choices:" << std::endl;
             std::cout << "  -L <str>        Manually set the Lindbladian" << std::endl;
             std::cout << "  --pauli <dbl> <dbl> <dbl>" << std::endl;
             std::cout << "  --two" << std::endl;
@@ -1013,11 +1163,7 @@ int main(int argc, char* argv[]) {
 
         // If given zero, set to what seems to be the minimum needed
         if (findMinimalAmount == 0) {
-            if (gridHeight == 1) {
-                findMinimalAmount = 2*numQubits*numQubits - numQubits;
-            } else {
-                findMinimalAmount = std::pow(4, numQubits)/2 - 1;
-            }
+            findMinimalAmount = std::pow(4, numQubits) - 1;
             std::cout << "Auto setting constraint limit to: " << findMinimalAmount << std::endl;
         }
 
@@ -1304,7 +1450,7 @@ int main(int argc, char* argv[]) {
             //std::cout << bestMonoms[i] << std::endl;
         //}
 
-        // Add the first used monoms to the top row TODO
+        // Add the first used monoms to the top row
         std::vector<Poly> topRow = {Poly(1)};
         int added = 0;
         for (auto& mon : monomsUsed) {
