@@ -1093,16 +1093,16 @@ int main(int argc, char* argv[]) {
 
                 // Determine the current to/from the hot bath
                 if (spinsToUse[j] == -1) {
+                    std::cout << "hot bath" << std::endl;
                     std::pair<char,int> oldMon('A', 0);
                     Poly newPoly = hamiltonianFull;
-                    //Poly newPoly = hamiltonianInter[0][0];
                     objPerSpin.push_back(lindbladianHot.replaced(oldMon, newPoly));
 
                 // Determine the current to/from the cold bath
                 } else if (spinsToUse[j] == -2) {
+                    std::cout << "cold bath" << std::endl;
                     std::pair<char,int> oldMon('A', 0);
                     Poly newPoly = hamiltonianFull;
-                    //Poly newPoly = hamiltonianInter[numQubits-1][numQubits-1];
                     objPerSpin.push_back(lindbladianCold.replaced(oldMon, newPoly));
 
                 // Otherwise we use J_i = -i[H, H_i]
@@ -1123,15 +1123,18 @@ int main(int argc, char* argv[]) {
             if (spinsToUse.size() == 2 && spinsToUse[0] != -1 && spinsToUse[0] != -2) {
                 int spin1 = spinsToUse[0]-1;
                 int spin2 = spinsToUse[1]-1;
+                std::cout << "two body current" << std::endl;
 
                 //Poly hamiltonianLocal = 0.5 * (hamiltonianInter[spin1][spin2] + hamiltonianInter[spin2][spin1]);
                 //objective = imag * hamiltonianFull.commutator(hamiltonianLocal);
 
                 //tempObj = imag * hamiltonianInter[spin1][spin1].commutator(hamiltonianInter[spin1][spin2]);
                 
-                Poly diff = hamiltonianInter[spin1][spin1] - hamiltonianInter[spin2][spin2];
-                tempObj = 0.5 * imag * hamiltonianInter[spin1][spin2].commutator(diff);
+                //Poly diff = hamiltonianInter[spin1][spin1] - hamiltonianInter[spin2][spin2];
+                //tempObj = 0.5 * imag * hamiltonianInter[spin1][spin2].commutator(diff);
 
+                tempObj = imag * hamiltonianFull.commutator(hamiltonianInter[spin1][spin2]);
+                
             } else {
 
                 // Objective is the first minus the rest
