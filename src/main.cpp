@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <complex>
+#include <iomanip>
 #include <unordered_set>
 #include <set>
 #include <chrono>
@@ -45,6 +46,17 @@ COMPLEX_OPS(*)
 COMPLEX_OPS(/)
 #undef COMPLEX_OPS
 
+// https://stackoverflow.com/questions/900326/how-do-i-elegantly-format-string-in-c-so-that-it-is-rounded-to-6-decimal-place
+std::string strRound(double value, int decimals) {
+    std::ostringstream ss;
+    ss << std::fixed << std::setprecision(decimals) << value;
+    std::string s = ss.str();
+    if(decimals > 0 && s[s.find_last_not_of('0')] == '.') {
+        s.erase(s.size() - decimals + 1);
+    }
+    return s;
+}
+
 // Useful constants
 const std::complex<double> imag(0, 1);
 
@@ -52,7 +64,6 @@ const std::complex<double> imag(0, 1);
 // Here we have a matrix of size 2^N x 2^N, and we want to trace out the siteInd-th qubit
 // the site index is zero-based
 std::vector<std::vector<Poly>> partialTrace(std::vector<std::vector<Poly>> mat, int siteInd) {
-
 
     // Get the size of the matrix
     int size = mat.size();
@@ -89,6 +100,7 @@ int main(int argc, char* argv[]) {
     srand(time(NULL));
 
     // Define the scenario
+    bool benchmark = false;
     int level = 0;
     int lindbladLevel = 0;
     int numQubits = 1;
@@ -187,6 +199,87 @@ int main(int argc, char* argv[]) {
             pauliString += "-" + std::to_string(coeff1+coeff2+coeff3) + "<A0>";
             lindbladian = Poly(pauliString);
             i += 3;
+
+        // Lindbladian "breaking" the second law
+        } else if (argAsString == "--second") {
+
+            // Params
+            double omega_h = 10;
+            double omega_c = 5;
+            double T_h = 12;
+            double T_c = 10;
+            double kappa = 1e-4;
+            numQubits = std::stoi(argv[i+1]);
+            double epsilon = std::stod(argv[i+2]);
+            i += 2;
+
+            // Calculated quantities
+            double beta_h = 1.0 / T_h;
+            double beta_c = 1.0 / T_c;
+            double gamma_h = kappa * std::pow(omega_h, 3) * (1 - std::exp(-beta_h * omega_h));
+            double gamma_c = kappa * std::pow(omega_c, 3) * (1 - std::exp(-beta_c * omega_c));
+
+            // Creation/annihilation operators
+            std::vector<Poly> as(numQubits, Poly());
+            std::vector<Poly> adags(numQubits, Poly());
+            for (int i=0; i<numQubits; i++) {
+                std::string XString = "<X" + std::to_string(i+1) + ">";
+                std::string YString = "<Y" + std::to_string(i+1) + ">";
+                for (int j=0; j<numQubits; j++) {
+                    if (j != i) {
+                        XString += "Z" + std::to_string(j+1);
+                        YString += "Z" + std::to_string(j+1);
+                    }
+                }
+                as[i] = Poly(0.5, XString) - Poly(0.5*imag, YString);
+                adags[i] = Poly(0.5, XString) + Poly(0.5*imag, YString);
+            }
+
+            // Hamiltonian
+            hamiltonianInter = std::vector<std::vector<Poly>>(numQubits, std::vector<Poly>(numQubits, Poly()));
+            for (int i=0; i<numQubits; i++) {
+                hamiltonianInter[i][i] = epsilon * as[i] * adags[i];
+                hamiltonianInter[i][i].reduce();
+            }
+            for (int i=0; i<numQubits-1; i++) {
+                hamiltonianInter[i][i+1] = epsilon * (adags[i] * as[i+1] + as[i] * adags[i+1]);
+                hamiltonianInter[i][i+1].reduce();
+                hamiltonianInter[i+1][i] = hamiltonianInter[i][i+1];
+            }
+            Poly H = Poly();
+            for (int i=0; i<numQubits; i++) {
+                for (int j=0; j<numQubits; j++) {
+                    H += hamiltonianInter[i][j];
+                }
+            }
+            H.reduce();
+
+            // The full Lindbladian
+            Poly rho("<R1>");
+            lindbladianHot = Poly();
+            lindbladianHot += gamma_h * (adags[0] * rho * as[0] - 0.5*as[0]*adags[0]*rho - 0.5*rho*as[0]*adags[0]);
+            lindbladianHot += gamma_h * std::exp(-beta_h*omega_h) * (as[0] * rho * adags[0] - 0.5*adags[0]*as[0]*rho - 0.5*rho*adags[0]*as[0]);
+            lindbladianCold = Poly();
+            lindbladianCold += gamma_c * (adags[numQubits-1] * rho * as[numQubits-1] - 0.5*as[numQubits-1]*adags[numQubits-1]*rho - 0.5*rho*as[numQubits-1]*adags[numQubits-1]);
+            lindbladianCold += gamma_c * std::exp(-beta_c*omega_c) * (as[numQubits-1] * rho * adags[numQubits-1] - 0.5*adags[numQubits-1]*as[numQubits-1]*rho - 0.5*rho*adags[numQubits-1]*as[numQubits-1]);
+            lindbladian = -imag*H.commutator(rho) + lindbladianHot + lindbladianCold;
+
+            // Simplify the Lindbladians
+            lindbladian = Poly("<A0>") * lindbladian;
+            lindbladianHot = Poly("<A0>") * lindbladianHot;
+            lindbladianCold = Poly("<A0>") * lindbladianCold;
+            lindbladianHot.cycleToAndRemove('R', 1);
+            lindbladianCold.cycleToAndRemove('R', 1);
+            lindbladian.cycleToAndRemove('R', 1);
+            lindbladian.reduce();
+            lindbladianHot.reduce();
+            lindbladianCold.reduce();
+
+            // Simple objective
+            objective = Poly();
+            for (int i=1; i<=numQubits; i++) {
+                objective += Poly(1.0/numQubits, "<Z" + std::to_string(i) + ">");
+            }
 
         // Two-body Lindbladian
         } else if (argAsString == "--two" || argAsString == "--twov") {
@@ -1079,6 +1172,12 @@ int main(int argc, char* argv[]) {
                 return 1;
             }
 
+            // Make sure at least one spin was specified
+            if (spinsToUse.size() == 0) {
+                std::cout << "Error - no spins specified" << std::endl;
+                return 1;
+            }
+
             // The full Hamiltonian
             Poly hamiltonianFull;
             for (int j=0; j<numQubits; j++) {
@@ -1087,61 +1186,30 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            // Determine the objective for each of these
-            std::vector<Poly> objPerSpin;
-            for (size_t j=0; j<spinsToUse.size(); j++) {
-
-                // Determine the current to/from the hot bath
-                if (spinsToUse[j] == -1) {
-                    std::cout << "hot bath" << std::endl;
-                    std::pair<char,int> oldMon('A', 0);
-                    Poly newPoly = hamiltonianFull;
-                    objPerSpin.push_back(lindbladianHot.replaced(oldMon, newPoly));
-
-                // Determine the current to/from the cold bath
-                } else if (spinsToUse[j] == -2) {
-                    std::cout << "cold bath" << std::endl;
-                    std::pair<char,int> oldMon('A', 0);
-                    Poly newPoly = hamiltonianFull;
-                    objPerSpin.push_back(lindbladianCold.replaced(oldMon, newPoly));
-
-                // Otherwise we use J_i = -i[H, H_i]
-                } else {
-                    int spin = spinsToUse[j]-1;
-                    objPerSpin.push_back(-imag * hamiltonianFull.commutator(hamiltonianInter[spin][spin]));
-
-                }
-
-                if (verbosity >= 2) {
-                    std::cout << "obj per spin " << j << " = " << objPerSpin[j] << std::endl;
-                }
-
-            }
-
-            // TODO
+            // If calculating the spin current between two spins TODO
             Poly tempObj;
             if (spinsToUse.size() == 2 && spinsToUse[0] != -1 && spinsToUse[0] != -2) {
                 int spin1 = spinsToUse[0]-1;
                 int spin2 = spinsToUse[1]-1;
-                std::cout << "two body current" << std::endl;
-
-                //Poly hamiltonianLocal = 0.5 * (hamiltonianInter[spin1][spin2] + hamiltonianInter[spin2][spin1]);
-                //objective = imag * hamiltonianFull.commutator(hamiltonianLocal);
-
                 //tempObj = imag * hamiltonianInter[spin1][spin1].commutator(hamiltonianInter[spin1][spin2]);
-                
-                //Poly diff = hamiltonianInter[spin1][spin1] - hamiltonianInter[spin2][spin2];
-                //tempObj = 0.5 * imag * hamiltonianInter[spin1][spin2].commutator(diff);
-
                 tempObj = imag * hamiltonianFull.commutator(hamiltonianInter[spin1][spin2]);
                 
-            } else {
+            // Determine the current to/from the hot bath
+            } else if (spinsToUse[0] == -1) {
+                std::pair<char,int> oldMon('A', 0);
+                Poly newPoly = hamiltonianFull;
+                tempObj = lindbladianHot.replaced(oldMon, newPoly);
 
-                // Objective is the first minus the rest
-                tempObj = objPerSpin[0];
-                for (size_t j=1; j<objPerSpin.size(); j++) {
-                    tempObj -= objPerSpin[j];
-                }
+            // Determine the current to/from the cold bath
+            } else if (spinsToUse[0] == -2) {
+                std::pair<char,int> oldMon('A', 0);
+                Poly newPoly = hamiltonianFull;
+                tempObj = lindbladianCold.replaced(oldMon, newPoly);
+
+            // Otherwise we use J_i = -i[H, H_i]
+            } else {
+                int spin = spinsToUse[0]-1;
+                tempObj = -imag * hamiltonianInter[spin][spin].commutator(hamiltonianFull);
 
             }
 
@@ -1182,23 +1250,25 @@ int main(int argc, char* argv[]) {
         } else if (argAsString == "-h" || argAsString == "--help") {
             std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
             std::cout << "Options:" << std::endl;
+            std::cout << "  -S <str>        Seed for the random number generator" << std::endl;
+            std::cout << "  -C <int>        Number of cores to use" << std::endl;
+            std::cout << "  -c <int>        Add some number of extra constraints to reduce the num of vars" << std::endl;
+            std::cout << "  -t <dbl>        Set the tolerance (used in various places)" << std::endl;
+            std::cout << "  -P              Take the current objective as a pseudo-objective" << std::endl;
+            std::cout << "  -v <int>        Verbosity level" << std::endl;
+            std::cout << "  -B              benchmarking mode" << std::endl;
+            std::cout << "Constraint options:" << std::endl;
             std::cout << "  -m <int>        Level of the moment matrix" << std::endl;
             std::cout << "  -l <int>        Level of the moments to put in the Lindbladian" << std::endl;
             std::cout << "  -e <mon>        Add an extra monomial to the top row of the moment matrix" << std::endl;
             std::cout << "  -E <mon>        Add an extra monomial to the list of Lindbladian replacements" << std::endl;
-            std::cout << "  -S <str>        Seed for the random number generator" << std::endl;
             std::cout << "  -M <int>        Try to generate the minimal set of linear constraints" << std::endl;
             std::cout << "  -A <int>        Try to generate the minimal moment matrix" << std::endl;
             std::cout << "  -r <int>        Insist that the reconstructed density matrix be positive" << std::endl;
             std::cout << "  -R              Try removing random constraints" << std::endl;
-            std::cout << "  -v <int>        Verbosity level" << std::endl;
-            std::cout << "  -C <int>        Number of cores to use" << std::endl;
-            std::cout << "  -c <int>        Add some number of extra constraints to reduce the num of vars" << std::endl;
-            std::cout << "  -t <dbl>        Set the tolerance (used in various places)" << std::endl;
             std::cout << "  -y <ints>       Add a symetry between two groups e.g. -y 1,2 3,4" << std::endl;
             std::cout << "  -Y              Assume full symmetry between all qubits" << std::endl;
             std::cout << "  -T              Add tracing-out constraints between density mats" << std::endl;
-            std::cout << "  -P              Take the current objective as a pseudo-objective" << std::endl;
             std::cout << "  --conHC P/N     same as objHC, but constraint to be positive/negative" << std::endl;
             std::cout << "Solver options:" << std::endl;
             std::cout << "  -s G            Use Gurobi as the solver" << std::endl;
@@ -1211,11 +1281,11 @@ int main(int argc, char* argv[]) {
             std::cout << "  --objX          Use avg sigma_X as the objective" << std::endl;
             std::cout << "  --objY          Use avg sigma_Y as the objective" << std::endl;
             std::cout << "  --objZ          Use avg sigma_Z as the objective" << std::endl;
-            std::cout << "  --objHC <ints>  Heat current of one or more sites" << std::endl;
-            std::cout << "                  One can also replace with H or C for the baths" << std::endl;
+            std::cout << "  --objHC H/C     Heat current for either the hot or cold bath" << std::endl;
             std::cout << "Limbliadian choices:" << std::endl;
             std::cout << "  -L <str>        Manually set the Lindbladian" << std::endl;
             std::cout << "  --pauli <dbl> <dbl> <dbl>" << std::endl;
+            std::cout << "  --second <int> <dbl>" << std::endl;
             std::cout << "  --two" << std::endl;
             std::cout << "  --twov <dbl> <dbl>" << std::endl;
             std::cout << "  --many  <int>" << std::endl;
@@ -1229,7 +1299,12 @@ int main(int argc, char* argv[]) {
             std::cout << "  --david2dr <dbl> <int> <int>" << std::endl;
             return 0;
 
-        /// If using all symmetries
+        // Benchmarking mode
+        } else if (argAsString == "-B") {
+            verbosity = 0;
+            benchmark = true;
+
+        // If using all symmetries
         } else if (argAsString == "-Y") {
             for (int i=1; i<=numQubits; i++) {
                 for (int j=i+1; j<=numQubits; j++) {
@@ -1315,7 +1390,12 @@ int main(int argc, char* argv[]) {
         // If given zero, set to what seems to be the minimum needed
         if (findMinimalAmount == 0) {
             findMinimalAmount = std::pow(4, numQubits) - 1;
-            std::cout << "Auto setting constraint limit to: " << findMinimalAmount << std::endl;
+            if (findMinimalAmount < 0) {
+                findMinimalAmount = 100000000;
+            }
+            if (verbosity >= 1) {
+                std::cout << "Auto setting constraint limit to: " << findMinimalAmount << std::endl;
+            }
         }
 
         // If a max num of constraints is given
@@ -1361,7 +1441,9 @@ int main(int argc, char* argv[]) {
             int nextQueueLoc = 0;
             while (int(constraintsZero.size()) < findMinimalAmount) {
                 double ratio = double(constraintsZero.size()) / (monomsInConstraints.size()-1);
-                std::cout << constraintsZero.size() << " / " << findMinimalAmount << " (" << ratio << ")        \r" << std::flush;
+                if (verbosity >= 1) {
+                    std::cout << constraintsZero.size() << " / " << findMinimalAmount << " (" << ratio << ")        \r" << std::flush;
+                }
 
                 // Stop if we're fully constrained
                 if (monomsInConstraints.size()-1 == constraintsZero.size() && constraintsZero.size() > 2) {
@@ -1386,14 +1468,18 @@ int main(int argc, char* argv[]) {
                             }
                         }
                     }
-                    std::cout << std::endl;
-                    std::cout << "Starting new cycle with monomial: " << monToAdd << std::endl;
+                    if (verbosity >= 2) {
+                        std::cout << std::endl;
+                        std::cout << "Starting new cycle with monomial: " << monToAdd << std::endl;
+                    }
                 }
 
                 // If we can't find anything else, break
                 if (monToAdd.size() == 0 && monomsUsed.count(monToAdd)) {
-                    std::cout << std::endl;
-                    std::cout << "Couldn't find any more monomials to add" << std::endl;
+                    if (verbosity >= 2) {
+                        std::cout << std::endl;
+                        std::cout << "Couldn't find any more monomials to add" << std::endl;
+                    }
                     break;
                 }
 
@@ -1501,7 +1587,9 @@ int main(int argc, char* argv[]) {
                 double lowerBoundTemp = boundsTemp.first;
                 double upperBoundTemp = boundsTemp.second;
                 double diff = upperBoundTemp - lowerBoundTemp;
-                std::cout << "cons: " << amountToTest << ", diff: " << diff << std::endl;
+                if (verbosity >= 1) {
+                    std::cout << "cons: " << amountToTest << ", diff: " << diff << std::endl;
+                }
                 if (diff < 1e-5) {
                     break;
                 } else {
@@ -1528,7 +1616,9 @@ int main(int argc, char* argv[]) {
                 double lowerBoundTemp = boundsTemp.first;
                 double upperBoundTemp = boundsTemp.second;
                 double diff = upperBoundTemp - lowerBoundTemp;
-                std::cout << "cons: " << toTest << ", diff: " << diff << std::endl;
+                if (verbosity >= 1) {
+                    std::cout << "cons: " << toTest << ", diff: " << diff << std::endl;
+                }
                 if (diff < 1e-5) {
                     maxNum = toTest;
                 } else {
@@ -1541,14 +1631,18 @@ int main(int argc, char* argv[]) {
             }
 
             // Output the minimal number of constraints
-            std::cout << "Minimal num constraints: " << maxNum << std::endl;
+            if (verbosity >= 1) {
+                std::cout << "Minimal num constraints: " << maxNum << std::endl;
+            }
             constraintsZero = constraintsZeroCopy;
 
         }
 
         // Final output
         double ratio = double(constraintsZero.size()) / (monomsUsed.size()-1);
-        std::cout << constraintsZero.size() << " / " << findMinimalAmount << " (" << ratio << ")               " << std::endl;
+        if (verbosity >= 1) {
+            std::cout << constraintsZero.size() << " / " << findMinimalAmount << " (" << ratio << ")               " << std::endl;
+        }
 
     }
 
@@ -1618,7 +1712,9 @@ int main(int argc, char* argv[]) {
     // If adding some reductive constraints
     int newReductConsAdded = 0;
     while (newReductConsAdded < reductiveCons) {
-        std::cout << newReductConsAdded << " / " << reductiveCons << "        \r" << std::flush;
+        if (verbosity >= 1) {
+            std::cout << newReductConsAdded << " / " << reductiveCons << "        \r" << std::flush;
+        }
 
         // Add constraints based on the monomials we already have
         std::set<Mon> monomsInConstraints;
@@ -1719,7 +1815,9 @@ int main(int argc, char* argv[]) {
         for (size_t i=0; i<extraMonomials.size(); i++) {
             Poly extraMonomial(Mon(extraMonomials[i]).reversed());
             topRow.push_back(extraMonomial);
-            std::cout << "Added " << extraMonomial << " to the top row" << std::endl;
+            if (verbosity >= 1) {
+                std::cout << "Added " << extraMonomial << " to the top row" << std::endl;
+            }
         }
         momentMatrices[0] = generateFromTopRow(topRow, verbosity);
     }
@@ -2154,8 +2252,10 @@ int main(int argc, char* argv[]) {
         if (traceCons) {
 
             // output all indices 
-            for (auto& site : sitesToInd) {
-                std::cout << site.first << " -> " << site.second << std::endl;
+            if (verbosity >= 1) {
+                for (auto& site : sitesToInd) {
+                    std::cout << site.first << " -> " << site.second << std::endl;
+                }
             }
 
             std::vector<std::pair<std::vector<int>, int>> thingsToDo;
@@ -2205,7 +2305,9 @@ int main(int argc, char* argv[]) {
 
             for (auto& thing : thingsToDo) {
 
-                std::cout << "Tracing out " << thing.first << " at " << thing.second << std::endl;
+                if (verbosity >= 1) {
+                    std::cout << "Tracing out " << thing.first << " at " << thing.second << std::endl;
+                }
 
                 std::vector<int> fullSites = thing.first;
                 int toTrace = thing.second;
@@ -2239,7 +2341,9 @@ int main(int argc, char* argv[]) {
         // Initial run
         std::pair<double,double> boundsStart = boundMOSEK(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity);
         double currentBoundDiff = boundsStart.second - boundsStart.first;
-        std::cout << "Original diff: " << currentBoundDiff << std::endl;
+        if (verbosity >= 1) {
+            std::cout << "Original diff: " << currentBoundDiff << std::endl;
+        }
         std::vector<Poly> constraintsZeroCopy = constraintsZero;
         std::vector<std::vector<std::vector<Poly>>> momentMatricesCopy = momentMatrices;
 
@@ -2260,11 +2364,15 @@ int main(int argc, char* argv[]) {
                 double lowerBoundTemp = boundsTemp.first;
                 double upperBoundTemp = boundsTemp.second;
                 double diff = upperBoundTemp - lowerBoundTemp;
-                std::cout << "Removed " << i << ", diff: " << diff << std::endl;
+                if (verbosity >= 1) {
+                    std::cout << "Removed " << i << ", diff: " << diff << std::endl;
+                }
 
                 // If it's better, remove it
                 if (diff - currentBoundDiff <= tol) {
-                    std::cout << "Removing constraint " << i << std::endl;
+                    if (verbosity >= 1) {
+                        std::cout << "Removing constraint " << i << std::endl;
+                    }
                     constraintsZeroCopy = constraintsZero;
                     removedSomething = true;
                     break;
@@ -2288,11 +2396,15 @@ int main(int argc, char* argv[]) {
                     double lowerBoundTemp = boundsTemp.first;
                     double upperBoundTemp = boundsTemp.second;
                     double diff = upperBoundTemp - lowerBoundTemp;
-                    std::cout << "Removed row/col " << i << ", diff: " << diff << ", change: " << diff - currentBoundDiff << std::endl;
+                    if (verbosity >= 1) {
+                        std::cout << "Removed row/col " << i << ", diff: " << diff << ", change: " << diff - currentBoundDiff << std::endl;
+                    }
 
                     // If it's better, remove it
                     if (diff - currentBoundDiff <= tol) {
-                        std::cout << "Removing row/col " << i << std::endl;
+                        if (verbosity >= 1) {
+                            std::cout << "Removing row/col " << i << std::endl;
+                        }
                         momentMatricesCopy = momentMatrices;
                         removedSomething = true;
                         break;
@@ -2307,7 +2419,9 @@ int main(int argc, char* argv[]) {
 
         }
 
-        std::cout << "Final constraints: " << constraintsZeroCopy.size() << std::endl;
+        if (verbosity >= 1) {
+            std::cout << "Final constraints: " << constraintsZeroCopy.size() << std::endl;
+        }
         constraintsZero = constraintsZeroCopy;
         momentMatrices = momentMatricesCopy;
 
@@ -2423,6 +2537,53 @@ int main(int argc, char* argv[]) {
     if (verbosity >= 1) { 
         std::cout << "Time to generate: " << std::chrono::duration_cast<std::chrono::milliseconds>(timeFinishedGeneration - timeFinishedArgs).count() / 1000.0 << "s" << std::endl;
         std::cout << "Time to solve: " << std::chrono::duration_cast<std::chrono::milliseconds>(timeFinishedSolving - timeFinishedGeneration).count() / 1000.0 << "s" << std::endl;
+    }
+
+    // Benchmarking output TODO
+    if (benchmark) {
+        std::string outputMat = "None";
+        std::string outputLin = "None ";
+        std::string outputRecon = "None";
+        std::string outputSym = "None";
+        std::string outputDiff = "None";
+        std::string outputTime = "None";
+        if (level > 0) {
+            std::string matWidth = std::to_string(momentMatrices[0].size());
+            outputMat = "level " + std::to_string(level) + " (" + matWidth + "x" + matWidth + ")";
+        }
+        if (autoMomentAmount) {
+            outputMat = "auto (" + std::to_string(autoMomentAmount+1) + ")";
+        }
+        if (lindbladLevel > 0) {
+            outputLin = "level " + std::to_string(lindbladLevel) + " (" + std::to_string(constraintsZero.size()) + ")";
+        } else if (findMinimal && findMinimalAmount >= 0) {
+            outputLin = "auto (" + std::to_string(constraintsZero.size()) + ")";
+        }
+        if (reconLevel > 0) {
+            std::string numMats = std::to_string(momentMatrices.size());
+            std::string matSize = std::to_string(momentMatrices[momentMatrices.size()-1].size());
+            outputRecon = "all " + std::to_string(reconLevel) + "-site (" + numMats + "x" + matSize + "x" + matSize + ")";
+        }
+        if (symmetries.size() > 0) {
+            outputSym = "yes (" + std::to_string(symmetries.size()) + ")";
+        }
+        double diff = upperBound - lowerBound;
+        double avg = (upperBound + lowerBound) / 2;
+        double error = 50 * diff / std::abs(avg);
+        outputDiff = std::to_string(diff) + " (" + strRound(error, 2) + "%)";
+        int timeInMillis = std::chrono::duration_cast<std::chrono::milliseconds>(timeFinishedSolving - timeFinishedArgs).count();
+        if (timeInMillis < 5000 && false) {
+            outputTime = std::to_string(timeInMillis) + "ms";
+        } else {
+            int minutes = timeInMillis / 60000;
+            int seconds = (timeInMillis % 60000) / 1000;
+            if (minutes > 0) {
+                outputTime = std::to_string(minutes) + "m" + std::to_string(seconds) + "s";
+            } else {
+                outputTime = strRound(timeInMillis / 1000.0, 2) + "s";
+            }
+        }
+        std::cout << outputMat << " & " << outputLin << " & " << outputRecon << " & " << outputSym << " & " << outputDiff << " & " << outputTime << " \\\\ \\hline" << std::endl;
     }
 
     // Exit without errors
