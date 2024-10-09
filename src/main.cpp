@@ -1890,8 +1890,10 @@ int main(int argc, char* argv[]) {
     }
 
     // Add symmetry constraints
+    int numSyms = 0;
     for (auto sym : symmetriesMap) {
         constraintsZero.push_back(Poly(sym.first)-Poly(sym.second));
+        numSyms++;
     }
 
     // Add constraints that the reconstructed density matrix is positive
@@ -2555,9 +2557,9 @@ int main(int argc, char* argv[]) {
             outputMat = "auto (" + std::to_string(autoMomentAmount+1) + ")";
         }
         if (lindbladLevel > 0) {
-            outputLin = "level " + std::to_string(lindbladLevel) + " (" + std::to_string(constraintsZero.size()) + ")";
+            outputLin = "level " + std::to_string(lindbladLevel) + " (" + std::to_string(constraintsZero.size()-numSyms) + ")";
         } else if (findMinimal && findMinimalAmount >= 0) {
-            outputLin = "auto (" + std::to_string(constraintsZero.size()) + ")";
+            outputLin = "auto (" + std::to_string(constraintsZero.size()-numSyms) + ")";
         }
         if (reconLevel > 0) {
             std::string numMats = std::to_string(momentMatrices.size());
@@ -2565,11 +2567,12 @@ int main(int argc, char* argv[]) {
             outputRecon = "all " + std::to_string(reconLevel) + "-site (" + numMats + "x" + matSize + "x" + matSize + ")";
         }
         if (symmetries.size() > 0) {
-            outputSym = "yes (" + std::to_string(symmetries.size()) + ")";
+            outputSym = "yes (" + std::to_string(numSyms) + ")";
         }
-        double diff = upperBound - lowerBound;
+        double diff = std::abs(upperBound - lowerBound);
         double avg = (upperBound + lowerBound) / 2;
-        double error = 50 * diff / std::abs(avg);
+        double error = 50 * diff;
+        error = std::max(0.0, std::min(error, 100.0));
         outputDiff = std::to_string(diff) + " (" + strRound(error, 2) + "%)";
         int timeInMillis = std::chrono::duration_cast<std::chrono::milliseconds>(timeFinishedSolving - timeFinishedArgs).count();
         if (timeInMillis < 5000 && false) {
