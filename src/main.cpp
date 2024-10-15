@@ -937,6 +937,58 @@ int main(int argc, char* argv[]) {
             lindbladianHot.cycleToAndRemove('R', 1);
             lindbladianHot.reduce();
 
+        // Lindbladian from quasiperiodic systems paper TODO
+        } else if (argAsString == "--quasi") {
+
+            // System params
+            numQubits = std::stoi(argv[i+1]);
+            i++;
+            double beta = (std::sqrt(5)-1)  / 2.0;
+            double U = 0.1;
+            double phi = 0;
+            double lambda = 1.0;
+            double mu = 0.01;
+            std::vector<double> h(numQubits, 0); 
+            for (int i=0; i<numQubits; i++) {
+                h[i] = lambda*std::cos(2.0*M_PI*beta*i + phi);
+            }
+
+            // H = XX + YY + ZZ + h_i Z_i
+            hamiltonianInter = std::vector<std::vector<Poly>>(numQubits, std::vector<Poly>(numQubits, Poly()));
+            for (int i=1; i<=numQubits; i++) {
+                hamiltonianInter[i-1][i-1] = Poly(1.0, "<Z" + std::to_string(i) + ">");
+            }
+            for (int i=1; i<numQubits; i++) {
+                hamiltonianInter[i-1][i] += Poly(1.0, "<X" + std::to_string(i) + "X" + std::to_string(i+1) + ">");
+                hamiltonianInter[i-1][i] += Poly(1.0, "<Y" + std::to_string(i) + "Y" + std::to_string(i+1) + ">");
+                hamiltonianInter[i-1][i] += Poly(1.0, "<Z" + std::to_string(i) + "Z" + std::to_string(i+1) + ">");
+                hamiltonianInter[i][i-1] = hamiltonianInter[i-1][i];
+            }
+
+            // Objective is 2XY - 2YX
+            objective = Poly(2.0, "<X1Y2>") - Poly(2.0, "<Y1X2>");
+
+            // Jump operators
+            std::vector<Poly> L_k(numQubits);
+            L_k[0] = Poly(std::sqrt(1+mu), "<P1>");
+            L_k[1] = Poly(std::sqrt(1-mu), "<M1>");
+            L_k[numQubits-2] = Poly(std::sqrt(1-mu), "<P" + std::to_string(numQubits) + ">");
+            L_k[numQubits-1] = Poly(std::sqrt(1+mu), "<M" + std::to_string(numQubits) + ">");
+
+            // The full Lindbladian
+            Poly rho("<R1>");
+            lindbladian = Poly();
+            for (int i=0; i<numQubits; i++) {
+                if (L_k[i].size() > 0) {
+                    lindbladian += (L_k[i] * rho).commutator(L_k[i].dagger());
+                    lindbladian += (L_k[i]).commutator(rho * L_k[i].dagger());
+                }
+            }
+            lindbladian.convertToPaulis();
+            lindbladian = Poly("<A0>") * lindbladian;
+            lindbladian.cycleToAndRemove('R', 1);
+            lindbladian.reduce();
+
         // Many-body Lindbladian
         } else if (argAsString == "--many" || argAsString == "--manyv" || argAsString == "--manyr") {
 
@@ -1297,6 +1349,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  --davidr <dbl> <int>" << std::endl;
             std::cout << "  --david2d <dbl> <int> <int>" << std::endl;
             std::cout << "  --david2dr <dbl> <int> <int>" << std::endl;
+            std::cout << "  -iquasi" << std::endl;
             return 0;
 
         // Benchmarking mode
@@ -1357,19 +1410,22 @@ int main(int argc, char* argv[]) {
         std::cout << "Original Lindbladian: " << lindbladian << std::endl;
     }
     for (size_t i=0; i<variablesToPut.size(); i++) {
-        std::pair<char,int> oldMon('A', 0);
-        Mon newPoly(variablesToPut[i].getKey());
-        Poly newConstraint = lindbladian.replaced(oldMon, newPoly);
-        if (verbosity >= 3) {
-            std::cout << std::endl;
-            std::cout << "Variable to put: " << newPoly << std::endl;
-            std::cout << "New constraint: " << newConstraint << std::endl;
+        std::pair<std::complex<double>, Mon> reducedMon = variablesToPut[i].getKey().reduce();
+        if (!monomsUsed.count(reducedMon.second)) {
+            std::pair<char,int> oldMon('A', 0);
+            Mon newPoly(reducedMon.second);
+            Poly newConstraint = lindbladian.replaced(oldMon, newPoly);
+            if (verbosity >= 3) {
+                std::cout << std::endl;
+                std::cout << "Variable to put: " << newPoly << std::endl;
+                std::cout << "New constraint: " << newConstraint << std::endl;
+            }
+            if (!newConstraint.isZero()) {
+                constraintsZero.push_back(newConstraint);
+            }
+            monomsUsed.insert(variablesToPut[i].getKey());
+            monomsUsedVec.push_back(variablesToPut[i].getKey());
         }
-        if (!newConstraint.isZero()) {
-            constraintsZero.push_back(newConstraint);
-        }
-        monomsUsed.insert(variablesToPut[i].getKey());
-        monomsUsedVec.push_back(variablesToPut[i].getKey());
     }
 
     // Reduce the constraints as much as possible
@@ -2567,13 +2623,13 @@ int main(int argc, char* argv[]) {
             outputRecon = "all " + std::to_string(reconLevel) + "-site (" + numMats + "x" + matSize + "x" + matSize + ")";
         }
         if (symmetries.size() > 0) {
-            outputSym = "yes (" + std::to_string(numSyms) + ")";
+            outputSym = "yes (" + std::to_string(symmetries.size()) + ")";
         }
         double diff = std::abs(upperBound - lowerBound);
         double avg = (upperBound + lowerBound) / 2;
         double error = 50 * diff;
         error = std::max(0.0, std::min(error, 100.0));
-        outputDiff = std::to_string(diff) + " (" + strRound(error, 2) + "%)";
+        outputDiff = std::to_string(diff) + " (" + strRound(error, 2) + "\\%)";
         int timeInMillis = std::chrono::duration_cast<std::chrono::milliseconds>(timeFinishedSolving - timeFinishedArgs).count();
         if (timeInMillis < 5000 && false) {
             outputTime = std::to_string(timeInMillis) + "ms";
