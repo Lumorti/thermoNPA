@@ -2615,7 +2615,8 @@ int main(int argc, char* argv[]) {
         if (lindbladLevel > 0) {
             outputLin = "level " + std::to_string(lindbladLevel) + " (" + std::to_string(constraintsZero.size()-numSyms) + ")";
         } else if (findMinimal && findMinimalAmount >= 0) {
-            outputLin = "auto (" + std::to_string(constraintsZero.size()-numSyms) + ")";
+            int width = constraintsZero.size() - numSyms;
+            outputLin = "auto (" + std::to_string(width) + "x" + std::to_string(width) + ")";
         }
         if (reconLevel > 0) {
             std::string numMats = std::to_string(momentMatrices.size());
