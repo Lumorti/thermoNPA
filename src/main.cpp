@@ -108,6 +108,7 @@ int main(int argc, char* argv[]) {
     int gridHeight = 1;
     double tol = 1e-7;
     Poly objective("<Z1>");
+    std::map<Mon, double> samples;
     Poly pseudoObjective;
     int verbosity = 1;
     std::string solver = "auto";
@@ -937,7 +938,7 @@ int main(int argc, char* argv[]) {
             lindbladianHot.cycleToAndRemove('R', 1);
             lindbladianHot.reduce();
 
-        // Lindbladian from quasiperiodic systems paper TODO
+        // Lindbladian from quasiperiodic systems paper
         } else if (argAsString == "--quasi") {
 
             // System params
@@ -1189,6 +1190,181 @@ int main(int argc, char* argv[]) {
             }
             symmetries.push_back({group1, group2});
 
+        // TODO
+        } else if (argAsString == "--leo") {
+
+            // The params
+            if (i+1 >= argc) {
+                std::cout << "Error - Not enough arguments" << std::endl;
+                return 1;
+            }
+            numQubits = std::stoi(argv[i+1]);
+            int numSamples = std::stoi(argv[i+2]);
+            i+=2;
+
+            // The Hamiltonian
+            // H = \sum_i <X{i}X{i+1}> + g * \sum_i <Zi>
+            Poly H;
+            double g = 0.5;
+            for (int i=1; i<=numQubits; i++) {
+                H += Poly(g, "<Z" + std::to_string(i) + ">");
+            }
+            for (int i=1; i<numQubits; i++) {
+                H += Poly(1, "<X" + std::to_string(i) + "X" + std::to_string(i+1) + ">");
+            }
+
+            // Pauli matrices
+            Eigen::SparseMatrix<std::complex<double>> X(2, 2);
+            Eigen::SparseMatrix<std::complex<double>> Y(2, 2);
+            Eigen::SparseMatrix<std::complex<double>> Z(2, 2);
+            Eigen::SparseMatrix<std::complex<double>> iden2(2, 2);
+            X.insert(0, 1) = 1;
+            X.insert(1, 0) = 1;
+            Y.insert(0, 1) = std::complex<double>(0, -1);
+            Y.insert(1, 0) = std::complex<double>(0, 1);
+            Z.insert(0, 0) = 1;
+            Z.insert(1, 1) = -1;
+            iden2.insert(0, 0) = 1;
+            iden2.insert(1, 1) = 1;
+            X.makeCompressed();
+            Y.makeCompressed();
+            Z.makeCompressed();
+            iden2.makeCompressed();
+
+            // Pauli operators on the state
+            std::cout << "Generating Pauli operators..." << std::endl;
+            std::vector<Eigen::SparseMatrix<std::complex<double>>> Xs(numQubits);
+            std::vector<Eigen::SparseMatrix<std::complex<double>>> Ys(numQubits);
+            std::vector<Eigen::SparseMatrix<std::complex<double>>> Zs(numQubits);
+            for (int i = 0; i < numQubits; i++) {
+                Xs[i] = X;
+                Ys[i] = Y;
+                Zs[i] = Z;
+                for (int j = 0; j < i; j++) {
+                    Xs[i] = kroneckerProduct(Xs[i], iden2).eval();
+                    Ys[i] = kroneckerProduct(Ys[i], iden2).eval();
+                    Zs[i] = kroneckerProduct(Zs[i], iden2).eval();
+                }
+                for (int j = i + 1; j < numQubits; j++) {
+                    Xs[i] = kroneckerProduct(iden2, Xs[i]).eval();
+                    Ys[i] = kroneckerProduct(iden2, Ys[i]).eval();
+                    Zs[i] = kroneckerProduct(iden2, Zs[i]).eval();
+                }
+                Xs[i].makeCompressed();
+                Ys[i].makeCompressed();
+                Zs[i].makeCompressed();
+            }
+
+            // Explicitly construct the Hamiltonian
+            std::cout << "Constructing Hamiltonian..." << std::endl;
+            int matSize = 1<<numQubits;
+            Eigen::SparseMatrix<std::complex<double>> hamiltonian(matSize, matSize);
+            for (auto term : H) {
+                Mon mon = term.first;
+                std::complex<double> coeff = term.second;
+                for (int i = 0; i < mon.size(); i++) {
+                    char op = mon[i].first;
+                    int ind = mon[i].second-1;
+                    if (op == 'X') {
+                        hamiltonian += coeff * Xs[ind];
+                    } else if (op == 'Y') {
+                        hamiltonian += coeff * Ys[ind];
+                    } else if (op == 'Z') {
+                        hamiltonian += coeff * Zs[ind];
+                    }
+                }
+            }
+            hamiltonian.makeCompressed();
+            
+            // Find the ground state
+            std::cout << "Diagonalizing Hamiltonian (size: " << matSize << "x" << matSize << ")..." << std::endl;
+            Eigen::SelfAdjointEigenSolver<Eigen::SparseMatrix<std::complex<double>>> es(hamiltonian);
+            std::cout << "Minimum eigenvalue: " << es.eigenvalues().minCoeff() << std::endl;
+            Eigen::VectorXcd groundState = es.eigenvectors().col(0);
+
+            // Errors
+            double K = 9 * numQubits * (numQubits - 1) / 2;
+            double delta = 0.01;
+            double epsilon = std::sqrt(2 * std::log((2.0 * K) / delta) / numSamples);
+            std::cout << "K = " << K << std::endl;
+            std::cout << "delta = " << delta << std::endl;
+            std::cout << "epsilon = " << epsilon << std::endl;
+
+            // Take samples
+            std::vector<Mon> sampleOperators;
+            for (int i = 0; i < numQubits; i++) {
+                sampleOperators.push_back(Mon("<X" + std::to_string(i+1) + ">"));
+                sampleOperators.push_back(Mon("<Y" + std::to_string(i+1) + ">"));
+                sampleOperators.push_back(Mon("<Z" + std::to_string(i+1) + ">"));
+                for (int j = i + 1; j < numQubits; j++) {
+                    sampleOperators.push_back(Mon("<X" + std::to_string(i+1) + "X" + std::to_string(j+1) + ">"));
+                    sampleOperators.push_back(Mon("<Y" + std::to_string(i+1) + "Y" + std::to_string(j+1) + ">"));
+                    sampleOperators.push_back(Mon("<Z" + std::to_string(i+1) + "Z" + std::to_string(j+1) + ">"));
+                }
+            }
+            samples = {};
+            for (auto mon : sampleOperators) {
+                Eigen::SparseMatrix<std::complex<double>> op = Eigen::Identity<Eigen::SparseMatrix<std::complex<double>>>(matSize, matSize);
+                for (int i = 0; i < mon.size(); i++) {
+                    char pauli = mon[i].first;
+                    int ind = mon[i].second-1;
+                    if (pauli == 'X') {
+                        op = Xs[ind];
+                    } else if (pauli == 'Y') {
+                        op = Ys[ind];
+                    } else if (pauli == 'Z') {
+                        op = Zs[ind];
+                    }
+                }
+
+                // Get the eigendecomposition of the operator
+                Eigen::SelfAdjointEigenSolver<Eigen::SparseMatrix<std::complex<double>>> esOp(op);
+                Eigen::VectorXcd opEvals = esOp.eigenvalues();
+                Eigen::MatrixXcd opEvecs = esOp.eigenvectors();
+
+                // Get the positive part of the operator
+                Eigen::MatrixXcd opPos = Eigen::MatrixXcd::Zero(matSize, matSize);
+                for (int i = 0; i < opEvals.size(); i++) {
+                    if (opEvals(i).real() > 0) {
+                        opPos += opEvals(i) * opEvecs.col(i) * opEvecs.col(i).adjoint();
+                    }
+                }
+
+                // Get the true expectation value
+                double trueExpectation = groundState.dot(op * groundState).real();
+                std::cout << "True expectation value of " << mon << " = " << trueExpectation << std::endl;
+                
+                // The probability of getting a 1 is trace(opPos * rho)
+                double prob1 = (opPos * groundState).trace().real();
+                std::cout << "Probability of getting a 1 for " << mon << " = " << prob1 << std::endl;
+                double expFromProb = 2 * prob1 - 1;
+                std::cout << "Expectation value of " << mon << " from prob = " << expFromProb << std::endl;
+
+                // Flip a coin
+                double avg = 0;
+                for (int i = 0; i < numSamples; i++) {
+                    double r = rand(0, 1);
+                    if (r < prob1) {
+                        avg += 1;
+                    } else {
+                        avg += 0;
+                    }
+                }
+                avg /= numSamples;
+                avg = 2 * avg - 1;
+                samples[mon] = avg;
+                std::cout << "Expectation value of " << mon << " from samples = " << avg << std::endl;
+
+                // Bound each quantity
+                double lower = avg - epsilon;
+                double upper = avg + epsilon;
+                std::cout << "Bounding " << mon << " to [" << lower << ", " << upper << "]" << std::endl;
+                std::cout << std::endl;
+
+            }
+
+            return 0;
+
         // Heat current objective
         } else if (argAsString == "--objHC" || argAsString == "--conHC") {
 
@@ -1238,7 +1414,7 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            // If calculating the spin current between two spins TODO
+            // If calculating the spin current between two spins
             Poly tempObj;
             if (spinsToUse.size() == 2 && spinsToUse[0] != -1 && spinsToUse[0] != -2) {
                 int spin1 = spinsToUse[0]-1;
@@ -2597,7 +2773,7 @@ int main(int argc, char* argv[]) {
         std::cout << "Time to solve: " << std::chrono::duration_cast<std::chrono::milliseconds>(timeFinishedSolving - timeFinishedGeneration).count() / 1000.0 << "s" << std::endl;
     }
 
-    // Benchmarking output TODO
+    // Benchmarking output
     if (benchmark) {
         std::string outputMat = "None";
         std::string outputLin = "None ";
