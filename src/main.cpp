@@ -1212,6 +1212,8 @@ int main(int argc, char* argv[]) {
             for (int i=1; i<numQubits; i++) {
                 H += Poly(1, "<X" + std::to_string(i) + "X" + std::to_string(i+1) + ">");
             }
+            H.randomize();
+            objective = H;
 
             // Pauli matrices
             Eigen::SparseMatrix<std::complex<double>> X(2, 2);
@@ -1241,14 +1243,14 @@ int main(int argc, char* argv[]) {
                 Ys[i] = Y;
                 Zs[i] = Z;
                 for (int j = 0; j < i; j++) {
-                    Xs[i] = kroneckerProduct(Xs[i], iden2).eval();
-                    Ys[i] = kroneckerProduct(Ys[i], iden2).eval();
-                    Zs[i] = kroneckerProduct(Zs[i], iden2).eval();
-                }
-                for (int j = i + 1; j < numQubits; j++) {
                     Xs[i] = kroneckerProduct(iden2, Xs[i]).eval();
                     Ys[i] = kroneckerProduct(iden2, Ys[i]).eval();
                     Zs[i] = kroneckerProduct(iden2, Zs[i]).eval();
+                }
+                for (int j = i + 1; j < numQubits; j++) {
+                    Xs[i] = kroneckerProduct(Xs[i], iden2).eval();
+                    Ys[i] = kroneckerProduct(Ys[i], iden2).eval();
+                    Zs[i] = kroneckerProduct(Zs[i], iden2).eval();
                 }
                 Xs[i].makeCompressed();
                 Ys[i].makeCompressed();
@@ -1257,30 +1259,39 @@ int main(int argc, char* argv[]) {
 
             // Explicitly construct the Hamiltonian
             std::cout << "Constructing Hamiltonian..." << std::endl;
-            int matSize = 1<<numQubits;
+            int matSize = 1 << numQubits;
             Eigen::SparseMatrix<std::complex<double>> hamiltonian(matSize, matSize);
             for (auto term : H) {
                 Mon mon = term.first;
                 std::complex<double> coeff = term.second;
-                for (int i = 0; i < mon.size(); i++) {
-                    char op = mon[i].first;
+
+                // Construct the operator
+                Eigen::SparseMatrix<std::complex<double>> op = Eigen::SparseMatrix<std::complex<double>>(matSize, matSize);
+                for (int i = 0; i < matSize; i++) {
+                    op.insert(i, i) = 1;
+                }
+                for (int i = mon.size()-1; i >= 0; i--) {
+                    char pauli = mon[i].first;
                     int ind = mon[i].second-1;
-                    if (op == 'X') {
-                        hamiltonian += coeff * Xs[ind];
-                    } else if (op == 'Y') {
-                        hamiltonian += coeff * Ys[ind];
-                    } else if (op == 'Z') {
-                        hamiltonian += coeff * Zs[ind];
+                    if (pauli == 'X') {
+                        op = op * Xs[ind];
+                    } else if (pauli == 'Y') {
+                        op = op * Ys[ind];
+                    } else if (pauli == 'Z') {
+                        op = op * Zs[ind];
                     }
                 }
+                hamiltonian += coeff * op;
+
             }
             hamiltonian.makeCompressed();
             
             // Find the ground state
             std::cout << "Diagonalizing Hamiltonian (size: " << matSize << "x" << matSize << ")..." << std::endl;
             Eigen::SelfAdjointEigenSolver<Eigen::SparseMatrix<std::complex<double>>> es(hamiltonian);
-            std::cout << "Minimum eigenvalue: " << es.eigenvalues().minCoeff() << std::endl;
-            Eigen::VectorXcd groundState = es.eigenvectors().col(0);
+            int pos = 0;
+            std::cout << "Minimum eigenvalue: " << es.eigenvalues().minCoeff(&pos) << std::endl;
+            Eigen::VectorXcd groundState = es.eigenvectors().col(pos);
 
             // Errors
             double K = 9 * numQubits * (numQubits - 1) / 2;
@@ -1304,16 +1315,21 @@ int main(int argc, char* argv[]) {
             }
             samples = {};
             for (auto mon : sampleOperators) {
-                Eigen::SparseMatrix<std::complex<double>> op = Eigen::Identity<Eigen::SparseMatrix<std::complex<double>>>(matSize, matSize);
-                for (int i = 0; i < mon.size(); i++) {
+
+                // Construct the operator
+                Eigen::SparseMatrix<std::complex<double>> op = Eigen::SparseMatrix<std::complex<double>>(matSize, matSize);
+                for (int i = 0; i < matSize; i++) {
+                    op.insert(i, i) = 1;
+                }
+                for (int i = mon.size()-1; i >= 0; i--) {
                     char pauli = mon[i].first;
                     int ind = mon[i].second-1;
                     if (pauli == 'X') {
-                        op = Xs[ind];
+                        op = op * Xs[ind];
                     } else if (pauli == 'Y') {
-                        op = Ys[ind];
+                        op = op * Ys[ind];
                     } else if (pauli == 'Z') {
-                        op = Zs[ind];
+                        op = op * Zs[ind];
                     }
                 }
 
@@ -1335,10 +1351,8 @@ int main(int argc, char* argv[]) {
                 std::cout << "True expectation value of " << mon << " = " << trueExpectation << std::endl;
                 
                 // The probability of getting a 1 is trace(opPos * rho)
-                double prob1 = (opPos * groundState).trace().real();
-                std::cout << "Probability of getting a 1 for " << mon << " = " << prob1 << std::endl;
+                double prob1 = (opPos * (groundState * groundState.adjoint())).trace().real();
                 double expFromProb = 2 * prob1 - 1;
-                std::cout << "Expectation value of " << mon << " from prob = " << expFromProb << std::endl;
 
                 // Flip a coin
                 double avg = 0;
@@ -1359,11 +1373,10 @@ int main(int argc, char* argv[]) {
                 double lower = avg - epsilon;
                 double upper = avg + epsilon;
                 std::cout << "Bounding " << mon << " to [" << lower << ", " << upper << "]" << std::endl;
-                std::cout << std::endl;
+                constraintsPositive.push_back(Poly(1, mon) - Poly(lower));
+                constraintsPositive.push_back(Poly(-1, mon) - Poly(-upper));
 
             }
-
-            return 0;
 
         // Heat current objective
         } else if (argAsString == "--objHC" || argAsString == "--conHC") {
