@@ -2439,6 +2439,7 @@ int main(int argc, char* argv[]) {
         if (objective.size() > 0) {
             std::cout << "Objective: " << std::endl;
             std::cout << objective << std::endl << std::endl;
+            std::cout << "Objective has size " << objective.size() << std::endl;
         }
         if (momentMatrices.size() > 0) {
             for (size_t i=0; i<momentMatrices.size(); i++) {
