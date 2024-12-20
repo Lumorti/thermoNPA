@@ -1190,194 +1190,6 @@ int main(int argc, char* argv[]) {
             }
             symmetries.push_back({group1, group2});
 
-        // TODO
-        } else if (argAsString == "--leo") {
-
-            // The params
-            if (i+1 >= argc) {
-                std::cout << "Error - Not enough arguments" << std::endl;
-                return 1;
-            }
-            numQubits = std::stoi(argv[i+1]);
-            int numSamples = std::stoi(argv[i+2]);
-            i+=2;
-
-            // The Hamiltonian
-            // H = \sum_i <X{i}X{i+1}> + g * \sum_i <Zi>
-            Poly H;
-            double g = 0.5;
-            for (int i=1; i<=numQubits; i++) {
-                H += Poly(g, "<Z" + std::to_string(i) + ">");
-            }
-            for (int i=1; i<numQubits; i++) {
-                H += Poly(1, "<X" + std::to_string(i) + "X" + std::to_string(i+1) + ">");
-            }
-            H.randomize();
-            objective = H;
-
-            // Pauli matrices
-            Eigen::SparseMatrix<std::complex<double>> X(2, 2);
-            Eigen::SparseMatrix<std::complex<double>> Y(2, 2);
-            Eigen::SparseMatrix<std::complex<double>> Z(2, 2);
-            Eigen::SparseMatrix<std::complex<double>> iden2(2, 2);
-            X.insert(0, 1) = 1;
-            X.insert(1, 0) = 1;
-            Y.insert(0, 1) = std::complex<double>(0, -1);
-            Y.insert(1, 0) = std::complex<double>(0, 1);
-            Z.insert(0, 0) = 1;
-            Z.insert(1, 1) = -1;
-            iden2.insert(0, 0) = 1;
-            iden2.insert(1, 1) = 1;
-            X.makeCompressed();
-            Y.makeCompressed();
-            Z.makeCompressed();
-            iden2.makeCompressed();
-
-            // Pauli operators on the state
-            std::cout << "Generating Pauli operators..." << std::endl;
-            std::vector<Eigen::SparseMatrix<std::complex<double>>> Xs(numQubits);
-            std::vector<Eigen::SparseMatrix<std::complex<double>>> Ys(numQubits);
-            std::vector<Eigen::SparseMatrix<std::complex<double>>> Zs(numQubits);
-            for (int i = 0; i < numQubits; i++) {
-                Xs[i] = X;
-                Ys[i] = Y;
-                Zs[i] = Z;
-                for (int j = 0; j < i; j++) {
-                    Xs[i] = kroneckerProduct(iden2, Xs[i]).eval();
-                    Ys[i] = kroneckerProduct(iden2, Ys[i]).eval();
-                    Zs[i] = kroneckerProduct(iden2, Zs[i]).eval();
-                }
-                for (int j = i + 1; j < numQubits; j++) {
-                    Xs[i] = kroneckerProduct(Xs[i], iden2).eval();
-                    Ys[i] = kroneckerProduct(Ys[i], iden2).eval();
-                    Zs[i] = kroneckerProduct(Zs[i], iden2).eval();
-                }
-                Xs[i].makeCompressed();
-                Ys[i].makeCompressed();
-                Zs[i].makeCompressed();
-            }
-
-            // Explicitly construct the Hamiltonian
-            std::cout << "Constructing Hamiltonian..." << std::endl;
-            int matSize = 1 << numQubits;
-            Eigen::SparseMatrix<std::complex<double>> hamiltonian(matSize, matSize);
-            for (auto term : H) {
-                Mon mon = term.first;
-                std::complex<double> coeff = term.second;
-
-                // Construct the operator
-                Eigen::SparseMatrix<std::complex<double>> op = Eigen::SparseMatrix<std::complex<double>>(matSize, matSize);
-                for (int i = 0; i < matSize; i++) {
-                    op.insert(i, i) = 1;
-                }
-                for (int i = mon.size()-1; i >= 0; i--) {
-                    char pauli = mon[i].first;
-                    int ind = mon[i].second-1;
-                    if (pauli == 'X') {
-                        op = op * Xs[ind];
-                    } else if (pauli == 'Y') {
-                        op = op * Ys[ind];
-                    } else if (pauli == 'Z') {
-                        op = op * Zs[ind];
-                    }
-                }
-                hamiltonian += coeff * op;
-
-            }
-            hamiltonian.makeCompressed();
-            
-            // Find the ground state
-            std::cout << "Diagonalizing Hamiltonian (size: " << matSize << "x" << matSize << ")..." << std::endl;
-            Eigen::SelfAdjointEigenSolver<Eigen::SparseMatrix<std::complex<double>>> es(hamiltonian);
-            int pos = 0;
-            std::cout << "Minimum eigenvalue: " << es.eigenvalues().minCoeff(&pos) << std::endl;
-            Eigen::VectorXcd groundState = es.eigenvectors().col(pos);
-
-            // Errors
-            double K = 9 * numQubits * (numQubits - 1) / 2;
-            double delta = 0.01;
-            double epsilon = std::sqrt(2 * std::log((2.0 * K) / delta) / numSamples);
-            std::cout << "K = " << K << std::endl;
-            std::cout << "delta = " << delta << std::endl;
-            std::cout << "epsilon = " << epsilon << std::endl;
-
-            // Take samples
-            std::vector<Mon> sampleOperators;
-            for (int i = 0; i < numQubits; i++) {
-                sampleOperators.push_back(Mon("<X" + std::to_string(i+1) + ">"));
-                sampleOperators.push_back(Mon("<Y" + std::to_string(i+1) + ">"));
-                sampleOperators.push_back(Mon("<Z" + std::to_string(i+1) + ">"));
-                for (int j = i + 1; j < numQubits; j++) {
-                    sampleOperators.push_back(Mon("<X" + std::to_string(i+1) + "X" + std::to_string(j+1) + ">"));
-                    sampleOperators.push_back(Mon("<Y" + std::to_string(i+1) + "Y" + std::to_string(j+1) + ">"));
-                    sampleOperators.push_back(Mon("<Z" + std::to_string(i+1) + "Z" + std::to_string(j+1) + ">"));
-                }
-            }
-            samples = {};
-            for (auto mon : sampleOperators) {
-
-                // Construct the operator
-                Eigen::SparseMatrix<std::complex<double>> op = Eigen::SparseMatrix<std::complex<double>>(matSize, matSize);
-                for (int i = 0; i < matSize; i++) {
-                    op.insert(i, i) = 1;
-                }
-                for (int i = mon.size()-1; i >= 0; i--) {
-                    char pauli = mon[i].first;
-                    int ind = mon[i].second-1;
-                    if (pauli == 'X') {
-                        op = op * Xs[ind];
-                    } else if (pauli == 'Y') {
-                        op = op * Ys[ind];
-                    } else if (pauli == 'Z') {
-                        op = op * Zs[ind];
-                    }
-                }
-
-                // Get the eigendecomposition of the operator
-                Eigen::SelfAdjointEigenSolver<Eigen::SparseMatrix<std::complex<double>>> esOp(op);
-                Eigen::VectorXcd opEvals = esOp.eigenvalues();
-                Eigen::MatrixXcd opEvecs = esOp.eigenvectors();
-
-                // Get the positive part of the operator
-                Eigen::MatrixXcd opPos = Eigen::MatrixXcd::Zero(matSize, matSize);
-                for (int i = 0; i < opEvals.size(); i++) {
-                    if (opEvals(i).real() > 0) {
-                        opPos += opEvals(i) * opEvecs.col(i) * opEvecs.col(i).adjoint();
-                    }
-                }
-
-                // Get the true expectation value
-                double trueExpectation = groundState.dot(op * groundState).real();
-                std::cout << "True expectation value of " << mon << " = " << trueExpectation << std::endl;
-                
-                // The probability of getting a 1 is trace(opPos * rho)
-                double prob1 = (opPos * (groundState * groundState.adjoint())).trace().real();
-                double expFromProb = 2 * prob1 - 1;
-
-                // Flip a coin
-                double avg = 0;
-                for (int i = 0; i < numSamples; i++) {
-                    double r = rand(0, 1);
-                    if (r < prob1) {
-                        avg += 1;
-                    } else {
-                        avg += 0;
-                    }
-                }
-                avg /= numSamples;
-                avg = 2 * avg - 1;
-                samples[mon] = avg;
-                std::cout << "Expectation value of " << mon << " from samples = " << avg << std::endl;
-
-                // Bound each quantity
-                double lower = avg - epsilon;
-                double upper = avg + epsilon;
-                std::cout << "Bounding " << mon << " to [" << lower << ", " << upper << "]" << std::endl;
-                constraintsPositive.push_back(Poly(1, mon) - Poly(lower));
-                constraintsPositive.push_back(Poly(-1, mon) - Poly(-upper));
-
-            }
-
         // Heat current objective
         } else if (argAsString == "--objHC" || argAsString == "--conHC") {
 
@@ -1585,6 +1397,7 @@ int main(int argc, char* argv[]) {
         variables.push_back(Mon("<Y" + std::to_string(i+1) + ">"));
         variables.push_back(Mon("<Z" + std::to_string(i+1) + ">"));
     }
+    addSingleMonomials(variables, objective);
     std::vector<Poly> variablesToPut = generateMonomials(variables, lindbladLevel, verbosity);
     for (size_t i=0; i<extraMonomialsLim.size(); i++) {
         variablesToPut.push_back(Poly(extraMonomialsLim[i]));
@@ -1615,6 +1428,15 @@ int main(int argc, char* argv[]) {
             monomsUsed.insert(variablesToPut[i].getKey());
             monomsUsedVec.push_back(variablesToPut[i].getKey());
         }
+    }
+
+    // If we don't have a Lindbladian, add things to monoms used
+    if (lindbladian.size() == 0) {
+        for (size_t i=0; i<variablesToPut.size(); i++) {
+            monomsUsed.insert(variablesToPut[i].getKey());
+            monomsUsedVec.push_back(variablesToPut[i].getKey());
+        }
+        std::cout << "Added " << variablesToPut.size() << " variables to the monomials used" << std::endl;
     }
 
     // Reduce the constraints as much as possible
