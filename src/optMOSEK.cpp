@@ -515,6 +515,30 @@ std::pair<double,double> boundMOSEK(Poly obj, std::vector<std::vector<std::vecto
         std::cout << "BVals: " << BVals << std::endl;
     }
 
+    // Determine if we need to have an imaginary part
+    bool needImag = false;
+    for (size_t k=0; k<psd.size(); k++) {
+        for (size_t i=0; i<psd[k].size(); i++) {
+            for (size_t j=i; j<psd[k][i].size(); j++) {
+                for (auto& term : psd[k][i][j]) {
+                    if (std::abs(std::imag(term.second)) > 1e-8) {
+                        needImag = true;
+                        break;
+                    }
+                }
+                if (needImag) {
+                    break;
+                }
+            }
+            if (needImag) {
+                break;
+            }
+        }
+        if (needImag) {
+            break;
+        }
+    }
+
     // The vectors defining the PSD constraints
     std::vector<std::shared_ptr<monty::ndarray<int,1>>> indicesPSDPerMat;
     std::vector<std::shared_ptr<monty::ndarray<double,1>>> coeffsPSDPerMat;
@@ -538,6 +562,9 @@ std::pair<double,double> boundMOSEK(Poly obj, std::vector<std::vector<std::vecto
 
         // The indices and coefficients for the svec
         int fullMatSize = int(psd[k].size());
+        if (needImag) {
+            fullMatSize *= 2;
+        }
         int sVecSize = fullMatSize * (fullMatSize + 1) / 2;
         int imagOffset = int(psd[k].size());
         std::vector<int> indicesPSD(numMatsNeeded*sVecSize, 0);
@@ -549,19 +576,34 @@ std::pair<double,double> boundMOSEK(Poly obj, std::vector<std::vector<std::vecto
                     
                     // Find this in the variable list
                     int realLoc = variableLocs[term.first];
+                    int imagLoc = variableLocs[term.first];
 
                     // Locations in the svec
                     int realInd = matLocToVecLoc(i, j, fullMatSize) + l*sVecSize;
+                    int imagInd = matLocToVecLoc(i, j+imagOffset, fullMatSize) + l*sVecSize;
+                    int realInd2 = matLocToVecLoc(i+imagOffset, j+imagOffset, fullMatSize) + l*sVecSize;
 
-                    // Set the coeff
+                    // Set the real coeffs
                     std::complex<double> val = term.second;
-                    double coeff = std::real(val);
+                    double realCoeff = std::real(val);
+                    double imagCoeff = std::imag(val);
                     indicesPSD[realInd] = realLoc;
-                    coeffsPSD[realInd] = coeff;
+                    coeffsPSD[realInd] = realCoeff;
+
+                    // Set stuff if we have an imaginary section
+                    if (needImag) {
+                        indicesPSD[realInd2] = realLoc;
+                        coeffsPSD[realInd2] = realCoeff;
+                        if (std::abs(imagCoeff) > 1e-8) {
+                            indicesPSD[imagInd] = imagLoc;
+                            coeffsPSD[imagInd] = imagCoeff;
+                        }
+                    }
 
                     // The off-diagonals are multiplied by sqrt(2)
                     if (i != j) {
                         coeffsPSD[realInd] *= std::sqrt(2.0);
+                        coeffsPSD[imagInd] *= std::sqrt(2.0);
                     }
 
                     l++;
