@@ -106,6 +106,7 @@ int main(int argc, char* argv[]) {
     int numQubits = 1;
     int gridWidth = 1;
     int gridHeight = 1;
+    int imagType = 0;
     double tol = 1e-7;
     Poly objective("<Z1>");
     std::map<Mon, double> samples;
@@ -1322,6 +1323,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  -y <ints>       Add a symetry between two groups e.g. -y 1,2 3,4" << std::endl;
             std::cout << "  -Y              Assume full symmetry between all qubits" << std::endl;
             std::cout << "  -T              Add tracing-out constraints between density mats" << std::endl;
+            std::cout << "  -i <int>        1 => ignore imag, 2 => alternate imag handling" << std::endl;
             std::cout << "  --conHC P/N     same as objHC, but constraint to be positive/negative" << std::endl;
             std::cout << "Solver options:" << std::endl;
             std::cout << "  -s G            Use Gurobi as the solver" << std::endl;
@@ -1350,13 +1352,18 @@ int main(int argc, char* argv[]) {
             std::cout << "  --davidr <dbl> <int>" << std::endl;
             std::cout << "  --david2d <dbl> <int> <int>" << std::endl;
             std::cout << "  --david2dr <dbl> <int> <int>" << std::endl;
-            std::cout << "  -iquasi" << std::endl;
+            std::cout << "  --quasi" << std::endl;
             return 0;
 
         // Benchmarking mode
         } else if (argAsString == "-B") {
             verbosity = 0;
             benchmark = true;
+
+        // Ignore the imaginary components of the moment matrix
+        } else if (argAsString == "-i") {
+            imagType = std::stoi(argv[i+1]);
+            i++;
 
         // If using all symmetries
         } else if (argAsString == "-Y") {
@@ -1766,6 +1773,9 @@ int main(int argc, char* argv[]) {
         std::vector<Poly> topRow = {Poly(1)};
         int added = 0;
         for (auto& mon : monomsUsed) {
+            if (mon.size() == 0) {
+                continue;
+            }
             topRow.push_back(Poly(mon));
             added++;
             if (added >= autoMomentAmount) {
@@ -2579,7 +2589,7 @@ int main(int argc, char* argv[]) {
     if (solver == "scs") {
         bounds = boundSCS(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity);
     } else if (solver == "mosek" || maxMatSize > 1) {
-        bounds = boundMOSEK(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity);
+        bounds = boundMOSEK(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity, {-1,1}, imagType);
     } else if (solver == "gurobi") {
         bounds = boundGurobi(objective, constraintsZero, verbosity);
     } else if (solver == "eigen") {

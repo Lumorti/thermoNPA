@@ -146,6 +146,10 @@ public:
     void replace(Mon mon, Poly replacement);
     Poly replaced(Mon mon, Poly replacement);
 
+    // Get the real or imaginary part
+    Poly realPart() const;
+    Poly imaginaryPart() const;
+
     // Reduce a polynomial using plus/minus operators to Paulis
     void convertToPaulis();
 

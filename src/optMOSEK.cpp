@@ -393,7 +393,7 @@ double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, st
 }
 
 // Convert to MOSEK form and solve
-std::pair<double,double> boundMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, std::vector<Poly> constraintsZero, std::vector<Poly> constraintsPositive, int verbosity, std::pair<int,int> varBounds, std::map<Mon, std::complex<double>>* xMap) {
+std::pair<double,double> boundMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, std::vector<Poly> constraintsZero, std::vector<Poly> constraintsPositive, int verbosity, std::pair<int,int> varBounds, int imagType, std::map<Mon, std::complex<double>>* xMap) {
 
     // Get the list of variables
     int oneIndex = 0;
@@ -410,6 +410,53 @@ std::pair<double,double> boundMOSEK(Poly obj, std::vector<std::vector<std::vecto
     }
     addVariables(variableSet, obj);
     std::vector<Mon> variables = toVector(variableSet);
+
+    // If we're doing alternate formulation, need more variables TODO
+    // H_r -> A_r + B_r        H_i -> C_r - C_r^T
+    std::vector<std::vector<std::vector<Poly>>> oldPSD = psd;
+    if (imagType == 2) {
+        int extraCount = 0;
+        int newSize = psd[0].size() * 2;
+        int delta = psd[0].size();
+        std::vector<std::vector<Poly>> newPSD(newSize, std::vector<Poly>(newSize, Poly()));
+        for (size_t i=0; i<psd[0].size(); i++) {
+            for (size_t j=i; j<psd[0][i].size(); j++) {
+
+                // The real section
+                variables.push_back(Mon("<A" + std::to_string(extraCount) + ">"));
+                variables.push_back(Mon("<B" + std::to_string(extraCount) + ">"));
+                newPSD[i][j] = Poly("<A" + std::to_string(extraCount) + ">");
+                newPSD[j][i] = Poly("<A" + std::to_string(extraCount) + ">");
+                newPSD[j+delta][i+delta] = Poly("<B" + std::to_string(extraCount) + ">");
+                newPSD[i+delta][j+delta] = Poly("<B" + std::to_string(extraCount) + ">");
+
+                // The imaginary section
+                variables.push_back(Mon("<C" + std::to_string(extraCount) + ">"));
+                variables.push_back(Mon("<D" + std::to_string(extraCount) + ">"));
+                newPSD[j+delta][i] = Poly("<D" + std::to_string(extraCount) + ">");
+                newPSD[i+delta][j] = Poly("<C" + std::to_string(extraCount) + ">");
+                newPSD[i][j+delta] = Poly("<D" + std::to_string(extraCount) + ">");
+                newPSD[j][i+delta] = Poly("<C" + std::to_string(extraCount) + ">");
+
+                // Constrain the real
+                Poly realCon = Poly();
+                realCon += newPSD[i][j] + newPSD[i+delta][j+delta] - psd[0][i][j].realPart();
+                constraintsZero.push_back(realCon);
+                //std::cout << realCon << std::endl;
+
+                // Constrain the imaginary
+                Poly imagCon = Poly();
+                imagCon += newPSD[i+delta][j] - newPSD[j+delta][i] - psd[0][i][j].imaginaryPart();
+                constraintsZero.push_back(imagCon);
+                //std::cout << imagCon << std::endl;
+
+                extraCount++;
+
+            }
+        }
+        //std::cout << newPSD << std::endl;
+        psd = {newPSD};
+    }
 
     // Output the variable list
     if (verbosity >= 2) {
@@ -538,6 +585,9 @@ std::pair<double,double> boundMOSEK(Poly obj, std::vector<std::vector<std::vecto
             break;
         }
     }
+    if (imagType == 1) {
+        needImag = false;
+    }
 
     // The vectors defining the PSD constraints
     std::vector<std::shared_ptr<monty::ndarray<int,1>>> indicesPSDPerMat;
@@ -576,12 +626,9 @@ std::pair<double,double> boundMOSEK(Poly obj, std::vector<std::vector<std::vecto
                     
                     // Find this in the variable list
                     int realLoc = variableLocs[term.first];
-                    int imagLoc = variableLocs[term.first];
 
                     // Locations in the svec
                     int realInd = matLocToVecLoc(i, j, fullMatSize) + l*sVecSize;
-                    int imagInd = matLocToVecLoc(i, j+imagOffset, fullMatSize) + l*sVecSize;
-                    int realInd2 = matLocToVecLoc(i+imagOffset, j+imagOffset, fullMatSize) + l*sVecSize;
 
                     // Set the real coeffs
                     std::complex<double> val = term.second;
@@ -590,20 +637,27 @@ std::pair<double,double> boundMOSEK(Poly obj, std::vector<std::vector<std::vecto
                     indicesPSD[realInd] = realLoc;
                     coeffsPSD[realInd] = realCoeff;
 
-                    // Set stuff if we have an imaginary section
-                    if (needImag) {
-                        indicesPSD[realInd2] = realLoc;
-                        coeffsPSD[realInd2] = realCoeff;
-                        if (std::abs(imagCoeff) > 1e-8) {
-                            indicesPSD[imagInd] = imagLoc;
-                            coeffsPSD[imagInd] = imagCoeff;
-                        }
-                    }
-
                     // The off-diagonals are multiplied by sqrt(2)
                     if (i != j) {
                         coeffsPSD[realInd] *= std::sqrt(2.0);
-                        coeffsPSD[imagInd] *= std::sqrt(2.0);
+                    }
+
+                    // Set stuff if we have an imaginary section
+                    if (needImag) {
+                        int imagInd = matLocToVecLoc(i, j+imagOffset, fullMatSize) + l*sVecSize;
+                        int imagInd2 = matLocToVecLoc(j, i+imagOffset, fullMatSize) + l*sVecSize;
+                        int realInd2 = matLocToVecLoc(i+imagOffset, j+imagOffset, fullMatSize) + l*sVecSize;
+                        indicesPSD[realInd2] = realLoc;
+                        coeffsPSD[realInd2] = realCoeff;
+                        indicesPSD[imagInd] = realLoc;
+                        coeffsPSD[imagInd] = imagCoeff;
+                        indicesPSD[imagInd2] = realLoc;
+                        coeffsPSD[imagInd2] = -imagCoeff;
+                        if (i != j) {
+                            coeffsPSD[imagInd] *= std::sqrt(2.0);
+                            coeffsPSD[realInd2] *= std::sqrt(2.0);
+                            coeffsPSD[imagInd2] *= std::sqrt(2.0);
+                        }
                     }
 
                     l++;
@@ -767,14 +821,14 @@ std::pair<double,double> boundMOSEK(Poly obj, std::vector<std::vector<std::vecto
 
         // Some matrix stuff
         if (psd.size() > 0) {
-            Eigen::MatrixXcd A = replaceVariables(psd[0], variables, variableValues);
+            Eigen::MatrixXcd A = replaceVariables(oldPSD[0], variables, variableValues);
             std::cout << "Moment matrix:" << std::endl;
-            std::cout << psd[0] << std::endl;
+            std::cout << oldPSD[0] << std::endl;
             std::cout << "Moment matrix with vars replaced:" << std::endl;
             std::cout << A << std::endl;
             std::vector<std::complex<double>> eigVals;
             std::vector<std::vector<std::complex<double>>> eigVecs;
-            getEigens(psd[0], variables, variableValues, eigVecs, eigVals);
+            getEigens(oldPSD[0], variables, variableValues, eigVecs, eigVals);
             std::cout << "Eigenvalues: " << eigVals << std::endl;
             int numZeroEig = 0;
             for (size_t i=0; i<eigVals.size(); i++) {

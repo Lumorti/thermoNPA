@@ -860,3 +860,21 @@ Poly operator*(const std::complex<double>& coeff, const Mon& mon) {
     return Poly(coeff, mon);
 }
 
+// Get the real or imaginary part
+Poly Poly::realPart() const {
+    Poly toReturn;
+    for (auto& term : polynomial) {
+        toReturn[term.first] = term.second.real();
+    }
+    toReturn.clean();
+    return toReturn;
+}
+Poly Poly::imaginaryPart() const {
+    Poly toReturn;
+    for (auto& term : polynomial) {
+        toReturn[term.first] = term.second.imag();
+    }
+    toReturn.clean();
+    return toReturn;
+}
+

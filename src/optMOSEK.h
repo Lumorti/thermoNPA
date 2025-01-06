@@ -6,6 +6,13 @@
 double solveMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, std::vector<Poly> constraintsZero={}, std::vector<Poly> constraintsPositive={}, int verbosity=1, std::pair<int,int> varBounds = {-1, 1}, std::map<Mon, std::complex<double>>* solution = nullptr);
 
 // Convert to MOSEK form and bound
-std::pair<double,double> boundMOSEK(Poly obj, std::vector<std::vector<std::vector<Poly>>>& psd, std::vector<Poly> constraintsZero={}, std::vector<Poly> constraintsPositive={}, int verbosity=1, std::pair<int,int> varBounds = {-1, 1}, std::map<Mon, std::complex<double>>* solution = nullptr);
+std::pair<double,double> boundMOSEK(Poly obj, 
+                                    std::vector<std::vector<std::vector<Poly>>>& psd, 
+                                    std::vector<Poly> constraintsZero={}, 
+                                    std::vector<Poly> constraintsPositive={}, 
+                                    int verbosity=1, 
+                                    std::pair<int,int> varBounds = {-1, 1}, 
+                                    int imagType = 0,
+                                    std::map<Mon, std::complex<double>>* solution = nullptr);
 
 
