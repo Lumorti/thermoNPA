@@ -30,10 +30,10 @@
 #./run -s M --david2d 0.5 5 2 -M 50000 -A 200 -y 1 6 -y 2 7 -y 3 8 -y 4 9 -y 5 10 -B | tee -a data/david2d.tex
 #./run -s M --david2d 0.5 5 2 -M 50000 -A 200 -r 4 -y 1 6 -y 2 7 -y 3 8 -y 4 9 -y 5 10 -B | tee -a data/david2d.tex
 #./run -s M --david2d 0.5 5 2 -M 70000 -A 250 -y 1 6 -y 2 7 -y 3 8 -y 4 9 -y 5 10 -B | tee -a data/david2d.tex
-./run -s M --david2d 0.5 5 2 -M 100000 -A 250 -y 1 6 -y 2 7 -y 3 8 -y 4 9 -y 5 10 -B | tee -a data/david2d.tex
-./run -s M --david2d 0.5 5 2 -M 100000 -A 300 -y 1 6 -y 2 7 -y 3 8 -y 4 9 -y 5 10 -B | tee -a data/david2d.tex
-./run -s M --david2d 0.5 5 2 -M 100000 -r 4 -y 1 6 -y 2 7 -y 3 8 -y 4 9 -y 5 10 -B | tee -a data/david2d.tex
-./run -s M --david2d 0.5 5 2 -M 100000 -r 5 -y 1 6 -y 2 7 -y 3 8 -y 4 9 -y 5 10 -B | tee -a data/david2d.tex
+#./run -s M --david2d 0.5 5 2 -M 100000 -A 250 -y 1 6 -y 2 7 -y 3 8 -y 4 9 -y 5 10 -B | tee -a data/david2d.tex
+#./run -s M --david2d 0.5 5 2 -M 100000 -A 300 -y 1 6 -y 2 7 -y 3 8 -y 4 9 -y 5 10 -B | tee -a data/david2d.tex
+#./run -s M --david2d 0.5 5 2 -M 100000 -r 4 -y 1 6 -y 2 7 -y 3 8 -y 4 9 -y 5 10 -B | tee -a data/david2d.tex
+#./run -s M --david2d 0.5 5 2 -M 100000 -r 5 -y 1 6 -y 2 7 -y 3 8 -y 4 9 -y 5 10 -B | tee -a data/david2d.tex
 
 # Graph versus system size
 #echo "" > data/graph1.dat
@@ -58,7 +58,12 @@
     #results=$(./run -s M --tensor $i -M 20000 -A 100 -Y -B)
     #diff=$(echo "$results" | awk '{print $12}')
     #echo "$results" | tee -a data/graph3.tex
-    #echo "$i $diff" | tee -a data/graph3.dat
+    #echo "$i $diff" | tee -a ../data/graph3.dat
+
+    #results=$(./run -s M --tensor $i -M 50000 -A 150 -Y -B)
+    #diff=$(echo "$results" | awk '{print $12}')
+    #echo "$results" | tee -a ../data/graph3.tex
+    #echo "$i $diff" | tee -a ../data/graph3.dat
 
 #done
 
