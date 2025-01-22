@@ -1915,11 +1915,14 @@ int main(int argc, char* argv[]) {
         addVariables(vars, momentMatrices[i]);
     }
     addVariables(vars, constraintsZero);
+    addVariables(vars, pseudoObjective);
+    addVariables(vars, constraintsPositive);
+    addVariables(vars, objective);
     std::map<Mon,Mon> symmetriesMap;
     for (auto sym : symmetries) {
         
         // If verbose, output the symmetry
-        if (verbosity >= 1) {
+        if (verbosity >= 2) {
             std::cout << "Adding symmetry between " << sym.first << " and " << sym.second << std::endl;
         }
 
@@ -1954,7 +1957,7 @@ int main(int argc, char* argv[]) {
                     }
                     
                 }
-                if (newMon < mon) {
+                if (vars.count(newMon)) {
                     symmetriesMap[mon] = newMon;
                     if (verbosity >= 3) {
                         std::cout << mon << " -> " << newMon << std::endl;
@@ -2460,36 +2463,36 @@ int main(int argc, char* argv[]) {
             }
 
             // Check each column of the moment matrix
-            for (size_t i=0; i<momentMatrices[0].size(); i++) {
+            //for (size_t i=0; i<momentMatrices[0].size(); i++) {
 
-                    // Remove the column
-                    momentMatrices = momentMatricesCopy;
-                    momentMatrices[0].erase(momentMatrices[0].begin() + i);
-                    for (size_t j=0; j<momentMatrices[0].size(); j++) {
-                        momentMatrices[0][j].erase(momentMatrices[0][j].begin() + i);
-                    }
+                    //// Remove the column
+                    //momentMatrices = momentMatricesCopy;
+                    //momentMatrices[0].erase(momentMatrices[0].begin() + i);
+                    //for (size_t j=0; j<momentMatrices[0].size(); j++) {
+                        //momentMatrices[0][j].erase(momentMatrices[0][j].begin() + i);
+                    //}
 
-                    // Get the bounds
-                    std::pair<double,double> boundsTemp;
-                    boundsTemp = boundMOSEK(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity);
-                    double lowerBoundTemp = boundsTemp.first;
-                    double upperBoundTemp = boundsTemp.second;
-                    double diff = upperBoundTemp - lowerBoundTemp;
-                    if (verbosity >= 1) {
-                        std::cout << "Removed row/col " << i << ", diff: " << diff << ", change: " << diff - currentBoundDiff << std::endl;
-                    }
+                    //// Get the bounds
+                    //std::pair<double,double> boundsTemp;
+                    //boundsTemp = boundMOSEK(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity);
+                    //double lowerBoundTemp = boundsTemp.first;
+                    //double upperBoundTemp = boundsTemp.second;
+                    //double diff = upperBoundTemp - lowerBoundTemp;
+                    //if (verbosity >= 1) {
+                        //std::cout << "Removed row/col " << i << ", diff: " << diff << ", change: " << diff - currentBoundDiff << std::endl;
+                    //}
 
-                    // If it's better, remove it
-                    if (diff - currentBoundDiff <= tol) {
-                        if (verbosity >= 1) {
-                            std::cout << "Removing row/col " << i << std::endl;
-                        }
-                        momentMatricesCopy = momentMatrices;
-                        removedSomething = true;
-                        break;
-                    }
+                    //// If it's better, remove it
+                    //if (diff - currentBoundDiff <= tol) {
+                        //if (verbosity >= 1) {
+                            //std::cout << "Removing row/col " << i << std::endl;
+                        //}
+                        //momentMatricesCopy = momentMatrices;
+                        //removedSomething = true;
+                        //break;
+                    //}
 
-            }
+            //}
 
             // If nothing was removed, break
             if (!removedSomething) {
@@ -2598,16 +2601,17 @@ int main(int argc, char* argv[]) {
     }
     double lowerBound = bounds.first;
     double upperBound = bounds.second;
+    double diff = std::abs(upperBound - lowerBound);
+    std::complex<double> center = (upperBound + lowerBound) / 2;
+    if (idealIsKnown) {
+        center = knownIdeal;
+        std::cout << "Known true optimum: " << knownIdeal << std::endl;
+    }
+    double error = (diff / std::abs(center)) * 50;
     if (verbosity >= 1) {
         std::cout << "Bounds: " << lowerBound << "  <  " << upperBound << std::endl;
         std::cout << "Difference: " << upperBound - lowerBound << std::endl;
-        if (idealIsKnown) {
-            std::cout << "Known ideal: " << knownIdeal << std::endl;
-            std::cout << "Error: " << 100*(upperBound-lowerBound)/knownIdeal << "%" << std::endl;
-        } else if (upperBound * lowerBound > 0) {
-            knownIdeal = (upperBound + lowerBound) / 2;
-            std::cout << "Averaged: " << knownIdeal << " +/- " << 100*(upperBound-lowerBound)/std::abs(2*knownIdeal) << "%" << std::endl;
-        }
+        std::cout << "Center: " << center << " +/- " << error << "%" << std::endl;
     }
 
     // Timing
@@ -2649,10 +2653,6 @@ int main(int argc, char* argv[]) {
         if (symmetries.size() > 0) {
             outputSym = "yes (" + std::to_string(symmetries.size()) + ")";
         }
-        double diff = std::abs(upperBound - lowerBound);
-        double avg = (upperBound + lowerBound) / 2;
-        double error = 50 * diff;
-        error = std::max(0.0, std::min(error, 100.0));
         outputDiff = std::to_string(diff) + " (" + strRound(error, 2) + "\\%)";
         int timeInMillis = std::chrono::duration_cast<std::chrono::milliseconds>(timeFinishedSolving - timeFinishedArgs).count();
         if (timeInMillis < 5000 && false) {
