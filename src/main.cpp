@@ -2587,6 +2587,27 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    double trivialMax = 0;
+    double trivialMin = 0;
+    for (auto& term : objective) {
+        double coeff = std::real(term.second);
+        if (term.first.size() == 0) {
+            trivialMax += coeff;
+            trivialMin += coeff;
+        } else {
+            if (coeff > 0) {
+                trivialMax += coeff;
+                trivialMin -= coeff;
+            } else {
+                trivialMax -= coeff;
+                trivialMin += coeff;
+            }
+        }
+    }
+    if (verbosity >= 1) {
+        std::cout << "Trivial bounds: " << trivialMin << " < obj < " << trivialMax << std::endl;
+    }
+
     // Solve
     std::pair<double,double> bounds;
     if (solver == "scs") {
@@ -2602,16 +2623,15 @@ int main(int argc, char* argv[]) {
     double lowerBound = bounds.first;
     double upperBound = bounds.second;
     double diff = std::abs(upperBound - lowerBound);
-    std::complex<double> center = (upperBound + lowerBound) / 2;
     if (idealIsKnown) {
-        center = knownIdeal;
-        std::cout << "Known true optimum: " << knownIdeal << std::endl;
+        std::cout << "Known True Optimum: " << knownIdeal << std::endl;
+        std::cout << "Relative Error: " << diff / std::abs(knownIdeal) * 100 << "%" << std::endl;
     }
-    double error = (diff / std::abs(center)) * 50;
+    double error = (diff / std::abs(trivialMax - trivialMin)) * 100;
     if (verbosity >= 1) {
         std::cout << "Bounds: " << lowerBound << "  <  " << upperBound << std::endl;
         std::cout << "Difference: " << upperBound - lowerBound << std::endl;
-        std::cout << "Center: " << center << " +/- " << error << "%" << std::endl;
+        std::cout << "As Percentage: " << error << "%" << std::endl;
     }
 
     // Timing
@@ -2653,7 +2673,8 @@ int main(int argc, char* argv[]) {
         if (symmetries.size() > 0) {
             outputSym = "yes (" + std::to_string(symmetries.size()) + ")";
         }
-        outputDiff = std::to_string(diff) + " (" + strRound(error, 2) + "\\%)";
+        //outputDiff = std::to_string(diff) + " (" + strRound(error, 2) + "\\%)";
+        outputDiff = "[" + std::to_string(lowerBound) + ", " + std::to_string(upperBound) + "] (" + strRound(error, 2) + "\\%)";
         int timeInMillis = std::chrono::duration_cast<std::chrono::milliseconds>(timeFinishedSolving - timeFinishedArgs).count();
         if (timeInMillis < 5000 && false) {
             outputTime = std::to_string(timeInMillis) + "ms";
