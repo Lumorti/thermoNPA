@@ -2605,7 +2605,7 @@ int main(int argc, char* argv[]) {
         }
     }
     if (verbosity >= 1) {
-        std::cout << "Trivial bounds: " << trivialMin << " < obj < " << trivialMax << std::endl;
+        std::cout << "Trivial bounds: " << trivialMin << " <= obj <= " << trivialMax << std::endl;
     }
 
     // Solve
@@ -2623,7 +2623,7 @@ int main(int argc, char* argv[]) {
     double lowerBound = bounds.first;
     double upperBound = bounds.second;
     double diff = std::abs(upperBound - lowerBound);
-    if (idealIsKnown) {
+    if (idealIsKnown && verbosity >= 1) {
         std::cout << "Known True Optimum: " << knownIdeal << std::endl;
         std::cout << "Relative Error: " << diff / std::abs(knownIdeal) * 100 << "%" << std::endl;
     }

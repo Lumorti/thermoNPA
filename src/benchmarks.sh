@@ -22,7 +22,6 @@ echo "" > data/tensorchain.tex
 # For the 2D case
 echo "" > data/david2d.tex
 ./run -s M -i 1 --david2d 0.5 2 5 -M 1000 -B | tee -a data/david2d.tex
-./run -s M -i 1 --david2d 0.5 2 5 -M 10000 -B | tee -a data/david2d.tex
 ./run -s M -i 1 --david2d 0.5 2 5 -M 10000 -r 4 -B | tee -a data/david2d.tex
 ./run -s M -i 1 --david2d 0.5 2 5 -M 10000 -A 100 -B | tee -a data/david2d.tex
 ./run -s M -i 1 --david2d 0.5 5 2 -M 30000 -A 150 -B | tee -a data/david2d.tex
