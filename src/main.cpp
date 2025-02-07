@@ -7,6 +7,7 @@
 #include <set>
 #include <chrono>
 #include <map>
+#include <fstream>
 
 // Import OpenMP
 #include <omp.h>
@@ -600,6 +601,160 @@ int main(int argc, char* argv[]) {
             }
             lindbladianHot.convertToPaulis();
             lindbladianCold.convertToPaulis();
+
+        // For an arbitrary connectivity, given as a file TODO
+        // This file should have the number of qubits on the first line
+        // Then each line should have two integers detailing connectivity (e.g. "3 6")
+        // For baths, use -1 for the cold and -2 for the hot
+        } else if (argAsString == "--file") {
+
+            // Get the filename
+            std::string filename = argv[i+1];
+            i++;
+            if (filename == "") {
+                std::cerr << "No filename given for --file" << std::endl;
+                return 1;
+            }
+
+            // Load the file
+            std::ifstream file(filename);
+            if (!file.is_open()) {
+                std::cerr << "Could not open file " << filename << std::endl;
+                return 1;
+            }
+
+            // Load the connectivity
+            std::set<std::pair<int, int>> connectivity;
+            std::set<int> connectedToHot;
+            std::set<int> connectedToCold;
+            int q1, q2;
+            while (file >> q1 >> q2) {
+                std::pair<int, int> conn;
+                if (q1 < q2) {
+                    conn = std::make_pair(q1, q2);
+                } else {
+                    conn = std::make_pair(q2, q1);
+                }
+                connectivity.insert(conn);
+                if (q1 == -1) {
+                    connectedToCold.insert(q2);
+                } else if (q2 == -1) {
+                    connectedToCold.insert(q1);
+                } else if (q1 == -2) {
+                    connectedToHot.insert(q2);
+                } else if (q2 == -2) {
+                    connectedToHot.insert(q1);
+                }
+            }
+
+            // Find the minimum and maximum qubit indices
+            int minQubit = 1000000;
+            int maxQubit = -1;
+            for (auto conn : connectivity) {
+                minQubit = std::min(minQubit, conn.first);
+                minQubit = std::min(minQubit, conn.second);
+                maxQubit = std::max(maxQubit, conn.first);
+                maxQubit = std::max(maxQubit, conn.second);
+            }
+
+            // Rescale the qubits to start at 0
+            std::set<std::pair<int, int>> newConnectivity;
+            for (auto &conn : connectivity) {
+                newConnectivity.insert(std::make_pair(conn.first - minQubit, conn.second - minQubit));
+            }
+            connectivity = newConnectivity;
+            std::set<int> newConnectedToHot;
+            for (auto &q : connectedToHot) {
+                newConnectedToHot.insert(q - minQubit);
+            }
+            connectedToHot = newConnectedToHot;
+            std::set<int> newConnectedToCold;
+            for (auto &q : connectedToCold) {
+                newConnectedToCold.insert(q - minQubit);
+            }
+            connectedToCold = newConnectedToCold;
+            numQubits = maxQubit - minQubit + 1;
+
+            // Defining quantities
+            double gamma_c = 1e-3;
+            double gamma_h = 1e-3;
+            double g = 0.1;
+            double T_h = 1.0;
+            double T_c = 0.1;
+            double delta = 0.005;
+            double epsilon_h = 1.0;
+
+            // Construct the objective as a polynomial
+            objective = Poly();
+            for (int i=1; i<=numQubits; i++) {
+                objective += Poly(1.0/numQubits, "<Z" + std::to_string(i) + ">");
+            }
+            
+            // The Hamiltonian
+            // H = \sum_nn <X{i}X{j}> + g * \sum_i <Zi>
+            Poly H;
+            for (int i=1; i<=numQubits; i++) {
+                H += Poly(g, "<Z" + std::to_string(i) + ">");
+            }
+            for (auto conn : connectivity) {
+                H += Poly(g, "<X" + std::to_string(conn.first) + "X" + std::to_string(conn.second) + ">");
+            }
+
+            // Output the Hamiltonian
+            if (verbosity >= 2) {
+                std::cout << "Hamiltonian: " << H << std::endl;
+            }
+
+            // The jump operators
+            std::vector<Poly> Gamma_k(numQubits);
+            for (int i=0; i<numQubits; i++) {
+                Gamma_k[i] = Poly("<X" + std::to_string(i+1) + ">") - imag*Poly("<Y" + std::to_string(i+1) + ">");
+                Gamma_k[i] /= 2.0;
+                if (connectedToHot.find(i) != connectedToHot.end()) {
+                    Gamma_k[i] *= std::sqrt(gamma_h);
+                } else if (connectedToCold.find(i) != connectedToCold.end()) {
+                    Gamma_k[i] *= std::sqrt(gamma_c);
+                } else {
+                    Gamma_k[i] *= 0.0;
+                }
+            }
+
+            // The full Lindbladian
+            // -i[H, rho] + \sum_k 0.5 * (2*gamma_h * Gamma_k rho Gamma_k^dagger - Gamma_k^dagger Gamma_k rho - rho Gamma_k^dagger Gamma_k)
+            Poly rho("<R1>");
+            lindbladian = -imag*H.commutator(rho);
+            for (int i=0; i<numQubits; i++) {
+                lindbladian += 0.5 * (2 * Gamma_k[i] * rho * Gamma_k[i].dagger() - Gamma_k[i].dagger() * Gamma_k[i] * rho - rho * Gamma_k[i].dagger() * Gamma_k[i]);
+            }
+            lindbladian = Poly("<A0>") * lindbladian;
+            lindbladian.cycleToAndRemove('R', 1);
+            lindbladian.reduce();
+
+            // Note the local and non-local Hamiltonians in case we need them later
+            hamiltonianInter = std::vector<std::vector<Poly>>(numQubits, std::vector<Poly>(numQubits, Poly()));
+            for (int i=1; i<=numQubits; i++) {
+                hamiltonianInter[i-1][i-1] = Poly(g, "<Z" + std::to_string(i) + ">");
+            }
+            for (auto conn : connectivity) {
+                hamiltonianInter[conn.first][conn.second] = Poly(1, "<X" + std::to_string(conn.first+1) + "X" + std::to_string(conn.second+1) + ">");
+                hamiltonianInter[conn.second][conn.first] = Poly(1, "<X" + std::to_string(conn.first+1) + "X" + std::to_string(conn.second+1) + ">");
+            }
+            lindbladianHot = Poly();
+            lindbladianCold = Poly();
+            for (int i=0; i<numQubits; i++) {
+                if (connectedToHot.find(i) != connectedToHot.end()) {
+                    lindbladianHot += 0.5 * (2 * Gamma_k[i] * rho * Gamma_k[i].dagger() - Gamma_k[i].dagger() * Gamma_k[i] * rho - rho * Gamma_k[i].dagger() * Gamma_k[i]);
+                }
+                if (connectedToCold.find(i) != connectedToCold.end()) {
+                    lindbladianCold += 0.5 * (2 * Gamma_k[i] * rho * Gamma_k[i].dagger() - Gamma_k[i].dagger() * Gamma_k[i] * rho - rho * Gamma_k[i].dagger() * Gamma_k[i]);
+                }
+            }
+            lindbladianHot = Poly("<A0>") * lindbladianHot;
+            lindbladianCold = Poly("<A0>") * lindbladianCold;
+            lindbladianHot.cycleToAndRemove('R', 1);
+            lindbladianCold.cycleToAndRemove('R', 1);
+            lindbladianHot.reduce();
+            lindbladianCold.reduce();
 
         // The Lindbladian from David
         } else if (argAsString == "--david" || argAsString == "--davidr") {
