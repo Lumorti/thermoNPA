@@ -13,7 +13,7 @@ make
 
 ## Usage
 
-The code can be ran by running:
+The code can be ran using:
 ```bash
 ./run --help
 ```
