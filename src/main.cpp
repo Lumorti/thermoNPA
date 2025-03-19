@@ -602,6 +602,69 @@ int main(int argc, char* argv[]) {
             lindbladianHot.convertToPaulis();
             lindbladianCold.convertToPaulis();
 
+        // TODO simple phase transition example
+        } else if (argAsString == "--phase") {
+
+            double gamma = std::stod(argv[i+1]);
+            i++;
+            numQubits = 1;
+
+            // Construct the objective as a polynomial
+            objective = Poly();
+            for (int i=1; i<=numQubits; i++) {
+                objective += Poly(1.0/numQubits, "<Z" + std::to_string(i) + ">");
+            }
+            
+            // The full Lindbladian
+            // (1-gamma)*(sigma_minus*rho*sigma_plus - 0.5*sigma_plus*sigma_minus*rho - 0.5*rho*sigma_plus*sigma_minus)
+            // + gamma*(sigma_z*rho*sigma_z - rho)
+            Poly rho("<R1>");
+            lindbladian = (1-gamma)*(Poly("<M1>")*rho*Poly("<P1>") - 0.5*Poly("<P1>")*Poly("<M1>")*rho - 0.5*rho*Poly("<P1>")*Poly("<M1>"))
+                        + gamma*(Poly("<Z1>")*rho*Poly("<Z1>") - rho);
+            lindbladian = Poly("<A0>") * lindbladian;
+            lindbladian.cycleToAndRemove('R', 1);
+            lindbladian.convertToPaulis();
+            lindbladian.reduce();
+
+        // TODO https://journals.aps.org/prx/abstract/10.1103/PhysRevX.6.031011
+        } else if (argAsString == "--phase2") {
+
+            double gamma = std::stod(argv[i+1]);
+            double Jx = std::stod(argv[i+2]);
+            double Jy = std::stod(argv[i+3]);
+            double Jz = std::stod(argv[i+4]);
+            numQubits = std::stoi(argv[i+5]);
+            i += 5;
+
+            // Objective is random for now
+            objective = Poly();
+            for (int i=1; i<=numQubits; i++) {
+                objective += Poly(1.0/numQubits, "<Z" + std::to_string(i) + ">");
+            }
+
+            // H = sum Jx X_i X_j + Jy Y_i Y_j + Jz Z_i Z_j
+            Poly H;
+            for (int i=1; i<=numQubits; i++) {
+                for (int j=i+1; j<=numQubits; j++) {
+                    H += Poly(Jx, "<X" + std::to_string(i) + "X" + std::to_string(j) + ">")
+                       + Poly(Jy, "<Y" + std::to_string(i) + "Y" + std::to_string(j) + ">")
+                       + Poly(Jz, "<Z" + std::to_string(i) + "Z" + std::to_string(j) + ">");
+                }
+            }
+
+            // Lindbladian = -i[H, rho] + gamma*(sum sigma_minus*rho*sigma_plus - 0.5*sigma_plus*sigma_minus*rho - 0.5*rho*sigma_plus*sigma_minus)
+            Poly rho("<R1>");
+            lindbladian = -imag*H.commutator(rho);
+            for (int i=1; i<=numQubits; i++) {
+                lindbladian += gamma*(Poly("<M" + std::to_string(i) + ">")*rho*Poly("<P" + std::to_string(i) + ">") - 0.5*Poly("<P" + std::to_string(i) + ">")*Poly("<M" + std::to_string(i) + ">")*rho - 0.5*rho*Poly("<P" + std::to_string(i) + ">")*Poly("<M" + std::to_string(i) + ">"));
+            }
+            lindbladian = Poly("<A0>") * lindbladian;
+            lindbladian.cycleToAndRemove('R', 1);
+            lindbladian.convertToPaulis();
+            lindbladian.reduce();
+
+        // TODO https://journals.aps.org/pra/pdf/10.1103/PhysRevA.98.042118?casa_token=CFcuEJLHI8IAAAAA%3AQA26OCFU-TCiLQGncKG3TRRu9FW-Bf5mfgdspWRoCLiLa-1UJN9qLSBlSy9qqyfGQPAvs4e54FXAwcwp
+
         // For an arbitrary connectivity, given as a file TODO
         // This file should have the number of qubits on the first line
         // Then each line should have two integers detailing connectivity (e.g. "3 6")
