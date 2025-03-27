@@ -17,13 +17,8 @@
 #include <Eigen/Sparse>
 #include <unsupported/Eigen/KroneckerProduct>
 
-// Local files
-#include "poly.h"
-#include "printing.h"
-#include "utils.h"
-#include "optMOSEK.h"
-#include "optGurobi.h"
-#include "optSCS.h"
+// PolyNC
+#include "../../PolyNC/src/polync.h"
  
 // https://stackoverflow.com/questions/2647858/multiplying-complex-with-constant-in-c
 template <typename T>
