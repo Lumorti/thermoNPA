@@ -1552,6 +1552,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  --objHC H/C     Heat current for either the hot or cold bath" << std::endl;
             std::cout << "Limbliadian choices:" << std::endl;
             std::cout << "  -L <str>        Manually set the Lindbladian" << std::endl;
+            std::cout << "  --file <str>    Read the Lindbladian from a file" << std::endl;
             std::cout << "  --pauli <dbl> <dbl> <dbl>" << std::endl;
             std::cout << "  --second <int> <dbl>" << std::endl;
             std::cout << "  --two" << std::endl;
@@ -2800,6 +2801,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    // Compute trivial bounds
     double trivialMax = 0;
     double trivialMin = 0;
     for (auto& term : objective) {
