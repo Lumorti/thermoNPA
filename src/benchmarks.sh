@@ -42,22 +42,37 @@ for i in 12 15 20 25 30 35 40 45 50 60 70 80 90 100 120 140 160 180 200
 do
 
     results=$(./run -s M -i 1 --tensor $i -M 10000 -A 40 -Y -B)
-    diff=$(echo "$results" | awk '{print $14}')
-    diff=$(echo $diff | tr -d '()%\\')
     echo "$results" | tee -a data/graph1.tex
-    echo "$i $diff" | tee -a data/graph1.dat
+    #diff=$(echo "$results" | awk '{print $14}')
+    #diff=$(echo $diff | tr -d '()%\\')
+    #echo "$i $diff" | tee -a data/graph1.dat
+    lower=$(echo "$results" | awk '{print $12}')
+    lower=$(echo $lower | tr -d '()%\\')
+    upper=$(echo "$results" | awk '{print $13}')
+    upper=$(echo $upper | tr -d '()%\\')
+    echo "$i $lower $upper" | tee -a data/graph1.dat
 
     results=$(./run -s M -i 1 --tensor $i -M 30000 -A 100 -Y -B)
-    diff=$(echo "$results" | awk '{print $14}')
-    diff=$(echo $diff | tr -d '()%\\')
     echo "$results" | tee -a data/graph2.tex
-    echo "$i $diff" | tee -a data/graph2.dat
+    #diff=$(echo "$results" | awk '{print $14}')
+    #diff=$(echo $diff | tr -d '()%\\')
+    #echo "$i $diff" | tee -a data/graph2.dat
+    lower=$(echo "$results" | awk '{print $12}')
+    lower=$(echo $lower | tr -d '()%\\')
+    upper=$(echo "$results" | awk '{print $13}')
+    upper=$(echo $upper | tr -d '()%\\')
+    echo "$i $lower $upper" | tee -a data/graph2.dat
 
     results=$(./run -s M -i 1 --tensor $i -M 70000 -A 250 -Y -B)
-    diff=$(echo "$results" | awk '{print $14}')
-    diff=$(echo $diff | tr -d '()%\\')
     echo "$results" | tee -a data/graph3.tex
-    echo "$i $diff" | tee -a data/graph3.dat
+    #diff=$(echo "$results" | awk '{print $14}')
+    #diff=$(echo $diff | tr -d '()%\\')
+    #echo "$i $diff" | tee -a data/graph3.dat
+    lower=$(echo "$results" | awk '{print $12}')
+    lower=$(echo $lower | tr -d '()%\\')
+    upper=$(echo "$results" | awk '{print $13}')
+    upper=$(echo $upper | tr -d '()%\\')
+    echo "$i $lower $upper" | tee -a data/graph3.dat
 
 done
 
