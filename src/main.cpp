@@ -56,6 +56,15 @@ std::string strRound(double value, int decimals) {
 // Useful constants
 const std::complex<double> imag(0, 1);
 
+// Trace of an eigen sparse matrix
+std::complex<double> trace(const Eigen::SparseMatrix<std::complex<double>>& mat) {
+    std::complex<double> trace = 0;
+    for (int k=0; k<mat.cols(); ++k) {
+        trace += mat.coeff(k, k);
+    }
+    return trace;
+}
+
 // Partial trace of a density matrix
 // Here we have a matrix of size 2^N x 2^N, and we want to trace out the siteInd-th qubit
 // the site index is zero-based
@@ -103,6 +112,7 @@ int main(int argc, char* argv[]) {
     int gridWidth = 1;
     int gridHeight = 1;
     int imagType = 0;
+    int numSamples = 0;
     double tol = 1e-7;
     Poly objective("<Z1>");
     std::map<Mon, double> samples;
@@ -659,8 +669,9 @@ int main(int argc, char* argv[]) {
             lindbladian.reduce();
 
         // TODO https://journals.aps.org/pra/pdf/10.1103/PhysRevA.98.042118?casa_token=CFcuEJLHI8IAAAAA%3AQA26OCFU-TCiLQGncKG3TRRu9FW-Bf5mfgdspWRoCLiLa-1UJN9qLSBlSy9qqyfGQPAvs4e54FXAwcwp
+        } else if (argAsString == "--phase3") {
 
-        // For an arbitrary connectivity, given as a file TODO
+        // For an arbitrary connectivity, given as a file
         // This file should have the number of qubits on the first line
         // Then each line should have two integers detailing connectivity (e.g. "3 6")
         // For baths, use -1 for the cold and -2 for the hot
@@ -1513,6 +1524,11 @@ int main(int argc, char* argv[]) {
         } else if (argAsString == "-P") {
             pseudoObjective = objective;
 
+        // If taking samples
+        } else if (argAsString == "--samples") {
+            numSamples = std::stoi(argv[i+1]);
+            i++;
+
         // Output the help
         } else if (argAsString == "-h" || argAsString == "--help") {
             std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
@@ -1524,6 +1540,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  -P              Take the current objective as a pseudo-objective" << std::endl;
             std::cout << "  -v <int>        Verbosity level" << std::endl;
             std::cout << "  -B              benchmarking mode" << std::endl;
+            std::cout << "  --samples <int> Solve exactly, take samples and use to bound values" << std::endl;
             std::cout << "Constraint options:" << std::endl;
             std::cout << "  -m <int>        Level of the moment matrix" << std::endl;
             std::cout << "  -l <int>        Level of the moments to put in the Lindbladian" << std::endl;
@@ -1567,6 +1584,9 @@ int main(int argc, char* argv[]) {
             std::cout << "  --david2d <dbl> <int> <int>" << std::endl;
             std::cout << "  --david2dr <dbl> <int> <int>" << std::endl;
             std::cout << "  --quasi" << std::endl;
+            std::cout << "  --phase1" << std::endl;
+            std::cout << "  --phase2" << std::endl;
+            std::cout << "  --phase3" << std::endl;
             return 0;
 
         // Benchmarking mode
@@ -1602,6 +1622,354 @@ int main(int argc, char* argv[]) {
 
     // Start a timer
     std::chrono::steady_clock::time_point timeFinishedArgs = std::chrono::steady_clock::now();
+
+    // If we take fake samples
+    if (numSamples != 0) {
+
+        // Save the old problem
+        std::vector<Poly> prevConsZero = constraintsZero;
+
+        // First we need to solve exactly the problem
+        std::set<Mon> monomsUsed;
+        std::vector<Mon> monomsUsedVec;
+        std::vector<std::vector<std::vector<Poly>>> momentMatrices = {};
+        std::vector<Mon> variables = {};
+        for (int i=0; i<numQubits; i++) {
+            variables.push_back(Mon("<X" + std::to_string(i+1) + ">"));
+            variables.push_back(Mon("<Y" + std::to_string(i+1) + ">"));
+            variables.push_back(Mon("<Z" + std::to_string(i+1) + ">"));
+        }
+        addSingleMonomials(variables, objective);
+        int fullLevel = numQubits;
+        std::vector<Poly> variablesToPut = generateMonomials(variables, fullLevel, verbosity);
+        for (size_t i=0; i<extraMonomialsLim.size(); i++) {
+            variablesToPut.push_back(Poly(extraMonomialsLim[i]));
+        }
+        for (size_t i=0; i<variablesToPut.size(); i++) {
+            std::pair<std::complex<double>, Mon> reducedMon = variablesToPut[i].getKey().reduce();
+            if (!monomsUsed.count(reducedMon.second)) {
+                std::pair<char,int> oldMon('A', 0);
+                Mon newPoly(reducedMon.second);
+                Poly newConstraint = lindbladian.replaced(oldMon, newPoly);
+                if (!newConstraint.isZero()) {
+                    constraintsZero.push_back(newConstraint);
+                }
+                monomsUsed.insert(variablesToPut[i].getKey());
+                monomsUsedVec.push_back(variablesToPut[i].getKey());
+            }
+        }
+
+        // Solve
+        std::map<Mon, std::complex<double>> results;
+        double res = solveEigen(objective, constraintsZero, verbosity, numCores, &results);
+        if (verbosity >= 2) {
+            std::cout << "Exact solver result: " << res << std::endl;
+        }
+        if (verbosity >= 3) {
+            for (const auto& [monom, value] : results) {
+                std::cout << monom << " = " << value << std::endl;
+            }
+        }
+        
+        // Restore the old problem
+        constraintsZero = prevConsZero;
+
+        // Pauli matrices
+        int matSize = 1 << numQubits;
+        Eigen::SparseMatrix<std::complex<double>> X(2, 2);
+        Eigen::SparseMatrix<std::complex<double>> Y(2, 2);
+        Eigen::SparseMatrix<std::complex<double>> Z(2, 2);
+        Eigen::SparseMatrix<std::complex<double>> iden1(1, 1);
+        Eigen::SparseMatrix<std::complex<double>> iden2(2, 2);
+        Eigen::SparseMatrix<std::complex<double>> idenFull(matSize, matSize);
+        X.insert(0, 1) = 1;
+        X.insert(1, 0) = 1;
+        Y.insert(0, 1) = std::complex<double>(0, -1);
+        Y.insert(1, 0) = std::complex<double>(0, 1);
+        Z.insert(0, 0) = 1;
+        Z.insert(1, 1) = -1;
+        iden1.insert(0, 0) = 1;
+        iden2.insert(0, 0) = 1;
+        iden2.insert(1, 1) = 1;
+        for (int i = 0; i < matSize; i++) {
+            idenFull.insert(i, i) = 1;
+        }
+        X.makeCompressed();
+        Y.makeCompressed();
+        Z.makeCompressed();
+        iden1.makeCompressed();
+        iden2.makeCompressed();
+        idenFull.makeCompressed();
+
+        // Pauli operators on the state
+        std::vector<Eigen::SparseMatrix<std::complex<double>>> Xs(numQubits);
+        std::vector<Eigen::SparseMatrix<std::complex<double>>> Ys(numQubits);
+        std::vector<Eigen::SparseMatrix<std::complex<double>>> Zs(numQubits);
+        for (int i = 0; i < numQubits; i++) {
+            Xs[i] = iden1;
+            Ys[i] = iden1;
+            Zs[i] = iden1;
+            for (int j = 0; j < numQubits; j++) {
+                if (j == i) {
+                    Xs[i] = kroneckerProduct(Xs[i], X).eval();
+                    Ys[i] = kroneckerProduct(Ys[i], Y).eval();
+                    Zs[i] = kroneckerProduct(Zs[i], Z).eval();
+                } else {
+                    Xs[i] = kroneckerProduct(Xs[i], iden2).eval();
+                    Ys[i] = kroneckerProduct(Ys[i], iden2).eval();
+                    Zs[i] = kroneckerProduct(Zs[i], iden2).eval();
+                }
+
+            }
+            Xs[i].makeCompressed();
+            Ys[i].makeCompressed();
+            Zs[i].makeCompressed();
+        }
+
+        // Form the ground truth from the results TODO
+        Eigen::SparseMatrix<std::complex<double>> groundTruth(matSize, matSize);
+        for (const auto& [monom, value] : results) {
+
+            // If it's non-zero
+            if (std::abs(value) > 1e-10) {
+
+                // Loop over the monomial to form the operator
+                Eigen::SparseMatrix<std::complex<double>> tempOp(matSize, matSize);
+                for (int j = 0; j < matSize; j++) {
+                    tempOp.insert(j, j) = 1;
+                }
+                for (int j = monom.size() - 1; j >= 0; j--) {
+                    char letter = monom[j].first;
+                    int index = monom[j].second - 1;
+                    if (letter == 'X') {
+                        tempOp = (Xs[index] * tempOp).eval();
+                    } else if (letter == 'Y') {
+                        tempOp = (Ys[index] * tempOp).eval();
+                    } else if (letter == 'Z') {
+                        tempOp = (Zs[index] * tempOp).eval();
+                    }
+                }
+                tempOp.makeCompressed();
+
+                // Add the operator to the ground truth
+                groundTruth += value * tempOp;
+
+            }
+
+        }
+
+        // Add the identity and normalize
+        Eigen::SparseMatrix<std::complex<double>> iden(matSize, matSize);
+        for (int i = 0; i < matSize; i++) {
+            iden.insert(i, i) = 1;
+        }
+        groundTruth += iden;
+        groundTruth /= (1 << (numQubits));
+        groundTruth.makeCompressed();
+
+        // Check that this is positive and has trace 1
+        //Eigen::SelfAdjointEigenSolver<Eigen::SparseMatrix<std::complex<double>>> es(groundTruth);
+        //Eigen::VectorXcd eigenValues = es.eigenvalues();
+        //Eigen::MatrixXcd eigenVectors = es.eigenvectors();
+        //std::complex<double> smallestEigenvalue = eigenValues(0).real();
+        //std::complex<double> matTrace = 0;
+        //for (int i = 0; i < matSize; i++) {
+            //matTrace += groundTruth.coeff(i, i);
+        //}
+        //if (verbosity >= 2) {
+            //std::cout << "Smallest eigenvalue: " << eigenValues(0).real() << std::endl;
+            //std::cout << "Trace: " << matTrace.real() << std::endl;
+        //}
+
+        // The samples we should take
+        std::set<Mon> sampleOperators;
+        for (int i = 0; i < numQubits; i++) {
+            sampleOperators.insert(Mon("<X" + std::to_string(i+1) + ">"));
+            sampleOperators.insert(Mon("<Y" + std::to_string(i+1) + ">"));
+            sampleOperators.insert(Mon("<Z" + std::to_string(i+1) + ">"));
+        }
+        if (numQubits >= 2) {
+            for (int i = 0; i < numQubits; i++) {
+                for (int j = i + 1; j < numQubits; j++) {
+                    sampleOperators.insert(Mon("<X" + std::to_string(i+1) + "X" + std::to_string(j+1) + ">"));
+                    sampleOperators.insert(Mon("<Y" + std::to_string(i+1) + "Y" + std::to_string(j+1) + ">"));
+                    sampleOperators.insert(Mon("<Z" + std::to_string(i+1) + "Z" + std::to_string(j+1) + ">"));
+                }
+            }
+        }
+        if (numQubits >= 3) {
+            for (int i = 0; i < numQubits; i++) {
+                for (int j = i + 1; j < numQubits; j++) {
+                    for (int k = j + 1; k < numQubits; k++) {
+                        sampleOperators.insert(Mon("<X" + std::to_string(i+1) + "X" + std::to_string(j+1) + "X" + std::to_string(k+1) + ">"));
+                        sampleOperators.insert(Mon("<Y" + std::to_string(i+1) + "Y" + std::to_string(j+1) + "Y" + std::to_string(k+1) + ">"));
+                        sampleOperators.insert(Mon("<Z" + std::to_string(i+1) + "Z" + std::to_string(j+1) + "Z" + std::to_string(k+1) + ">"));
+                    }
+                }
+            }
+        }
+        if (numQubits >= 4) {
+            for (int i = 0; i < numQubits; i++) {
+                for (int j = i + 1; j < numQubits; j++) {
+                    for (int k = j + 1; k < numQubits; k++) {
+                        for (int l = k + 1; l < numQubits; l++) {
+                            sampleOperators.insert(Mon("<X" + std::to_string(i+1) + "X" + std::to_string(j+1) + "X" + std::to_string(k+1) + "X" + std::to_string(l+1) + ">"));
+                            sampleOperators.insert(Mon("<Y" + std::to_string(i+1) + "Y" + std::to_string(j+1) + "Y" + std::to_string(k+1) + "Y" + std::to_string(l+1) + ">"));
+                            sampleOperators.insert(Mon("<Z" + std::to_string(i+1) + "Z" + std::to_string(j+1) + "Z" + std::to_string(k+1) + "Z" + std::to_string(l+1) + ">"));
+                        }
+                    }
+                }
+            }
+        }
+        if (numQubits >= 5) {
+            for (int i = 0; i < numQubits; i++) {
+                for (int j = i + 1; j < numQubits; j++) {
+                    for (int k = j + 1; k < numQubits; k++) {
+                        for (int l = k + 1; l < numQubits; l++) {
+                            for (int m = l + 1; m < numQubits; m++) {
+                                sampleOperators.insert(Mon("<X" + std::to_string(i+1) + "X" + std::to_string(j+1) + "X" + std::to_string(k+1) + "X" + std::to_string(l+1) + "X" + std::to_string(m+1) + ">"));
+                                sampleOperators.insert(Mon("<Y" + std::to_string(i+1) + "Y" + std::to_string(j+1) + "Y" + std::to_string(k+1) + "Y" + std::to_string(l+1) + "Y" + std::to_string(m+1) + ">"));
+                                sampleOperators.insert(Mon("<Z" + std::to_string(i+1) + "Z" + std::to_string(j+1) + "Z" + std::to_string(k+1) + "Z" + std::to_string(l+1) + "Z" + std::to_string(m+1) + ">"));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        for (auto term : objective) {
+            Mon mon = term.first;
+            sampleOperators.insert(mon);
+            //sampleOperators.erase(mon);
+        }
+
+        // Remove the trivial monomial
+        sampleOperators.erase(Mon());
+
+        // Verbose output
+        if (verbosity >= 3) {
+            std::cout << "Sample operators: " << std::endl;
+            for (auto mon : sampleOperators) {
+                std::cout << mon << std::endl;
+            }
+        }
+
+        // Errors
+        //double K = 9 * numQubits * (numQubits - 1) / 2;
+        double K = sampleOperators.size();
+        double delta = 0.01;
+        double epsilon = std::sqrt(2 * std::log((2.0 * K) / delta) / numSamples);
+        if (verbosity >= 2) {
+            std::cout << "K = " << K << std::endl;
+            std::cout << "delta = " << delta << std::endl;
+            std::cout << "epsilon = " << epsilon << std::endl;
+        }
+
+        // Take samples
+        samples = {};
+        for (auto mon : sampleOperators) {
+
+            // Construct the operator
+            Eigen::SparseMatrix<std::complex<double>> op = Eigen::SparseMatrix<std::complex<double>>(matSize, matSize);
+            for (int i = 0; i < matSize; i++) {
+                op.insert(i, i) = 1;
+            }
+            for (int i = mon.size()-1; i >= 0; i--) {
+                char pauli = mon[i].first;
+                int ind = mon[i].second-1;
+                if (pauli == 'X') {
+                    op = op * Xs[ind];
+                } else if (pauli == 'Y') {
+                    op = op * Ys[ind];
+                } else if (pauli == 'Z') {
+                    op = op * Zs[ind];
+                }
+            }
+            op.makeCompressed();
+            
+            // Get the true expectation value
+            double trueExpectation = Eigen::MatrixXcd(op * groundTruth).trace().real();
+
+            // Get the eigendecomposition of the operator
+            Eigen::SelfAdjointEigenSolver<Eigen::SparseMatrix<std::complex<double>>> esOp(op);
+            Eigen::VectorXcd opEvals = esOp.eigenvalues();
+            Eigen::MatrixXcd opEvecs = esOp.eigenvectors();
+
+            // Get the positive part of the operator
+            Eigen::MatrixXcd opPos = Eigen::MatrixXcd::Zero(matSize, matSize);
+            for (int i = 0; i < opEvals.size(); i++) {
+                if (opEvals(i).real() > 0) {
+                    opPos += opEvals(i) * opEvecs.col(i) * opEvecs.col(i).adjoint();
+                }
+            }
+
+            // If -1 given as the number of samples, use the exact
+            if (numSamples == -1) {
+                constraintsZero.push_back(Poly(1, mon) - Poly(trueExpectation));
+                samples[mon] = trueExpectation;
+                continue;
+            }
+            
+            // The probability of getting a 1 is trace(opPos * rho)
+            double prob1 = (opPos * groundTruth).trace().real();
+            double expFromProb = 2 * prob1 - 1;
+
+            // Flip a coin
+            double avg = 0;
+            for (int i = 0; i < numSamples; i++) {
+                double r = rand(0, 1);
+                if (r < prob1) {
+                    avg += 1;
+                } else {
+                    avg += 0;
+                }
+            }
+            avg /= numSamples;
+            avg = 2 * avg - 1;
+            samples[mon] = avg;
+
+            // Bound each quantity
+            double lower = avg - epsilon;
+            double upper = avg + epsilon;
+            constraintsPositive.push_back(Poly(1, mon) - Poly(lower));
+            constraintsPositive.push_back(Poly(-1, mon) - Poly(-upper));
+
+            // Verbose output
+            if (verbosity >= 3) {
+                std::cout << "True expectation value of " << mon << " = " << trueExpectation << std::endl;
+                std::cout << "Expectation value of " << mon << " from samples = " << avg << std::endl;
+                std::cout << "Bounding " << mon << " to [" << lower << ", " << upper << "]" << std::endl;
+            }
+
+        }
+
+        // Trivially bound the objective using the above samples
+        double minVal = 0;
+        double maxVal = 0;
+        for (auto term : objective) {
+            Mon mon = term.first;
+            double coeff = std::real(term.second);
+            if (mon.size() == 0) {
+                minVal += coeff;
+                maxVal += coeff;
+            } else if (samples.find(mon) != samples.end()) {
+                double sample = samples[mon];
+                if (coeff > 0) {
+                    maxVal += coeff * std::min(sample + epsilon, 1.0);
+                    minVal += coeff * std::max(sample - epsilon, -1.0);
+                } else {
+                    maxVal += coeff * std::max(sample - epsilon, -1.0);
+                    minVal += coeff * std::min(sample + epsilon, 1.0);
+                }
+            } else {
+                minVal -= std::abs(coeff);
+                maxVal += std::abs(coeff);
+            }
+        }
+        if (verbosity >= 1) {
+            std::cout << "Objective trivially bounded to [" << minVal << ", " << maxVal << "]" << std::endl;
+        }
+
+    }
 
     // If we haven't given a pseudo-objective, set it to the objective
     if (pseudoObjective.size() == 0) {
