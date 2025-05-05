@@ -122,6 +122,7 @@ int main(int argc, char* argv[]) {
     bool excludeX = false;
     bool excludeY = false;
     bool excludeZ = false;
+    bool outputLindbladAsLaTeX = false;
     int percentile = 99;
     Poly objective("<Z1>");
     std::map<Mon, double> samples;
@@ -1581,6 +1582,10 @@ int main(int argc, char* argv[]) {
             maxPaulis = std::stoi(argv[i+1]);
             i++;
 
+        // If outputting the Lindbladian in LaTeX form
+        } else if (argAsString == "-X") {
+            outputLindbladAsLaTeX = true;
+
         // Output the help
         } else if (argAsString == "-h" || argAsString == "--help") {
             std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
@@ -1592,9 +1597,10 @@ int main(int argc, char* argv[]) {
             std::cout << "  -P              Take the current objective as a pseudo-objective" << std::endl;
             std::cout << "  -v <int>        Verbosity level" << std::endl;
             std::cout << "  -B              benchmarking mode" << std::endl;
+            std::cout << "  -X              output the Lindbladian in LaTeX form" << std::endl;
+            std::cout << "Sampling options:" << std::endl;
             std::cout << "  --samples <int> Solve exactly, take samples and use to bound values" << std::endl;
             std::cout << "  --shots   <int> Same as above, but limit the total number of measurements" << std::endl;
-            std::cout << "Sampling options:" << std::endl;
             std::cout << "  -p <int>        Percentile for the error (e.g. 95)" << std::endl;
             std::cout << "  --all <int>     Samples from all Pauli strings evenly up to this degree" << std::endl;
             std::cout << "  --onlyobj       Sample only from the objective" << std::endl;
@@ -1688,6 +1694,85 @@ int main(int argc, char* argv[]) {
     // If we haven't given a pseudo-objective, set it to the objective
     if (pseudoObjective.size() == 0) {
         pseudoObjective = objective;
+    }
+
+    // If we're just outputting the Lindbladian in LaTeX form, do that and exit
+    if (outputLindbladAsLaTeX) {
+        std::cout << "Lindbladian in LaTeX form: " << std::endl;
+        std::stringstream ss;
+        ss << lindbladian;
+        std::string lindbladianLaTeX = ss.str();
+
+        // Replace all A0 with G
+        size_t pos = 0;
+        while ((pos = lindbladianLaTeX.find("A0", pos)) != std::string::npos) {
+            lindbladianLaTeX.replace(pos, 2, "G");
+            pos += 1;
+        }
+
+        // Replace all < with \braket{
+        pos = 0;
+        while ((pos = lindbladianLaTeX.find("<", pos)) != std::string::npos) {
+            lindbladianLaTeX.replace(pos, 1, "\\braket{");
+            pos += 7;
+        }
+
+        // Replace all > with }
+        pos = 0;
+        while ((pos = lindbladianLaTeX.find(">", pos)) != std::string::npos) {
+            lindbladianLaTeX.replace(pos, 1, "}");
+            pos += 1;
+        }
+
+        // Put a newline every 4 }
+        pos = 0;
+        int numBrackets = 0;
+        while ((pos = lindbladianLaTeX.find("}", pos)) != std::string::npos) {
+            numBrackets++;
+            if (numBrackets % 4 == 0) {
+                lindbladianLaTeX.replace(pos, 1, "}\\\\\n&");
+                pos += 2;
+            }
+            pos += 1;
+        }
+
+        // Replace all X10 with X_{10} etc.
+        for (int i=numQubits; i>=1; i--) {
+            std::string toReplace = "X" + std::to_string(i);
+            size_t pos = 0;
+            while ((pos = lindbladianLaTeX.find(toReplace, pos)) != std::string::npos) {
+                lindbladianLaTeX.replace(pos, toReplace.size(), "X_{" + std::to_string(i) + "}");
+                pos += 3;
+            }
+        }
+
+        // Replace all Y10 with Y_{10} etc.
+        for (int i=numQubits; i>=1; i--) {
+            std::string toReplace = "Y" + std::to_string(i);
+            size_t pos = 0;
+            while ((pos = lindbladianLaTeX.find(toReplace, pos)) != std::string::npos) {
+                lindbladianLaTeX.replace(pos, toReplace.size(), "Y_{" + std::to_string(i) + "}");
+                pos += 3;
+            }
+        }
+
+        // Replace all Z10 with Z_{10} etc.
+        for (int i=numQubits; i>=1; i--) {
+            std::string toReplace = "Z" + std::to_string(i);
+            size_t pos = 0;
+            while ((pos = lindbladianLaTeX.find(toReplace, pos)) != std::string::npos) {
+                lindbladianLaTeX.replace(pos, toReplace.size(), "Z_{" + std::to_string(i) + "}");
+                pos += 3;
+            }
+        }
+
+        // The starting align
+        lindbladianLaTeX = "&" + lindbladianLaTeX;
+
+        // Output and stop
+        std::cout << lindbladianLaTeX << std::endl;
+        return 0;
+
     }
 
     // Create the Lindbladian applied to many different operators
