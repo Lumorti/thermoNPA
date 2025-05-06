@@ -115,6 +115,7 @@ int main(int argc, char* argv[]) {
     int numSamples = 0;
     int numShots = 0;
     double tol = 1e-7;
+    bool outputToFile = false;
     std::string sampleChoice = "all";
     int maxSampleDegree = 2;
     int maxPaulis = 1000000;
@@ -172,25 +173,49 @@ int main(int argc, char* argv[]) {
             i++;
 
         // Pauli X objective
-        } else if (argAsString == "--objX") {
+        } else if (argAsString == "--objX" || argAsString == "--objx") {
             objective = Poly();
             for (int i=1; i<=numQubits; i++) {
                 objective += Poly(1.0/numQubits, "<X" + std::to_string(i) + ">");
             }
 
         // Pauli Y objective
-        } else if (argAsString == "--objY") {
+        } else if (argAsString == "--objY" || argAsString == "--objy") {
             objective = Poly();
             for (int i=1; i<=numQubits; i++) {
                 objective += Poly(1.0/numQubits, "<Y" + std::to_string(i) + ">");
             }
 
         // Pauli Z objective
-        } else if (argAsString == "--objZ") {
+        } else if (argAsString == "--objZ" || argAsString == "--objx") {
             objective = Poly();
             for (int i=1; i<=numQubits; i++) {
                 objective += Poly(1.0/numQubits, "<Z" + std::to_string(i) + ">");
             }
+
+        // Objective is made of random first order Paulis
+        } else if (argAsString == "--objRand" || argAsString == "--objrand") {
+            int order = std::stoi(argv[i+1]);
+            i++;
+            objective = Poly();
+            if (order >= 1) {
+                for (int i=0; i<numQubits; i++) {
+                    objective += Poly(1.0/numQubits, "<X" + std::to_string(i+1) + ">");
+                    objective += Poly(1.0/numQubits, "<Y" + std::to_string(i+1) + ">");
+                    objective += Poly(1.0/numQubits, "<Z" + std::to_string(i+1) + ">");
+                }
+            }
+            if (order >= 2) {
+                for (int i=0; i<numQubits; i++) {
+                    for (int j=i+1; j<numQubits; j++) {
+                        objective += Poly(1.0/numQubits, "<X" + std::to_string(i+1) + "X" + std::to_string(j+1) + ">");
+                        objective += Poly(1.0/numQubits, "<Y" + std::to_string(i+1) + "Y" + std::to_string(j+1) + ">");
+                        objective += Poly(1.0/numQubits, "<Z" + std::to_string(i+1) + "Z" + std::to_string(j+1) + ">");
+                    }
+                }
+            }
+            objective.randomize();
+            objective.normalize(true);
 
         // Setting the tolerance
         } else if (argAsString == "-t") {
@@ -617,8 +642,8 @@ int main(int argc, char* argv[]) {
             lindbladianHot.convertToPaulis();
             lindbladianCold.convertToPaulis();
 
-        // TODO simple phase transition example
-        } else if (argAsString == "--phase") {
+        // Simple phase transition example
+        } else if (argAsString == "--phase1") {
 
             double gamma = std::stod(argv[i+1]);
             i++;
@@ -641,15 +666,20 @@ int main(int argc, char* argv[]) {
             lindbladian.convertToPaulis();
             lindbladian.reduce();
 
-        // TODO https://journals.aps.org/prx/abstract/10.1103/PhysRevX.6.031011
+        // TODO
+        // Jin "Cluster Mean-Field Approach to the Steady-State Phase Diagram of Dissipative Spin Systems"
+        // Lee "Unconventional magnetism via optical pumping of interacting spin systems"
         } else if (argAsString == "--phase2") {
 
-            double gamma = std::stod(argv[i+1]);
-            double Jx = std::stod(argv[i+2]);
-            double Jy = std::stod(argv[i+3]);
-            double Jz = std::stod(argv[i+4]);
-            numQubits = std::stoi(argv[i+5]);
-            i += 5;
+            // Parameters
+            int latticeWidth = std::stoi(argv[i+1]);
+            int latticeHeight = std::stoi(argv[i+2]);
+            double Jx = std::stod(argv[i+3]);
+            double Jy = std::stod(argv[i+4]);
+            double gamma = 1.0;
+            double Jz = 1.0;
+            numQubits = latticeWidth * latticeHeight;
+            i += 4;
 
             // Objective is random for now
             objective = Poly();
@@ -658,12 +688,47 @@ int main(int argc, char* argv[]) {
             }
 
             // H = sum Jx X_i X_j + Jy Y_i Y_j + Jz Z_i Z_j
+            // 2D grid
             Poly H;
-            for (int i=1; i<=numQubits; i++) {
-                for (int j=i+1; j<=numQubits; j++) {
-                    H += Poly(Jx, "<X" + std::to_string(i) + "X" + std::to_string(j) + ">")
-                       + Poly(Jy, "<Y" + std::to_string(i) + "Y" + std::to_string(j) + ">")
-                       + Poly(Jz, "<Z" + std::to_string(i) + "Z" + std::to_string(j) + ">");
+            for (int x=0; x<latticeWidth; x++) {
+                for (int y=0; y<latticeHeight; y++) {
+
+                    // The index of this spin
+                    int i = x + y*latticeWidth + 1;
+                    int j = 0;
+
+                    // The index of the spin x++
+                    if (x < latticeWidth-1) {
+                        j = (x+1) + y*latticeWidth + 1;
+                        H += Poly(Jx, "<X" + std::to_string(i) + "X" + std::to_string(j) + ">");
+                        H += Poly(Jy, "<Y" + std::to_string(i) + "Y" + std::to_string(j) + ">");
+                        H += Poly(Jz, "<Z" + std::to_string(i) + "Z" + std::to_string(j) + ">");
+                    }
+
+                    // The index of the spin y++
+                    if (y < latticeHeight-1) {
+                        j = x + (y+1)*latticeWidth + 1;
+                        H += Poly(Jx, "<X" + std::to_string(i) + "X" + std::to_string(j) + ">");
+                        H += Poly(Jy, "<Y" + std::to_string(i) + "Y" + std::to_string(j) + ">");
+                        H += Poly(Jz, "<Z" + std::to_string(i) + "Z" + std::to_string(j) + ">");
+                    }
+
+                    // The index of the spin x--
+                    if (x > 0) {
+                        j = (x-1) + y*latticeWidth + 1;
+                        H += Poly(Jx, "<X" + std::to_string(i) + "X" + std::to_string(j) + ">");
+                        H += Poly(Jy, "<Y" + std::to_string(i) + "Y" + std::to_string(j) + ">");
+                        H += Poly(Jz, "<Z" + std::to_string(i) + "Z" + std::to_string(j) + ">");
+                    }
+
+                    // The index of the spin y--
+                    if (y > 0) {
+                        j = x + (y-1)*latticeWidth + 1;
+                        H += Poly(Jx, "<X" + std::to_string(i) + "X" + std::to_string(j) + ">");
+                        H += Poly(Jy, "<Y" + std::to_string(i) + "Y" + std::to_string(j) + ">");
+                        H += Poly(Jz, "<Z" + std::to_string(i) + "Z" + std::to_string(j) + ">");
+                    }
+
                 }
             }
 
@@ -1586,6 +1651,10 @@ int main(int argc, char* argv[]) {
         } else if (argAsString == "-X") {
             outputLindbladAsLaTeX = true;
 
+        // If outputting the final moments to file
+        } else if (argAsString == "-F") {
+            outputToFile = true;
+
         // Output the help
         } else if (argAsString == "-h" || argAsString == "--help") {
             std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
@@ -1598,6 +1667,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  -v <int>        Verbosity level" << std::endl;
             std::cout << "  -B              benchmarking mode" << std::endl;
             std::cout << "  -X              output the Lindbladian in LaTeX form" << std::endl;
+            std::cout << "  -F              output the final moments to file (monoms.csv)" << std::endl;
             std::cout << "Sampling options:" << std::endl;
             std::cout << "  --samples <int> Solve exactly, take samples and use to bound values" << std::endl;
             std::cout << "  --shots   <int> Same as above, but limit the total number of measurements" << std::endl;
@@ -1635,6 +1705,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  --objY          Use avg sigma_Y as the objective" << std::endl;
             std::cout << "  --objZ          Use avg sigma_Z as the objective" << std::endl;
             std::cout << "  --objHC H/C     Heat current for either the hot or cold bath" << std::endl;
+            std::cout << "  --objRand <int> Random objective up to a certain order" << std::endl;
             std::cout << "Limbliadian choices:" << std::endl;
             std::cout << "  -L <str>        Manually set the Lindbladian" << std::endl;
             std::cout << "  --file <str>    Read the Lindbladian from a file" << std::endl;
@@ -3347,14 +3418,15 @@ int main(int argc, char* argv[]) {
 
     // Solve
     std::pair<double,double> bounds;
+    std::map<Mon, std::complex<double>> results;
     if (solver == "scs") {
-        bounds = boundSCS(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity);
+        bounds = boundSCS(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity, {-1,1}, &results);
     } else if (solver == "mosek" || maxMatSize > 1) {
-        bounds = boundMOSEK(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity, {-1,1}, imagType);
+        bounds = boundMOSEK(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity, {-1,1}, imagType, &results);
     } else if (solver == "gurobi") {
-        bounds = boundGurobi(objective, constraintsZero, verbosity);
+        bounds = boundGurobi(objective, constraintsZero, verbosity, &results);
     } else if (solver == "eigen") {
-        double res = solveEigen(objective, constraintsZero, verbosity, numCores);
+        double res = solveEigen(objective, constraintsZero, verbosity, numCores, &results);
         bounds = {res, res};
     }
     double lowerBound = bounds.first;
@@ -3373,6 +3445,20 @@ int main(int argc, char* argv[]) {
 
     // Timing
     std::chrono::steady_clock::time_point timeFinishedSolving = std::chrono::steady_clock::now();
+
+    // If told to output final moments to file TODO
+    if (outputToFile && results.size() > 0) {
+        std::string filename = "monoms.csv";
+        std::ofstream outFile(filename);
+        if (outFile.is_open()) {
+            for (const auto& pair : results) {
+                outFile << pair.first.size() << "," << pair.first << "," << pair.second.real() << "," << pair.second.imag() << "\n";
+            }
+            outFile.close();
+        } else {
+            std::cerr << "Error opening file: " << filename << std::endl;
+        }
+    }
 
     // Output the timings
     if (verbosity >= 1) { 

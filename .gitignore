@@ -6,3 +6,4 @@ src/*.o
 callgrind*
 temp*
 fit.log
+data/monoms_*
