@@ -3032,6 +3032,7 @@ int main(int argc, char* argv[]) {
         //}
 
         // The samples we should take TODO different sampling methods
+        // TODO sample the energy and from that estimate magnetization
         std::set<Mon> sampleOperators;
         if (sampleChoice == "all") {
             std::vector<Mon> variables = {};
