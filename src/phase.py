@@ -21,11 +21,13 @@ lowers = np.zeros((len(Jxs), len(Jys)))
 # os.system(f'rm data/monoms_*.csv')
 # for x, Jx in enumerate(Jxs):
     # for y, Jy in enumerate(Jys):
-        # # os.system(f'./run -S 2 --phase2 2 2 {Jx} {Jy} --objRand 2 -M 0 > data.dat')
-        # # os.system(f'./run -S 3 --phase2 3 2 {Jx} {Jy} --objRand 2 -M 2000 -r 2 > data.dat')
-        # # os.system(f'./run -S 3 --phase2 3 2 {Jx} {Jy} --objRand 2 -M 0 -F > data.dat')
+
+        # # os.system(f'./run -S 2 --phase2 2 2 {Jx} {Jy} --objRand 2 -M 0 -F > data.dat')
+        # # os.system(f'./run -S 3 --phase2 3 2 {Jx} {Jy} --objRand 2 -M 2000 -r 2 -F > data.dat')
+        # os.system(f'./run -S 3 --phase2 3 2 {Jx} {Jy} --objRand 2 -M 0 -F > data.dat')
         # # os.system(f'./run -S 2 --phase2 3 2 {Jx} {Jy} --objRand 2 -M 1000 -A 30 -s M > data.dat')
-        # os.system(f'./run -S 1 --phase2 4 4 {Jx} {Jy} --objRand 2 -M 5000 -r 2 -s M -F > data.dat')
+        # # os.system(f'./run -S 1 --phase2 4 4 {Jx} {Jy} --objRand 2 -M 5000 -r 2 -s M -F > data.dat')
+
         # os.system(f'mv monoms.csv data/monoms_{x}_{y}.csv')
         # res = open('data.dat').readlines()
         # bounds = [unknownVal, unknownVal]
@@ -36,8 +38,9 @@ lowers = np.zeros((len(Jxs), len(Jys)))
         # print(f'Jx: {Jx}, Jy: {Jy}, Bounds: {bounds}')
         # uppers[x, y] = bounds[0]
         # lowers[x, y] = bounds[1]
+# os.system('rm data.dat -f')
 
-# Instead, just lot from the monoms.csv files
+# Instead, just everything from the monoms.csv files
 monoms = np.genfromtxt(f'data/monoms_0_0.csv', delimiter=',')
 numMonoms = monoms.shape[0]
 obj = np.zeros(numMonoms)
@@ -81,7 +84,7 @@ plt.xlabel('Jx')
 plt.ylabel('Jy')
 plt.subplot(132)
 plt.imshow(avgs, extent=[Jxs[0], Jxs[-1], Jys[0], Jys[-1]], origin='lower', aspect='equal')
-plt.title('Average Bound')
+plt.title('Average of Bounds')
 plt.xlabel('Jx')
 plt.ylabel('Jy')
 plt.subplot(133)
@@ -90,6 +93,6 @@ plt.title('Lower Bound')
 plt.xlabel('Jx')
 plt.ylabel('Jy')
 plt.tight_layout()
-plt.savefig('phases.png')
+plt.savefig('data/phases.png')
 plt.show()
 
