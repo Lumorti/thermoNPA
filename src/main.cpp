@@ -1647,6 +1647,10 @@ int main(int argc, char* argv[]) {
             maxPaulis = std::stoi(argv[i+1]);
             i++;
 
+        // If sampling from the energy
+        } else if (argAsString == "--energy") {
+            sampleChoice = "energy";
+
         // If outputting the Lindbladian in LaTeX form
         } else if (argAsString == "-X") {
             outputLindbladAsLaTeX = true;
@@ -1669,11 +1673,12 @@ int main(int argc, char* argv[]) {
             std::cout << "  -X              output the Lindbladian in LaTeX form" << std::endl;
             std::cout << "  -F              output the final moments to file (monoms.csv)" << std::endl;
             std::cout << "Sampling options:" << std::endl;
-            std::cout << "  --samples <int> Solve exactly, take samples and use to bound values" << std::endl;
+            std::cout << "  --samples <int> Solve exactly, take this many samples per Pauli string" << std::endl;
             std::cout << "  --shots   <int> Same as above, but limit the total number of measurements" << std::endl;
             std::cout << "  -p <int>        Percentile for the error (e.g. 95)" << std::endl;
             std::cout << "  --all <int>     Samples from all Pauli strings evenly up to this degree" << std::endl;
             std::cout << "  --onlyobj       Sample only from the objective" << std::endl;
+            std::cout << "  --energy        Sample only the energy" << std::endl;
             std::cout << "  --auto <int>    Samples from a subset Pauli strings" << std::endl;
             std::cout << "  --noobj         Exclude the objective from the sampling" << std::endl;
             std::cout << "  --nox           Exclude any X terms from the sampling" << std::endl;
@@ -3031,8 +3036,13 @@ int main(int argc, char* argv[]) {
             //std::cout << "Trace: " << matTrace.real() << std::endl;
         //}
 
-        // The samples we should take TODO different sampling methods
-        // TODO sample the energy and from that estimate magnetization
+        // TODO for the partial information project
+        //  - purity objective
+        //  - many different objectives
+        //  - energy objective
+        //  - energy measurement
+
+        // The samples we should take
         std::set<Mon> sampleOperators;
         if (sampleChoice == "all") {
             std::vector<Mon> variables = {};
@@ -3044,6 +3054,24 @@ int main(int argc, char* argv[]) {
             std::vector<Poly> variablesToPut = generateMonomials(variables, maxSampleDegree, verbosity);
             for (size_t i=0; i<variablesToPut.size(); i++) {
                 sampleOperators.insert(variablesToPut[i].getKey());
+            }
+
+        // If we should sample only the energy
+        } else if (sampleChoice == "energy") {
+
+            // Construct the Hamiltonian
+            Poly H = Poly();
+            for (int i=0; i<numQubits; i++) {
+                for (int j=0; j<numQubits; j++) {
+                    H += hamiltonianInter[i][j];
+                }
+            }
+            H.reduce();
+
+            // Add all of these terms to the sample operators
+            for (auto term : H) {
+                Mon mon = term.first;
+                sampleOperators.insert(mon);
             }
 
         // If we should try to determine the best set
@@ -3095,7 +3123,7 @@ int main(int argc, char* argv[]) {
                 }
             }
             if (verbosity >= 3) {
-                std::cout << "Monomial counts size:" << monCount.size() << std::endl;
+                std::cout << "Monomial counts size: " << monCount.size() << std::endl;
             }
 
             // Delete the trivial monomial
@@ -3134,6 +3162,7 @@ int main(int argc, char* argv[]) {
 
         // If exluding X terms
         if (excludeX) {
+            std::set<Mon> newOps;
             for (auto mon : sampleOperators) {
                 bool hasX = false;
                 for (auto term : mon) {
@@ -3142,14 +3171,16 @@ int main(int argc, char* argv[]) {
                         break;
                     }
                 }
-                if (hasX) {
-                    sampleOperators.erase(mon);
+                if (!hasX) {
+                    newOps.insert(mon);
                 }
             }
+            sampleOperators = newOps;
         }
 
         // If exluding Y terms
         if (excludeY) {
+            std::set<Mon> newOps;
             for (auto mon : sampleOperators) {
                 bool hasY = false;
                 for (auto term : mon) {
@@ -3158,14 +3189,16 @@ int main(int argc, char* argv[]) {
                         break;
                     }
                 }
-                if (hasY) {
-                    sampleOperators.erase(mon);
+                if (!hasY) {
+                    newOps.insert(mon);
                 }
             }
+            sampleOperators = newOps;
         }
 
         // If exluding Z terms
         if (excludeZ) {
+            std::set<Mon> newOps;
             for (auto mon : sampleOperators) {
                 bool hasZ = false;
                 for (auto term : mon) {
@@ -3174,14 +3207,17 @@ int main(int argc, char* argv[]) {
                         break;
                     }
                 }
-                if (hasZ) {
-                    sampleOperators.erase(mon);
+                if (!hasZ) {
+                    newOps.insert(mon);
                 }
             }
+            sampleOperators = newOps;
         }
 
         // Remove the trivial monomial
-        sampleOperators.erase(Mon());
+        if (sampleOperators.count(Mon())) {
+            sampleOperators.erase(Mon());
+        }
 
         // If we're taking samples to a total number of shots
         if (numShots != 0) {
@@ -3447,7 +3483,7 @@ int main(int argc, char* argv[]) {
     // Timing
     std::chrono::steady_clock::time_point timeFinishedSolving = std::chrono::steady_clock::now();
 
-    // If told to output final moments to file TODO
+    // If told to output final moments to file
     if (outputToFile && results.size() > 0) {
         std::string filename = "monoms.csv";
         std::ofstream outFile(filename);
