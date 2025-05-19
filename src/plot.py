@@ -20,17 +20,17 @@ mids2 = (data2[:, 1] + data2[:, 2]) / 2
 err2 = (data2[:, 2] - data2[:, 1]) / 2
 mids3 = (data3[:, 1] + data3[:, 2]) / 2
 err3 = (data3[:, 2] - data3[:, 1]) / 2
-markers1, caps1, bars1 = ax1.errorbar(data1[:, 0], mids1, yerr=err1, linestyle='-', color='black', fmt='none', label='constraint set 1 (10s)', capsize=0, elinewidth=8, capthick=1)
-markers2, caps2, bars2 = ax1.errorbar(data2[:, 0], mids2, yerr=err2, linestyle='-', color='red', fmt='none', label='constraint set 2 (1m)', capsize=0, elinewidth=8, capthick=1)
-markers3, caps3, bars3 = ax1.errorbar(data3[:, 0], mids3, yerr=err3, linestyle='-', color='blue', fmt='none', label='constraint set 3 (1hr)', capsize=0, elinewidth=8, capthick=1)
+markers1, caps1, bars1 = ax1.errorbar(data1[:, 0], mids1, yerr=err1, linestyle='-', color='black', fmt='none', label='Constraint set 1 (10s)', capsize=0, elinewidth=8, capthick=1)
+markers2, caps2, bars2 = ax1.errorbar(data2[:, 0], mids2, yerr=err2, linestyle='-', color='red', fmt='none', label='Constraint set 2 (1m)', capsize=0, elinewidth=8, capthick=1)
+markers3, caps3, bars3 = ax1.errorbar(data3[:, 0], mids3, yerr=err3, linestyle='-', color='blue', fmt='none', label='Constraint set 3 (1hr)', capsize=0, elinewidth=8, capthick=1)
 for bar in bars1:
     bar.set_alpha(0.6)
 for bar in bars2:
     bar.set_alpha(0.6)
 for bar in bars3:
     bar.set_alpha(0.6)
-ax1.set_xlabel('number of qubits, n', labelpad=15)
-ax1.set_ylabel('bounded interval, $[\\langle M \\rangle_{lb}, \\langle M \\rangle_{up}]$', color='black', labelpad=15)
+ax1.set_xlabel('Number of qubits, n', labelpad=15)
+ax1.set_ylabel('Bounded interval, $[\\langle M \\rangle_{lb}, \\langle M \\rangle_{ub}]$', color='black', labelpad=15)
 ax1.tick_params(axis='y', labelcolor='black')
 
 # Also plot a point at each max and min
