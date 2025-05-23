@@ -115,6 +115,7 @@ int main(int argc, char* argv[]) {
     int numSamples = 0;
     int numShots = 0;
     double tol = 1e-7;
+    bool usePurity = false;
     bool outputToFile = false;
     std::string sampleChoice = "all";
     int maxSampleDegree = 2;
@@ -188,6 +189,14 @@ int main(int argc, char* argv[]) {
 
         // Pauli Z objective
         } else if (argAsString == "--objZ" || argAsString == "--objx") {
+            objective = Poly();
+            for (int i=1; i<=numQubits; i++) {
+                objective += Poly(1.0/numQubits, "<Z" + std::to_string(i) + ">");
+            }
+
+        // Purity objective
+        } else if (argAsString == "--objPurity" || argAsString == "--objpurity") {
+            usePurity = true;
             objective = Poly();
             for (int i=1; i<=numQubits; i++) {
                 objective += Poly(1.0/numQubits, "<Z" + std::to_string(i) + ">");
@@ -1711,6 +1720,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  --objZ          Use avg sigma_Z as the objective" << std::endl;
             std::cout << "  --objHC H/C     Heat current for either the hot or cold bath" << std::endl;
             std::cout << "  --objRand <int> Random objective up to a certain order" << std::endl;
+            std::cout << "  --objPurity     Try to minimize the purity of the state" << std::endl;
             std::cout << "Limbliadian choices:" << std::endl;
             std::cout << "  -L <str>        Manually set the Lindbladian" << std::endl;
             std::cout << "  --file <str>    Read the Lindbladian from a file" << std::endl;
@@ -2041,8 +2051,6 @@ int main(int argc, char* argv[]) {
                 }
 
             }
-
-            
 
         // If a value not given, binary search
         } else {
@@ -3353,6 +3361,7 @@ int main(int argc, char* argv[]) {
         }
 
     }
+
     // Output the problem
     if (verbosity >= 2) {
         std::cout << std::endl;
@@ -3404,6 +3413,23 @@ int main(int argc, char* argv[]) {
     }
     addVariables(variableSet, objective);
     int numVars = variableSet.size()-1;
+
+    // If using purity as the objective
+    std::vector<Mon> quadCone;
+    if (usePurity) {
+
+        // Add all the Pauli strings in variableSet
+        quadCone.push_back(Mon("<T1>"));
+        for (auto mon : variableSet) {
+            if (mon.size() > 0) {
+                quadCone.push_back(mon);
+            }
+        }
+
+        // Objective is the purity
+        objective = Poly(1, Mon("<T1>"));
+
+    }
 
     // Auto detect the best solver
     if (solver == "auto") {
@@ -3459,7 +3485,7 @@ int main(int argc, char* argv[]) {
     if (solver == "scs") {
         bounds = boundSCS(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity, {-1,1}, &results);
     } else if (solver == "mosek" || maxMatSize > 1) {
-        bounds = boundMOSEK(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity, {-1,1}, imagType, &results);
+        bounds = boundMOSEK(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity, {-1,1}, imagType, &results, quadCone);
     } else if (solver == "gurobi") {
         bounds = boundGurobi(objective, constraintsZero, verbosity, &results);
     } else if (solver == "eigen") {
@@ -3468,6 +3494,9 @@ int main(int argc, char* argv[]) {
     }
     double lowerBound = bounds.first;
     double upperBound = bounds.second;
+    if (usePurity) {
+        lowerBound = std::pow(lowerBound, 2) / std::pow(2, numQubits);
+    }
     double diff = std::abs(upperBound - lowerBound);
     if (idealIsKnown && verbosity >= 1) {
         std::cout << "Known True Optimum: " << knownIdeal << std::endl;
