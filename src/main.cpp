@@ -106,6 +106,7 @@ int main(int argc, char* argv[]) {
 
     // Define the scenario
     bool benchmark = false;
+    bool checkObj = false;
     int level = 0;
     int lindbladLevel = 0;
     int numQubits = 1;
@@ -125,7 +126,7 @@ int main(int argc, char* argv[]) {
     bool excludeY = false;
     bool excludeZ = false;
     bool outputLindbladAsLaTeX = false;
-    int percentile = 99;
+    int percentile = 95;
     Poly objective("<Z1>");
     std::map<Mon, double> samples;
     Poly pseudoObjective;
@@ -202,7 +203,7 @@ int main(int argc, char* argv[]) {
                 objective += Poly(1.0/numQubits, "<Z" + std::to_string(i) + ">");
             }
 
-        // Objective is made of random first order Paulis
+        // Objective is made of random Paulis of some order
         } else if (argAsString == "--objRand" || argAsString == "--objrand") {
             int order = std::stoi(argv[i+1]);
             i++;
@@ -1668,6 +1669,12 @@ int main(int argc, char* argv[]) {
         } else if (argAsString == "-F") {
             outputToFile = true;
 
+        // If checking the final results by reconstructing the full state
+        } else if (argAsString == "-o") {
+            checkObj = true;
+            findMinimal = true;
+            findMinimalAmount = 0;
+
         // Output the help
         } else if (argAsString == "-h" || argAsString == "--help") {
             std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
@@ -1681,6 +1688,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  -B              benchmarking mode" << std::endl;
             std::cout << "  -X              output the Lindbladian in LaTeX form" << std::endl;
             std::cout << "  -F              output the final moments to file (monoms.csv)" << std::endl;
+            std::cout << "  -o              check the final results by reconstructing the full state" << std::endl;
             std::cout << "Sampling options:" << std::endl;
             std::cout << "  --samples <int> Solve exactly, take this many samples per Pauli string" << std::endl;
             std::cout << "  --shots   <int> Same as above, but limit the total number of measurements" << std::endl;
@@ -2395,76 +2403,76 @@ int main(int argc, char* argv[]) {
         numSyms++;
     }
 
+    // Pauli matrices
+    Eigen::SparseMatrix<std::complex<double>> pauliI(2,2);
+    pauliI.insert(0,0) = 1;
+    pauliI.insert(1,1) = 1;
+    pauliI.makeCompressed();
+    Eigen::SparseMatrix<std::complex<double>> pauliX(2,2);
+    pauliX.insert(0,1) = 1;
+    pauliX.insert(1,0) = 1;
+    pauliX.makeCompressed();
+    Eigen::SparseMatrix<std::complex<double>> pauliY(2,2);
+    pauliY.insert(0,1) = std::complex<double>(0,-1);
+    pauliY.insert(1,0) = std::complex<double>(0,1);
+    pauliY.makeCompressed();
+    Eigen::SparseMatrix<std::complex<double>> pauliZ(2,2);
+    pauliZ.insert(0,0) = 1;
+    pauliZ.insert(1,1) = -1;
+    pauliZ.makeCompressed();
+    std::map<int, std::string> letterMap = {{0, "I"}, {1, "X"}, {2, "Y"}, {3, "Z"}};
+    std::map<std::vector<int>, Eigen::SparseMatrix<std::complex<double>>> pauliMap;
+    for (int i=0; i<4; i++) {
+        std::vector<int> key = {i};
+        if (i == 0) {
+            pauliMap[key] = pauliI;
+        } else if (i == 1) {
+            pauliMap[key] = pauliX;
+        } else if (i == 2) {
+            pauliMap[key] = pauliY;
+        } else if (i == 3) {
+            pauliMap[key] = pauliZ;
+        }
+    }
+    for (int i=0; i<4; i++) {
+        for (int j=0; j<4; j++) {
+            std::vector<int> key = {i,j};
+            pauliMap[key] = kroneckerProduct(pauliMap[{i}], pauliMap[{j}]);
+        }
+    }
+    for (int i=0; i<4; i++) {
+        for (int j=0; j<4; j++) {
+            for (int k=0; k<4; k++) {
+                std::vector<int> key = {i,j,k};
+                pauliMap[key] = kroneckerProduct(pauliMap[{i,j}], pauliMap[{k}]);
+            }
+        }
+    }
+    for (int i=0; i<4; i++) {
+        for (int j=0; j<4; j++) {
+            for (int k=0; k<4; k++) {
+                for (int l=0; l<4; l++) {
+                    std::vector<int> key = {i,j,k,l};
+                    pauliMap[key] = kroneckerProduct(pauliMap[{i,j,k}], pauliMap[{l}]);
+                }
+            }
+        }
+    }
+    for (int i=0; i<4; i++) {
+        for (int j=0; j<4; j++) {
+            for (int k=0; k<4; k++) {
+                for (int l=0; l<4; l++) {
+                    for (int m=0; m<4; m++) {
+                        std::vector<int> key = {i,j,k,l,m};
+                        pauliMap[key] = kroneckerProduct(pauliMap[{i,j,k,l}], pauliMap[{m}]);
+                    }
+                }
+            }
+        }
+    }
+
     // Add constraints that the reconstructed density matrix is positive
     if (reconLevel != 0) {
-
-        // Pauli matrices
-        Eigen::SparseMatrix<std::complex<double>> pauliI(2,2);
-        pauliI.insert(0,0) = 1;
-        pauliI.insert(1,1) = 1;
-        pauliI.makeCompressed();
-        Eigen::SparseMatrix<std::complex<double>> pauliX(2,2);
-        pauliX.insert(0,1) = 1;
-        pauliX.insert(1,0) = 1;
-        pauliX.makeCompressed();
-        Eigen::SparseMatrix<std::complex<double>> pauliY(2,2);
-        pauliY.insert(0,1) = std::complex<double>(0,-1);
-        pauliY.insert(1,0) = std::complex<double>(0,1);
-        pauliY.makeCompressed();
-        Eigen::SparseMatrix<std::complex<double>> pauliZ(2,2);
-        pauliZ.insert(0,0) = 1;
-        pauliZ.insert(1,1) = -1;
-        pauliZ.makeCompressed();
-        std::map<int, std::string> letterMap = {{0, "I"}, {1, "X"}, {2, "Y"}, {3, "Z"}};
-        std::map<std::vector<int>, Eigen::SparseMatrix<std::complex<double>>> pauliMap;
-        for (int i=0; i<4; i++) {
-            std::vector<int> key = {i};
-            if (i == 0) {
-                pauliMap[key] = pauliI;
-            } else if (i == 1) {
-                pauliMap[key] = pauliX;
-            } else if (i == 2) {
-                pauliMap[key] = pauliY;
-            } else if (i == 3) {
-                pauliMap[key] = pauliZ;
-            }
-        }
-        for (int i=0; i<4; i++) {
-            for (int j=0; j<4; j++) {
-                std::vector<int> key = {i,j};
-                pauliMap[key] = kroneckerProduct(pauliMap[{i}], pauliMap[{j}]);
-            }
-        }
-        for (int i=0; i<4; i++) {
-            for (int j=0; j<4; j++) {
-                for (int k=0; k<4; k++) {
-                    std::vector<int> key = {i,j,k};
-                    pauliMap[key] = kroneckerProduct(pauliMap[{i,j}], pauliMap[{k}]);
-                }
-            }
-        }
-        for (int i=0; i<4; i++) {
-            for (int j=0; j<4; j++) {
-                for (int k=0; k<4; k++) {
-                    for (int l=0; l<4; l++) {
-                        std::vector<int> key = {i,j,k,l};
-                        pauliMap[key] = kroneckerProduct(pauliMap[{i,j,k}], pauliMap[{l}]);
-                    }
-                }
-            }
-        }
-        for (int i=0; i<4; i++) {
-            for (int j=0; j<4; j++) {
-                for (int k=0; k<4; k++) {
-                    for (int l=0; l<4; l++) {
-                        for (int m=0; m<4; m++) {
-                            std::vector<int> key = {i,j,k,l,m};
-                            pauliMap[key] = kroneckerProduct(pauliMap[{i,j,k,l}], pauliMap[{m}]);
-                        }
-                    }
-                }
-            }
-        }
 
         // Keep track of what all the various density mats are
         std::map<std::vector<int>, int> sitesToInd;
@@ -3045,7 +3053,7 @@ int main(int argc, char* argv[]) {
         //}
 
         // TODO for the partial information project
-        //  - purity objective
+        //  - test purity objective
         //  - many different objectives
         //  - energy objective
         //  - energy measurement
@@ -3160,6 +3168,15 @@ int main(int argc, char* argv[]) {
 
         }
 
+        // Remove any T monomials
+        std::set<Mon> sampleOperatorsNew;
+        for (auto mon : sampleOperators) {
+            if (!mon.contains('T')) {
+                sampleOperatorsNew.insert(mon);
+            }
+        }
+        sampleOperators = sampleOperatorsNew;
+
         // If exluding the objective
         if (excludeObjective) {
             for (auto term : objective) {
@@ -3172,14 +3189,7 @@ int main(int argc, char* argv[]) {
         if (excludeX) {
             std::set<Mon> newOps;
             for (auto mon : sampleOperators) {
-                bool hasX = false;
-                for (auto term : mon) {
-                    if (term.first == 'X') {
-                        hasX = true;
-                        break;
-                    }
-                }
-                if (!hasX) {
+                if (!mon.contains('X')) {
                     newOps.insert(mon);
                 }
             }
@@ -3190,14 +3200,7 @@ int main(int argc, char* argv[]) {
         if (excludeY) {
             std::set<Mon> newOps;
             for (auto mon : sampleOperators) {
-                bool hasY = false;
-                for (auto term : mon) {
-                    if (term.first == 'Y') {
-                        hasY = true;
-                        break;
-                    }
-                }
-                if (!hasY) {
+                if (!mon.contains('Y')) {
                     newOps.insert(mon);
                 }
             }
@@ -3208,14 +3211,7 @@ int main(int argc, char* argv[]) {
         if (excludeZ) {
             std::set<Mon> newOps;
             for (auto mon : sampleOperators) {
-                bool hasZ = false;
-                for (auto term : mon) {
-                    if (term.first == 'Z') {
-                        hasZ = true;
-                        break;
-                    }
-                }
-                if (!hasZ) {
+                if (!mon.contains('Z')) {
                     newOps.insert(mon);
                 }
             }
@@ -3421,9 +3417,7 @@ int main(int argc, char* argv[]) {
         // Add all the Pauli strings in variableSet
         quadCone.push_back(Mon("<T1>"));
         for (auto mon : variableSet) {
-            if (mon.size() > 0) {
-                quadCone.push_back(mon);
-            }
+            quadCone.push_back(mon);
         }
 
         // Objective is the purity
@@ -3530,6 +3524,79 @@ int main(int argc, char* argv[]) {
     if (verbosity >= 1) { 
         std::cout << "Time to generate: " << std::chrono::duration_cast<std::chrono::milliseconds>(timeFinishedGeneration - timeFinishedArgs).count() / 1000.0 << "s" << std::endl;
         std::cout << "Time to solve: " << std::chrono::duration_cast<std::chrono::milliseconds>(timeFinishedSolving - timeFinishedGeneration).count() / 1000.0 << "s" << std::endl;
+    }
+
+    // If told to check the final results by reconstructing the full matrix TODO
+    if (checkObj) {
+
+        // Reconstruct the full matrix
+        int fullMatSize = 1 << numQubits;
+        Eigen::MatrixXcd reconMatrix(fullMatSize, fullMatSize);
+
+        // For each Pauli string in the results
+        for (auto& [monom, value] : results) {
+
+            // If the monomial is not trivial
+            if (!monom.contains('T')) {
+
+                // Turn X1Y2I3 -> {1, 2, 0}
+                std::vector<int> inds(numQubits, 0);
+                for (int i = 0; i < monom.size(); i++) {
+                    char letter = monom[i].first;
+                    int index = monom[i].second - 1;
+                    if (letter == 'X') {
+                        inds[index] = 1;
+                    } else if (letter == 'Y') {
+                        inds[index] = 2;
+                    } else if (letter == 'Z') {
+                        inds[index] = 3;
+                    }
+                }
+
+                // Verbose output
+                if (verbosity >= 3) {
+                    std::cout << monom << " = " << value  << " (";
+                    for (int i = 0; i < numQubits; i++) {
+                        std::cout << inds[i];
+                        if (i < numQubits - 1) {
+                            std::cout << ", ";
+                        }
+                    }
+                    std::cout << ")" << std::endl;
+                }
+
+                // The corresponding matrix
+                Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[inds];
+
+                // Add it, scaled by the value
+                reconMatrix += value * mat;
+
+            }
+
+        }
+
+        // Normalize
+        reconMatrix /= fullMatSize;
+
+        // Ensure that the result is positive and has trace 1
+        Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> es(reconMatrix);
+        Eigen::VectorXcd eigenValues = es.eigenvalues();
+        std::complex<double> smallestEigenvalue = eigenValues(0).real();
+        std::complex<double> matTrace = 0;
+        for (int i = 0; i < fullMatSize; i++) {
+            matTrace += reconMatrix(i, i);
+        }
+        if (verbosity >= 1) {
+            std::cout << "Smallest eigenvalue: " << eigenValues(0).real() << std::endl;
+            std::cout << "Trace: " << matTrace.real() << std::endl;
+        }
+
+        // Check the purity
+        double purity = (reconMatrix * reconMatrix).trace().real();
+        if (verbosity >= 1) {
+            std::cout << "Purity: " << purity << std::endl;
+        }
+
     }
 
     // Benchmarking output
