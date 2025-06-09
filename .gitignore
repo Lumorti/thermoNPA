@@ -7,3 +7,4 @@ callgrind*
 temp*
 fit.log
 data/monoms_*
+tensor/*
