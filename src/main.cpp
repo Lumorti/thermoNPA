@@ -539,15 +539,13 @@ int main(int argc, char* argv[]) {
                 int yLoc = i / gridWidth;
 
                 // The leftmost qubits are connected to the hot bath
-                //if (xLoc == 0) {
-                if (xLoc == 0 && yLoc == std::floor(gridHeight/2)) {
+                if (xLoc == 0) {
                     gamma_plus[i] = gamma_h_plus;
                     gamma_minus[i] = gamma_h_minus;
                     epsilons[i] = epsilon_h;
 
                 // The rightmost qubits are connected to the cold bath
-                //} else if (xLoc == gridWidth-1) {
-                } else if (xLoc == gridWidth-1 && yLoc == std::floor(gridHeight/2)) {
+                } else if (xLoc == gridWidth-1) {
                     gamma_plus[i] = gamma_c_plus;
                     gamma_minus[i] = gamma_c_minus;
                     epsilons[i] = epsilon_c;
