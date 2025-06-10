@@ -67,7 +67,7 @@ echo "" > data/2d.tex
 
 #done
 
-#git add .
-#git commit -m "Updated data"
-#git push
+git add .
+git commit -m "Updated data"
+git push
 
