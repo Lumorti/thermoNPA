@@ -1,3 +1,4 @@
+state.*
 run
 runDebug
 *.o

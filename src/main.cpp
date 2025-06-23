@@ -109,6 +109,8 @@ int main(int argc, char* argv[]) {
     bool checkObj = false;
     int level = 0;
     int lindbladLevel = 0;
+    bool precompute = false;
+    bool precomputed = false;
     int numQubits = 1;
     int gridWidth = 1;
     int gridHeight = 1;
@@ -1673,6 +1675,15 @@ int main(int argc, char* argv[]) {
             findMinimal = true;
             findMinimalAmount = 0;
 
+        // If precomputing the solution
+        } else if (argAsString == "--precompute") {
+            precompute = true;
+            numSamples = 1;
+
+        // If using a precomputed solution
+        } else if (argAsString == "--precomputed") {
+            precomputed = true;
+
         // Output the help
         } else if (argAsString == "-h" || argAsString == "--help") {
             std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
@@ -1687,6 +1698,8 @@ int main(int argc, char* argv[]) {
             std::cout << "  -X              output the Lindbladian in LaTeX form" << std::endl;
             std::cout << "  -F              output the final moments to file (monoms.csv)" << std::endl;
             std::cout << "  -o              check the final results by reconstructing the full state" << std::endl;
+            std::cout << "  --precompute    solve the system exactly, saving the state to state.dat" << std::endl;
+            std::cout << "  --precomputed   load the known optimum state from state.dat" << std::endl;
             std::cout << "Sampling options:" << std::endl;
             std::cout << "  --samples <int> Solve exactly, take this many samples per Pauli string" << std::endl;
             std::cout << "  --shots   <int> Same as above, but limit the total number of measurements" << std::endl;
@@ -2895,54 +2908,6 @@ int main(int argc, char* argv[]) {
     // If we take fake samples
     if (numSamples != 0) {
 
-        // Save the old problem
-        std::vector<Poly> prevConsZero = constraintsZero;
-
-        // First we need to solve exactly the problem
-        std::set<Mon> monomsUsed;
-        std::vector<Mon> monomsUsedVec;
-        std::vector<std::vector<std::vector<Poly>>> momentMatrices = {};
-        std::vector<Mon> variables = {};
-        for (int i=0; i<numQubits; i++) {
-            variables.push_back(Mon("<X" + std::to_string(i+1) + ">"));
-            variables.push_back(Mon("<Y" + std::to_string(i+1) + ">"));
-            variables.push_back(Mon("<Z" + std::to_string(i+1) + ">"));
-        }
-        addSingleMonomials(variables, objective);
-        int fullLevel = numQubits;
-        std::vector<Poly> variablesToPut = generateMonomials(variables, fullLevel, verbosity);
-        for (size_t i=0; i<extraMonomialsLim.size(); i++) {
-            variablesToPut.push_back(Poly(extraMonomialsLim[i]));
-        }
-        for (size_t i=0; i<variablesToPut.size(); i++) {
-            std::pair<std::complex<double>, Mon> reducedMon = variablesToPut[i].getKey().reduce();
-            if (!monomsUsed.count(reducedMon.second)) {
-                std::pair<char,int> oldMon('A', 0);
-                Mon newPoly(reducedMon.second);
-                Poly newConstraint = lindbladian.replaced(oldMon, newPoly);
-                if (!newConstraint.isZero()) {
-                    constraintsZero.push_back(newConstraint);
-                }
-                monomsUsed.insert(variablesToPut[i].getKey());
-                monomsUsedVec.push_back(variablesToPut[i].getKey());
-            }
-        }
-
-        // Solve
-        std::map<Mon, std::complex<double>> results;
-        double res = solveEigen(objective, constraintsZero, 0, numCores, &results);
-        if (verbosity >= 2) {
-            std::cout << "Exact solver result: " << res << std::endl;
-        }
-        if (verbosity >= 3) {
-            for (const auto& [monom, value] : results) {
-                std::cout << monom << " = " << value << std::endl;
-            }
-        }
-        
-        // Restore the old problem
-        constraintsZero = prevConsZero;
-
         // Pauli matrices
         int matSize = 1 << numQubits;
         Eigen::SparseMatrix<std::complex<double>> X(2, 2);
@@ -2970,6 +2935,9 @@ int main(int argc, char* argv[]) {
         iden2.makeCompressed();
         idenFull.makeCompressed();
 
+        // The state we want to find
+        Eigen::SparseMatrix<std::complex<double>> groundTruth(matSize, matSize);
+
         // Pauli operators on the state
         std::vector<Eigen::SparseMatrix<std::complex<double>>> Xs(numQubits);
         std::vector<Eigen::SparseMatrix<std::complex<double>>> Ys(numQubits);
@@ -2995,46 +2963,139 @@ int main(int argc, char* argv[]) {
             Zs[i].makeCompressed();
         }
 
-        // Form the ground truth from the results
-        Eigen::SparseMatrix<std::complex<double>> groundTruth(matSize, matSize);
-        for (const auto& [monom, value] : results) {
+        // If precomputed, load the ground truth
+        if (precomputed) {
+            if (verbosity >= 1) {
+                std::cout << "Loading precomputed ground truth" << std::endl;
+            }
+            std::string filename = "state.dat";
+            std::ifstream inFile(filename);
+            if (!inFile.is_open()) {
+                throw std::runtime_error("Could not open ground truth file: " + filename);
+            }
+            std::string line;
+            while (std::getline(inFile, line)) {
+                std::istringstream iss(line);
+                int row, col;
+                double real, imag;
+                if (!(iss >> row >> col >> real >> imag)) {break;}
+                std::cout << "Read entry: " << row << ", " << col << ", " << real << ", " << imag << std::endl;
+                groundTruth.insert(row, col) = std::complex<double>(real, imag);
+            }
+            inFile.close();
 
-            // If it's non-zero
-            if (std::abs(value) > 1e-10) {
+        // Otherwise we need to solve for the ground truth
+        } else {
 
-                // Loop over the monomial to form the operator
-                Eigen::SparseMatrix<std::complex<double>> tempOp(matSize, matSize);
-                for (int j = 0; j < matSize; j++) {
-                    tempOp.insert(j, j) = 1;
-                }
-                for (int j = monom.size() - 1; j >= 0; j--) {
-                    char letter = monom[j].first;
-                    int index = monom[j].second - 1;
-                    if (letter == 'X') {
-                        tempOp = (Xs[index] * tempOp).eval();
-                    } else if (letter == 'Y') {
-                        tempOp = (Ys[index] * tempOp).eval();
-                    } else if (letter == 'Z') {
-                        tempOp = (Zs[index] * tempOp).eval();
+            // Save the old problem
+            std::vector<Poly> prevConsZero = constraintsZero;
+
+            // First we need to solve exactly the problem
+            std::set<Mon> monomsUsed;
+            std::vector<Mon> monomsUsedVec;
+            std::vector<std::vector<std::vector<Poly>>> momentMatrices = {};
+            std::vector<Mon> variables = {};
+            for (int i=0; i<numQubits; i++) {
+                variables.push_back(Mon("<X" + std::to_string(i+1) + ">"));
+                variables.push_back(Mon("<Y" + std::to_string(i+1) + ">"));
+                variables.push_back(Mon("<Z" + std::to_string(i+1) + ">"));
+            }
+            addSingleMonomials(variables, objective);
+            int fullLevel = numQubits;
+            std::vector<Poly> variablesToPut = generateMonomials(variables, fullLevel, verbosity);
+            for (size_t i=0; i<extraMonomialsLim.size(); i++) {
+                variablesToPut.push_back(Poly(extraMonomialsLim[i]));
+            }
+            for (size_t i=0; i<variablesToPut.size(); i++) {
+                std::pair<std::complex<double>, Mon> reducedMon = variablesToPut[i].getKey().reduce();
+                if (!monomsUsed.count(reducedMon.second)) {
+                    std::pair<char,int> oldMon('A', 0);
+                    Mon newPoly(reducedMon.second);
+                    Poly newConstraint = lindbladian.replaced(oldMon, newPoly);
+                    if (!newConstraint.isZero()) {
+                        constraintsZero.push_back(newConstraint);
                     }
+                    monomsUsed.insert(variablesToPut[i].getKey());
+                    monomsUsedVec.push_back(variablesToPut[i].getKey());
                 }
-                tempOp.makeCompressed();
+            }
 
-                // Add the operator to the ground truth
-                groundTruth += value * tempOp;
+            // Solve
+            std::map<Mon, std::complex<double>> results;
+            double res = solveEigen(objective, constraintsZero, 0, numCores, &results);
+            if (verbosity >= 2) {
+                std::cout << "Exact solver result: " << res << std::endl;
+            }
+            if (verbosity >= 3) {
+                for (const auto& [monom, value] : results) {
+                    std::cout << monom << " = " << value << std::endl;
+                }
+            }
+            
+            // Restore the old problem
+            constraintsZero = prevConsZero;
+
+            // Form the ground truth from the results
+            for (const auto& [monom, value] : results) {
+
+                // If it's non-zero
+                if (std::abs(value) > 1e-10) {
+
+                    // Loop over the monomial to form the operator
+                    Eigen::SparseMatrix<std::complex<double>> tempOp(matSize, matSize);
+                    for (int j = 0; j < matSize; j++) {
+                        tempOp.insert(j, j) = 1;
+                    }
+                    for (int j = monom.size() - 1; j >= 0; j--) {
+                        char letter = monom[j].first;
+                        int index = monom[j].second - 1;
+                        if (letter == 'X') {
+                            tempOp = (Xs[index] * tempOp).eval();
+                        } else if (letter == 'Y') {
+                            tempOp = (Ys[index] * tempOp).eval();
+                        } else if (letter == 'Z') {
+                            tempOp = (Zs[index] * tempOp).eval();
+                        }
+                    }
+                    tempOp.makeCompressed();
+
+                    // Add the operator to the ground truth
+                    groundTruth += value * tempOp;
+
+                }
 
             }
 
-        }
+            // Add the identity and normalize
+            Eigen::SparseMatrix<std::complex<double>> iden(matSize, matSize);
+            for (int i = 0; i < matSize; i++) {
+                iden.insert(i, i) = 1;
+            }
+            groundTruth += iden;
+            groundTruth /= (1 << (numQubits));
+            groundTruth.makeCompressed();
 
-        // Add the identity and normalize
-        Eigen::SparseMatrix<std::complex<double>> iden(matSize, matSize);
-        for (int i = 0; i < matSize; i++) {
-            iden.insert(i, i) = 1;
+            // If precomputing, save this to file TODO
+            if (precompute) {
+                std::string filename = "state.dat";
+                std::ofstream outFile(filename);
+                if (outFile.is_open()) {
+                    for (int k = 0; k < groundTruth.outerSize(); ++k) {
+                        for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(groundTruth, k); it; ++it) {
+                            outFile << it.row() << " " << it.col() << " " << it.value().real() << " " << it.value().imag() << "\n";
+                        }
+                    }
+                    outFile.close();
+                    if (verbosity >= 1) {
+                        std::cout << "Ground truth saved to: " << filename << std::endl;
+                    }
+                } else {
+                    std::cerr << "Error opening file for writing: " << filename << std::endl;
+                }
+                return 0;
+            }
+
         }
-        groundTruth += iden;
-        groundTruth /= (1 << (numQubits));
-        groundTruth.makeCompressed();
 
         // Check that this is positive and has trace 1
         //Eigen::SelfAdjointEigenSolver<Eigen::SparseMatrix<std::complex<double>>> es(groundTruth);
@@ -3049,12 +3110,6 @@ int main(int argc, char* argv[]) {
             //std::cout << "Smallest eigenvalue: " << eigenValues(0).real() << std::endl;
             //std::cout << "Trace: " << matTrace.real() << std::endl;
         //}
-
-        // TODO for the partial information project
-        //  - test purity objective
-        //  - many different objectives
-        //  - energy objective
-        //  - energy measurement
 
         // The samples we should take
         std::set<Mon> sampleOperators;
