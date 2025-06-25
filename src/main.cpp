@@ -123,6 +123,7 @@ int main(int argc, char* argv[]) {
     std::string sampleChoice = "all";
     int maxSampleDegree = 2;
     int maxPaulis = 1000000;
+    std::vector<int> includeOnly;
     bool excludeObjective = false;
     bool excludeX = false;
     bool excludeY = false;
@@ -1684,6 +1685,29 @@ int main(int argc, char* argv[]) {
         } else if (argAsString == "--precomputed") {
             precomputed = true;
 
+        // If told to only include these qubits TODO
+        } else if (argAsString == "-I") {
+            std::vector<int> qubitsToUse;
+            std::string qubitsAsString = std::string(argv[i+1]);
+            i++;
+            std::string toConvert = "";
+            for (size_t j=0; j<qubitsAsString.size(); j++) {
+                if (qubitsAsString[j] != ',') {
+                    toConvert += qubitsAsString[j];
+                }
+                if (qubitsAsString[j] == ',' || j == qubitsAsString.size()-1) {
+                    qubitsToUse.push_back(std::stoi(toConvert));
+                    toConvert = "";
+                }
+            }
+            for (int q : qubitsToUse) {
+                if (q < 1 || q > numQubits) {
+                    std::cout << "Error - invalid qubit index " << q << " specified" << std::endl;
+                    return 1;
+                }
+            }
+            includeOnly = qubitsToUse;
+
         // Output the help
         } else if (argAsString == "-h" || argAsString == "--help") {
             std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
@@ -1723,6 +1747,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  -R              Try removing random constraints" << std::endl;
             std::cout << "  -y <ints>       Add a symetry between two groups e.g. -y 1,2 3,4" << std::endl;
             std::cout << "  -Y              Assume full symmetry between all qubits" << std::endl;
+            std::cout << "  -I <ints>       Only put operators with these qubits into the Lindbladian" << std::endl;
             std::cout << "  -T              Add tracing-out constraints between density mats" << std::endl;
             std::cout << "  -i <int>        1 => ignore imag, 2 => alternate imag handling" << std::endl;
             std::cout << "  --conHC P/N     same as objHC, but constraint to be positive/negative" << std::endl;
@@ -1880,7 +1905,7 @@ int main(int argc, char* argv[]) {
 
     }
 
-    // Create the Lindbladian applied to many different operators
+    // Determine which monomials to put in the Lindbladian
     std::set<Mon> monomsUsed;
     std::vector<Mon> monomsUsedVec;
     std::vector<std::vector<std::vector<Poly>>> momentMatrices = {};
@@ -1895,6 +1920,23 @@ int main(int argc, char* argv[]) {
     for (size_t i=0; i<extraMonomialsLim.size(); i++) {
         variablesToPut.push_back(Poly(extraMonomialsLim[i]));
     }
+    if (includeOnly.size() > 0) { // TODO
+        std::vector<Poly> variablesToPutFiltered;
+        for (size_t i=0; i<variablesToPut.size(); i++) {
+            Mon mon = variablesToPut[i].getKey();
+            bool allGood = true;
+            for (int j=0; j<mon.size(); j++) {
+                if (std::find(includeOnly.begin(), includeOnly.end(), mon[j].second) == includeOnly.end()) {
+                    allGood = false;
+                    break;
+                }
+            }
+            if (allGood) {
+                variablesToPutFiltered.push_back(variablesToPut[i]);
+            }
+        }
+        variablesToPut = variablesToPutFiltered;
+    }
     if (verbosity >= 2) {
         std::cout << std::endl;
         std::cout << "Variables to put in Lindbladian: " << std::endl;
@@ -1904,6 +1946,8 @@ int main(int argc, char* argv[]) {
         std::cout << std::endl;
         std::cout << "Original Lindbladian: " << lindbladian << std::endl;
     }
+
+    // Put them in the Lindbladian
     for (size_t i=0; i<variablesToPut.size(); i++) {
         std::pair<std::complex<double>, Mon> reducedMon = variablesToPut[i].getKey().reduce();
         if (!monomsUsed.count(reducedMon.second)) {
@@ -2065,7 +2109,18 @@ int main(int argc, char* argv[]) {
                 for (auto& term : newTerms) {
                     if (!monomsInConstraints.count(term)) {
                         monomsInConstraints.insert(term);
-                        queue.push_back(term);
+                        bool allGood = true;
+                        if (includeOnly.size() > 0) {
+                            for (int j=0; j<term.size(); j++) {
+                                if (std::find(includeOnly.begin(), includeOnly.end(), term[j].second) == includeOnly.end()) {
+                                    allGood = false;
+                                    break;
+                                }
+                            }
+                        }
+                        if (allGood) {
+                            queue.push_back(term);
+                        }
                     }
                 }
 

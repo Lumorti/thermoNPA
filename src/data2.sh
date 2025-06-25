@@ -1,19 +1,20 @@
 #!/bin/bash
 
-#> data.dat
-#for A in 10 20 30 40 50 60 70 80 90 100 200
-##for A in 110 120 130 140 150 160 170 180 190
-#do
-    ##for M in 10 100 1000 2000 5000 7500 10000 20000
-    #for M in 25000 30000 35000
-    #do
-        #./run --tensor 12 -M $M -A $A > temp.log
-        #diff=$(cat temp.log | grep "Difference" | awk '{print $2}')
-        #timeSolve=$(cat temp.log | grep "Time to solve" | awk '{print $4}')
-        #timeGen=$(cat temp.log | grep "Time to generate" | awk '{print $4}')
-        #timeSolve=${timeSolve::-1}
-        #timeGen=${timeGen::-1}
-        #echo $A $M $diff $timeSolve $timeGen | tee -a data.dat
-    #done
-#done
+> data.dat
 
+val3=$(./run --tensor 3 -s M -l 3 -I 2 -Y -r 3 -B)
+echo "val3: $val3"
+val4=$(./run --tensor 4 -s M -l 3 -I 2,3 -Y -r 3 -B)
+echo "val4: $val4"
+val5=$(./run --tensor 5 -s M -l 3 -I 2,3,4 -Y -r 3 -B)
+echo "val5: $val5"
+val6=$(./run --tensor 6 -s M -l 3 -I 2,3,4,5 -Y -r 3 -B)
+echo "val6: $val6"
+val7=$(./run --tensor 7 -s M -l 3 -I 2,3,4,5,6 -Y -r 3 -B)
+echo "val7: $val7"
+val8=$(./run --tensor 8 -s M -l 3 -I 2,3,4,5,6,7 -Y -r 3 -B)
+echo "val8: $val8"
+val9=$(./run --tensor 9 -s M -l 3 -I 2,3,4,5,6,7,8 -Y -r 3 -B)
+echo "val9: $val9"
+val10=$(./run --tensor 10 -s M -l 3 -I 2,3,4,5,6,7,8,9 -Y -r 3 -B)
+echo "val10: $val10"
