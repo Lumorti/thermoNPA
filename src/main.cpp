@@ -105,6 +105,8 @@ int main(int argc, char* argv[]) {
     srand(time(NULL));
 
     // Define the scenario
+    std::string note = "";
+    bool allTimeInMillis = false;
     bool benchmark = false;
     bool checkObj = false;
     int level = 0;
@@ -201,8 +203,11 @@ int main(int argc, char* argv[]) {
         // Purity objective
         } else if (argAsString == "--objPurity" || argAsString == "--objpurity") {
             usePurity = true;
+            solver = "mosek";
             objective = Poly();
             for (int i=1; i<=numQubits; i++) {
+                objective += Poly(1.0/numQubits, "<X" + std::to_string(i) + ">");
+                objective += Poly(1.0/numQubits, "<Y" + std::to_string(i) + ">");
                 objective += Poly(1.0/numQubits, "<Z" + std::to_string(i) + ">");
             }
 
@@ -1708,6 +1713,15 @@ int main(int argc, char* argv[]) {
             }
             includeOnly = qubitsToUse;
 
+        // If told to output all times in milliseconds
+        } else if (argAsString == "--millis") {
+            allTimeInMillis = true;
+
+        // If a note is given
+        } else if (argAsString == "-N") {
+            note = std::string(argv[i+1]);
+            i++;
+
         // Output the help
         } else if (argAsString == "-h" || argAsString == "--help") {
             std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
@@ -1722,6 +1736,8 @@ int main(int argc, char* argv[]) {
             std::cout << "  -X              output the Lindbladian in LaTeX form" << std::endl;
             std::cout << "  -F              output the final moments to file (monoms.csv)" << std::endl;
             std::cout << "  -o              check the final results by reconstructing the full state" << std::endl;
+            std::cout << "  -N <str>        add a note to the run" << std::endl;
+            std::cout << "  --millis        output all times in milliseconds (i.e. don't auto convert)" << std::endl;
             std::cout << "  --precompute    solve the system exactly, saving the state to state.dat" << std::endl;
             std::cout << "  --precomputed   load the known optimum state from state.dat" << std::endl;
             std::cout << "Sampling options:" << std::endl;
@@ -3034,7 +3050,6 @@ int main(int argc, char* argv[]) {
                 int row, col;
                 double real, imag;
                 if (!(iss >> row >> col >> real >> imag)) {break;}
-                std::cout << "Read entry: " << row << ", " << col << ", " << real << ", " << imag << std::endl;
                 groundTruth.insert(row, col) = std::complex<double>(real, imag);
             }
             inFile.close();
@@ -3130,7 +3145,7 @@ int main(int argc, char* argv[]) {
             groundTruth /= (1 << (numQubits));
             groundTruth.makeCompressed();
 
-            // If precomputing, save this to file TODO
+            // If precomputing, save this to file
             if (precompute) {
                 std::string filename = "state.dat";
                 std::ofstream outFile(filename);
@@ -3276,11 +3291,12 @@ int main(int argc, char* argv[]) {
 
         }
 
-        // Remove any T monomials
+        // Simplfy all, also remove any T monomials TODO
         std::set<Mon> sampleOperatorsNew;
         for (auto mon : sampleOperators) {
-            if (!mon.contains('T')) {
-                sampleOperatorsNew.insert(mon);
+            std::pair<std::complex<double>, Mon> reducedMon = mon.reduce();
+            if (!reducedMon.second.contains('T')) {
+                sampleOperatorsNew.insert(reducedMon.second);
             }
         }
         sampleOperators = sampleOperatorsNew;
@@ -3332,8 +3348,12 @@ int main(int argc, char* argv[]) {
         }
 
         // If we're taking samples to a total number of shots
-        if (numShots != 0) {
+        if (numShots == -1) {
+            numSamples = -1;
+        } else if (numShots != 0) {
             numSamples = numShots / sampleOperators.size();
+        } else {
+            numShots = numSamples * sampleOperators.size();
         }
 
         // Verbose output
@@ -3466,6 +3486,47 @@ int main(int argc, char* argv[]) {
 
     }
 
+    // Count the size of the problem
+    if (verbosity >= 2) {
+        std::cout << std::endl;
+    }
+    int maxMatSize = 0;
+    for (size_t i=0; i<momentMatrices.size(); i++) {
+        if (momentMatrices[i].size() > maxMatSize) {
+            maxMatSize = momentMatrices[i].size();
+        }
+    }
+    int numCons = constraintsZero.size();
+    int numMats = momentMatrices.size();
+    std::set<Mon> variableSet;
+    variableSet.insert(Mon());
+    for (size_t i=0; i<momentMatrices.size(); i++) {
+        addVariables(variableSet, momentMatrices[i]);
+    }
+    for (size_t i=0; i<constraintsZero.size(); i++) {
+        addVariables(variableSet, constraintsZero[i]);
+    }
+    for (size_t i=0; i<constraintsPositive.size(); i++) {
+        addVariables(variableSet, constraintsPositive[i]);
+    }
+    addVariables(variableSet, objective);
+    int numVars = variableSet.size()-1;
+
+    // If using purity as the objective TODO higher order Paulis
+    std::vector<Mon> quadCone;
+    if (usePurity) {
+
+        // Add all the Pauli strings in variableSet
+        quadCone.push_back(Mon("<T1>"));
+        for (auto mon : variableSet) {
+            quadCone.push_back(mon);
+        }
+
+        // Objective is the purity
+        objective = Poly(1, Mon("<T1>"));
+
+    }
+
     // Output the problem
     if (verbosity >= 2) {
         std::cout << std::endl;
@@ -3492,45 +3553,17 @@ int main(int argc, char* argv[]) {
             std::cout << "Zero constraints (" << constraintsZero.size() << "): " << std::endl;
             std::cout << constraintsZero << std::endl;
         }
+        if (constraintsPositive.size() > 0) {
+            std::cout << "Positive constraints (" << constraintsPositive.size() << "): " << std::endl;
+            std::cout << constraintsPositive << std::endl;
+        }
+        if (quadCone.size() > 0) {
+            std::cout << "Quadratic cone constraints (" << quadCone.size() << "): " << std::endl;
+            for (const auto& mon : quadCone) {
+                std::cout << mon << std::endl;
+            }
+        }
         std::cout << "----------------------------------------" << std::endl;
-    }
-
-    // Count the size of the problem
-    if (verbosity >= 2) {
-        std::cout << std::endl;
-    }
-    int maxMatSize = 0;
-    for (size_t i=0; i<momentMatrices.size(); i++) {
-        if (momentMatrices[i].size() > maxMatSize) {
-            maxMatSize = momentMatrices[i].size();
-        }
-    }
-    int numCons = constraintsZero.size();
-    int numMats = momentMatrices.size();
-    std::set<Mon> variableSet;
-    variableSet.insert(Mon());
-    for (size_t i=0; i<momentMatrices.size(); i++) {
-        addVariables(variableSet, momentMatrices[i]);
-    }
-    for (size_t i=0; i<constraintsZero.size(); i++) {
-        addVariables(variableSet, constraintsZero[i]);
-    }
-    addVariables(variableSet, objective);
-    int numVars = variableSet.size()-1;
-
-    // If using purity as the objective
-    std::vector<Mon> quadCone;
-    if (usePurity) {
-
-        // Add all the Pauli strings in variableSet
-        quadCone.push_back(Mon("<T1>"));
-        for (auto mon : variableSet) {
-            quadCone.push_back(mon);
-        }
-
-        // Objective is the purity
-        objective = Poly(1, Mon("<T1>"));
-
     }
 
     // Auto detect the best solver
@@ -3577,6 +3610,10 @@ int main(int argc, char* argv[]) {
             }
         }
     }
+    if (usePurity) {
+        trivialMin = 0.0;
+        trivialMax = 1.0;
+    }
     if (verbosity >= 1) {
         std::cout << "Trivial bounds: " << trivialMin << " <= obj <= " << trivialMax << std::endl;
     }
@@ -3598,6 +3635,7 @@ int main(int argc, char* argv[]) {
     double upperBound = bounds.second;
     if (usePurity) {
         lowerBound = std::pow(lowerBound, 2) / std::pow(2, numQubits);
+        upperBound = 1.0;
     }
     double diff = std::abs(upperBound - lowerBound);
     if (idealIsKnown && verbosity >= 1) {
@@ -3715,6 +3753,8 @@ int main(int argc, char* argv[]) {
         std::string outputSym = "None";
         std::string outputDiff = "None";
         std::string outputTime = "None";
+        std::string outputShots = "None";
+        std::string outputNote = "";
         if (level > 0) {
             std::string matWidth = std::to_string(momentMatrices[0].size());
             outputMat = "level " + std::to_string(level) + " (" + matWidth + "x" + matWidth + ")";
@@ -3729,6 +3769,14 @@ int main(int argc, char* argv[]) {
             int width = constraintsZero.size() - numSyms;
             outputLin = "auto (" + std::to_string(width) + ")";
         }
+        if (numSamples != 0) {
+            outputShots = "";
+            outputShots += sampleChoice;
+            if (sampleChoice == "all") {
+                outputShots += " order-" + std::to_string(maxSampleDegree);
+            }
+            outputShots += " (" + std::to_string(numShots) + ")";
+        }
         if (reconLevel > 0) {
             std::string numMats = std::to_string(momentMatrices.size());
             std::string matSize = std::to_string(momentMatrices[momentMatrices.size()-1].size());
@@ -3737,10 +3785,9 @@ int main(int argc, char* argv[]) {
         if (symmetries.size() > 0) {
             outputSym = "yes (" + std::to_string(symmetries.size()) + ")";
         }
-        //outputDiff = std::to_string(diff) + " (" + strRound(error, 2) + "\\%)";
         outputDiff = "[" + std::to_string(lowerBound) + ", " + std::to_string(upperBound) + "] (" + strRound(error, 2) + "\\%)";
         int timeInMillis = std::chrono::duration_cast<std::chrono::milliseconds>(timeFinishedSolving - timeFinishedArgs).count();
-        if (timeInMillis < 5000 && false) {
+        if (allTimeInMillis) {
             outputTime = std::to_string(timeInMillis) + "ms";
         } else {
             int minutes = timeInMillis / 60000;
@@ -3751,7 +3798,14 @@ int main(int argc, char* argv[]) {
                 outputTime = strRound(timeInMillis / 1000.0, 2) + "s";
             }
         }
-        std::cout << outputMat << " & " << outputLin << " & " << outputRecon << " & " << outputSym << " & " << outputDiff << " & " << outputTime << " \\\\ \\hline" << std::endl;
+        if (note.size() > 0) {
+            outputNote = " & " + note;
+        }
+        if (numSamples != 0) {
+            std::cout << outputMat << " & " << outputLin << " & " << outputRecon << " & " << outputSym << " & " << outputShots << " & " << outputDiff << " & " << outputTime << outputNote << " \\\\ \\hline" << std::endl;
+        } else {
+            std::cout << outputMat << " & " << outputLin << " & " << outputRecon << " & " << outputSym << " & " << outputDiff << " & " << outputTime << outputNote << " \\\\ \\hline" << std::endl;
+        }
     }
 
     // Exit without errors

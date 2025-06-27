@@ -1,0 +1,111 @@
+file & magnoz
+auto (21x21) & auto (25) & None & None & all order-1 (1000) & [-0.785706, -0.742873] (2.14\%) & 0.16s & sdp+shots1 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-2 (1000) & [-0.785706, -0.742873] (2.14\%) & 0.16s & sdp+shots2 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-3 (1000) & [-0.785706, -0.742873] (2.14\%) & 0.16s & sdp+shots3 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-4 (1000) & [-0.785706, -0.742873] (2.14\%) & 0.16s & sdp+shots4 \\ \hline
+auto (21x21) & auto (25) & None & None & auto (1000) & [-0.785706, -0.742873] (2.14\%) & 0.16s & sdp+auto10 \\ \hline
+auto (21x21) & auto (25) & None & None & auto (1000) & [-0.785706, -0.742873] (2.14\%) & 0.18s & sdp+auto50 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-1 (5000) & [-0.785706, -0.742873] (2.14\%) & 0.17s & sdp+shots1 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-2 (5000) & [-0.785706, -0.742873] (2.14\%) & 0.17s & sdp+shots2 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-3 (5000) & [-0.785706, -0.742873] (2.14\%) & 0.16s & sdp+shots3 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-4 (5000) & [-0.785706, -0.742873] (2.14\%) & 0.18s & sdp+shots4 \\ \hline
+auto (21x21) & auto (25) & None & None & auto (5000) & [-0.785706, -0.743246] (2.12\%) & 0.16s & sdp+auto10 \\ \hline
+auto (21x21) & auto (25) & None & None & auto (5000) & [-0.785706, -0.742873] (2.14\%) & 0.18s & sdp+auto50 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-1 (10000) & [-0.785706, -0.742873] (2.14\%) & 0.17s & sdp+shots1 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-2 (10000) & [-0.785706, -0.742873] (2.14\%) & 0.17s & sdp+shots2 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-3 (10000) & [-0.785706, -0.742873] (2.14\%) & 0.17s & sdp+shots3 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-4 (10000) & [-0.785706, -0.742873] (2.14\%) & 0.17s & sdp+shots4 \\ \hline
+auto (21x21) & auto (25) & None & None & auto (10000) & [-0.785706, -0.746562] (1.96\%) & 0.16s & sdp+auto10 \\ \hline
+auto (21x21) & auto (25) & None & None & auto (10000) & [-0.785706, -0.742873] (2.14\%) & 0.16s & sdp+auto50 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-1 (50000) & [-0.785706, -0.742873] (2.14\%) & 0.15s & sdp+shots1 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-2 (50000) & [-0.785180, -0.746846] (1.92\%) & 0.17s & sdp+shots2 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-3 (50000) & [-0.785705, -0.742873] (2.14\%) & 0.15s & sdp+shots3 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-4 (50000) & [-0.785706, -0.742873] (2.14\%) & 0.18s & sdp+shots4 \\ \hline
+auto (21x21) & auto (25) & None & None & auto (50000) & [-0.785706, -0.751616] (1.70\%) & 0.16s & sdp+auto10 \\ \hline
+auto (21x21) & auto (25) & None & None & auto (50000) & [-0.785706, -0.749409] (1.81\%) & 0.15s & sdp+auto50 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-1 (100000) & [-0.785706, -0.742873] (2.14\%) & 0.15s & sdp+shots1 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-2 (100000) & [-0.785706, -0.749257] (1.82\%) & 0.16s & sdp+shots2 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-3 (100000) & [-0.785408, -0.746354] (1.95\%) & 0.15s & sdp+shots3 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-4 (100000) & [-0.785706, -0.743092] (2.13\%) & 0.18s & sdp+shots4 \\ \hline
+auto (21x21) & auto (25) & None & None & auto (100000) & [-0.785706, -0.755700] (1.50\%) & 0.16s & sdp+auto10 \\ \hline
+auto (21x21) & auto (25) & None & None & auto (100000) & [-0.784676, -0.751887] (1.64\%) & 0.15s & sdp+auto50 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-1 (500000) & [-0.785706, -0.742873] (2.14\%) & 0.16s & sdp+shots1 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-2 (500000) & [-0.783387, -0.754473] (1.45\%) & 0.16s & sdp+shots2 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-3 (500000) & [-0.784614, -0.748388] (1.81\%) & 0.16s & sdp+shots3 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-4 (500000) & [-0.785007, -0.750772] (1.71\%) & 0.20s & sdp+shots4 \\ \hline
+auto (21x21) & auto (25) & None & None & auto (500000) & [-0.785629, -0.757769] (1.39\%) & 0.16s & sdp+auto10 \\ \hline
+auto (21x21) & auto (25) & None & None & auto (500000) & [-0.783296, -0.760282] (1.15\%) & 0.16s & sdp+auto50 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-1 (1000000) & [-0.785706, -0.742873] (2.14\%) & 0.16s & sdp+shots1 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-2 (1000000) & [-0.779530, -0.757341] (1.11\%) & 0.17s & sdp+shots2 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-3 (1000000) & [-0.783813, -0.753924] (1.49\%) & 0.17s & sdp+shots3 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-4 (1000000) & [-0.784376, -0.757569] (1.34\%) & 0.18s & sdp+shots4 \\ \hline
+auto (21x21) & auto (25) & None & None & auto (1000000) & [-0.785626, -0.759049] (1.33\%) & 0.16s & sdp+auto10 \\ \hline
+auto (21x21) & auto (25) & None & None & auto (1000000) & [-0.778907, -0.759613] (0.96\%) & 0.17s & sdp+auto50 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-1 (5000000) & [-0.785706, -0.742873] (2.14\%) & 0.20s & sdp+shots1 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-2 (5000000) & [-0.775622, -0.764908] (0.54\%) & 0.20s & sdp+shots2 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-3 (5000000) & [-0.776321, -0.760244] (0.80\%) & 0.23s & sdp+shots3 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-4 (5000000) & [-0.778436, -0.760681] (0.89\%) & 0.23s & sdp+shots4 \\ \hline
+auto (21x21) & auto (25) & None & None & auto (5000000) & [-0.783950, -0.760915] (1.15\%) & 0.20s & sdp+auto10 \\ \hline
+auto (21x21) & auto (25) & None & None & auto (5000000) & [-0.774247, -0.766657] (0.38\%) & 0.19s & sdp+auto50 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-1 (10000000) & [-0.785706, -0.742873] (2.14\%) & 0.27s & sdp+shots1 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-2 (10000000) & [-0.773520, -0.765653] (0.39\%) & 0.29s & sdp+shots2 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-3 (10000000) & [-0.775891, -0.764639] (0.56\%) & 0.27s & sdp+shots3 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-4 (10000000) & [-0.777279, -0.764818] (0.62\%) & 0.29s & sdp+shots4 \\ \hline
+auto (21x21) & auto (25) & None & None & auto (10000000) & [-0.783738, -0.762314] (1.07\%) & 0.28s & sdp+auto10 \\ \hline
+auto (21x21) & auto (25) & None & None & auto (10000000) & [-0.772708, -0.766966] (0.29\%) & 0.27s & sdp+auto50 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-1 (50000000) & [-0.785706, -0.742873] (2.14\%) & 0.77s & sdp+shots1 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-2 (50000000) & [-0.771720, -0.768270] (0.17\%) & 0.76s & sdp+shots2 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-3 (50000000) & [-0.772633, -0.767640] (0.25\%) & 0.77s & sdp+shots3 \\ \hline
+auto (21x21) & auto (25) & None & None & all order-4 (50000000) & [-0.772901, -0.767134] (0.29\%) & 0.78s & sdp+shots4 \\ \hline
+auto (21x21) & auto (25) & None & None & auto (50000000) & [-0.783196, -0.762846] (1.02\%) & 0.76s & sdp+auto10 \\ \hline
+auto (21x21) & auto (25) & None & None & auto (50000000) & [-0.771014, -0.768534] (0.12\%) & 0.75s & sdp+auto50 \\ \hline
+auto (21x21) & auto (33) & None & None & all order-1 (-1) & [-0.785706, -0.742873] (2.14\%) & 0.15s & sdp+shots1 \\ \hline
+auto (21x21) & auto (57) & None & None & all order-2 (-1) & [-0.769864, -0.769864] (0.0\%) & 0.12s & sdp+shots2 \\ \hline
+auto (21x21) & auto (89) & None & None & all order-3 (-1) & [-0.769864, -0.769864] (0.0\%) & 0.13s & sdp+shots3 \\ \hline
+auto (21x21) & auto (105) & None & None & all order-4 (-1) & [-0.769864, -0.769864] (0.0\%) & 0.14s & sdp+shots4 \\ \hline
+auto (21x21) & auto (30) & None & None & auto (-1) & [-0.782612, -0.763309] (0.97\%) & 0.15s & sdp+auto10 \\ \hline
+auto (21x21) & auto (45) & None & None & auto (-1) & [-0.769864, -0.769864] (0.0\%) & 0.12s & sdp+auto50 \\ \hline
+file & purity
+None & None  & None & None & all order-1 (1000) & [0.111498, 1.000000] (88.85\%) & 11ms & shots1 \\ \hline
+None & None  & None & None & all order-4 (1000) & [0.062500, 1.000000] (93.75\%) & 57ms & shots4 \\ \hline
+auto (26x26) & auto (50) & None & None & all order-1 (1000) & [0.342186, 1.000000] (65.78\%) & 284ms & sdp+shots1 \\ \hline
+auto (26x26) & auto (50) & None & None & all order-4 (1000) & [0.342186, 1.000000] (65.78\%) & 283ms & sdp+shots4 \\ \hline
+None & None  & None & None & all order-1 (5000) & [0.162068, 1.000000] (83.79\%) & 12ms & shots1 \\ \hline
+None & None  & None & None & all order-4 (5000) & [0.062526, 1.000000] (93.75\%) & 79ms & shots4 \\ \hline
+auto (26x26) & auto (50) & None & None & all order-1 (5000) & [0.342186, 1.000000] (65.78\%) & 262ms & sdp+shots1 \\ \hline
+auto (26x26) & auto (50) & None & None & all order-4 (5000) & [0.342186, 1.000000] (65.78\%) & 288ms & sdp+shots4 \\ \hline
+None & None  & None & None & all order-1 (10000) & [0.183147, 1.000000] (81.69\%) & 11ms & shots1 \\ \hline
+None & None  & None & None & all order-4 (10000) & [0.079824, 1.000000] (92.02\%) & 59ms & shots4 \\ \hline
+auto (26x26) & auto (50) & None & None & all order-1 (10000) & [0.342187, 1.000000] (65.78\%) & 278ms & sdp+shots1 \\ \hline
+auto (26x26) & auto (50) & None & None & all order-4 (10000) & [0.342186, 1.000000] (65.78\%) & 317ms & sdp+shots4 \\ \hline
+None & None  & None & None & all order-1 (50000) & [0.199790, 1.000000] (80.02\%) & 12ms & shots1 \\ \hline
+None & None  & None & None & all order-4 (50000) & [0.186257, 1.000000] (81.37\%) & 63ms & shots4 \\ \hline
+auto (26x26) & auto (50) & None & None & all order-1 (50000) & [0.342186, 1.000000] (65.78\%) & 234ms & sdp+shots1 \\ \hline
+auto (26x26) & auto (50) & None & None & all order-4 (50000) & [0.349495, 1.000000] (65.05\%) & 276ms & sdp+shots4 \\ \hline
+None & None  & None & None & all order-1 (100000) & [0.208239, 1.000000] (79.18\%) & 12ms & shots1 \\ \hline
+None & None  & None & None & all order-4 (100000) & [0.224578, 1.000000] (77.54\%) & 59ms & shots4 \\ \hline
+auto (26x26) & auto (50) & None & None & all order-1 (100000) & [0.342187, 1.000000] (65.78\%) & 243ms & sdp+shots1 \\ \hline
+auto (26x26) & auto (50) & None & None & all order-4 (100000) & [0.352302, 1.000000] (64.77\%) & 284ms & sdp+shots4 \\ \hline
+None & None  & None & None & all order-1 (500000) & [0.214599, 1.000000] (78.54\%) & 19ms & shots1 \\ \hline
+None & None  & None & None & all order-4 (500000) & [0.318773, 1.000000] (68.12\%) & 67ms & shots4 \\ \hline
+auto (26x26) & auto (50) & None & None & all order-1 (500000) & [0.342187, 1.000000] (65.78\%) & 266ms & sdp+shots1 \\ \hline
+auto (26x26) & auto (50) & None & None & all order-4 (500000) & [0.372429, 1.000000] (62.76\%) & 284ms & sdp+shots4 \\ \hline
+None & None  & None & None & all order-1 (1000000) & [0.216892, 1.000000] (78.31\%) & 28ms & shots1 \\ \hline
+None & None  & None & None & all order-4 (1000000) & [0.346382, 1.000000] (65.36\%) & 90ms & shots4 \\ \hline
+auto (26x26) & auto (50) & None & None & all order-1 (1000000) & [0.342186, 1.000000] (65.78\%) & 281ms & sdp+shots1 \\ \hline
+auto (26x26) & auto (50) & None & None & all order-4 (1000000) & [0.383403, 1.000000] (61.66\%) & 294ms & sdp+shots4 \\ \hline
+None & None  & None & None & all order-1 (5000000) & [0.219427, 1.000000] (78.06\%) & 84ms & shots1 \\ \hline
+None & None  & None & None & all order-4 (5000000) & [0.380870, 1.000000] (61.91\%) & 125ms & shots4 \\ \hline
+auto (26x26) & auto (50) & None & None & all order-1 (5000000) & [0.342207, 1.000000] (65.78\%) & 289ms & sdp+shots1 \\ \hline
+auto (26x26) & auto (50) & None & None & all order-4 (5000000) & [0.396387, 1.000000] (60.36\%) & 407ms & sdp+shots4 \\ \hline
+None & None  & None & None & all order-1 (10000000) & [0.220376, 1.000000] (77.96\%) & 137ms & shots1 \\ \hline
+None & None  & None & None & all order-4 (10000000) & [0.388811, 1.000000] (61.12\%) & 187ms & shots4 \\ \hline
+auto (26x26) & auto (50) & None & None & all order-1 (10000000) & [0.342599, 1.000000] (65.74\%) & 391ms & sdp+shots1 \\ \hline
+auto (26x26) & auto (50) & None & None & all order-4 (10000000) & [0.400124, 1.000000] (59.99\%) & 445ms & sdp+shots4 \\ \hline
+None & None  & None & None & all order-1 (50000000) & [0.221182, 1.000000] (77.88\%) & 579ms & shots1 \\ \hline
+None & None  & None & None & all order-4 (50000000) & [0.405150, 1.000000] (59.48\%) & 701ms & shots4 \\ \hline
+auto (26x26) & auto (50) & None & None & all order-1 (50000000) & [0.342876, 1.000000] (65.71\%) & 821ms & sdp+shots1 \\ \hline
+auto (26x26) & auto (50) & None & None & all order-4 (50000000) & [0.408787, 1.000000] (59.12\%) & 935ms & sdp+shots4 \\ \hline
+None & None  & None & None & all order-1 (-1) & [0.221806, 1.000000] (77.82\%) & 9ms & shots1 \\ \hline
+None & None  & None & None & all order-4 (-1) & [0.416308, 1.000000] (58.37\%) & 52ms & shots4 \\ \hline
+auto (26x26) & auto (62) & None & None & all order-1 (-1) & [0.343205, 1.000000] (65.68\%) & 251ms & sdp+shots1 \\ \hline
