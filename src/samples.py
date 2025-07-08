@@ -146,7 +146,7 @@ for filename in set(point["filename"] for point in points):
     labels, handles = zip(*sorted(zip(labels, handles), key=lambda t: t[0]))
     ax.legend(handles, labels)
     plt.show()
-    # plt.savefig('data/purity.png', bbox_inches='tight', dpi=300)
+    plt.savefig('data/purity.png', bbox_inches='tight')
 
 
 
