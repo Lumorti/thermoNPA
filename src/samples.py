@@ -145,8 +145,8 @@ for filename in set(point["filename"] for point in points):
     handles, labels = ax.get_legend_handles_labels()
     labels, handles = zip(*sorted(zip(labels, handles), key=lambda t: t[0]))
     ax.legend(handles, labels)
+    plt.savefig('data/estimation_' + filename + '.png', bbox_inches='tight')
     plt.show()
-    plt.savefig('data/purity.png', bbox_inches='tight')
 
 
 
