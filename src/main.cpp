@@ -1507,6 +1507,11 @@ int main(int argc, char* argv[]) {
             symmetries.push_back({group1, group2});
 
         // Heat current objective
+        // --objHC H C   is    hot -> cold
+        // --objHC 2 C   is    spin 2 -> cold
+        // --objHC 2 5   is    spin 2 -> spin 5
+        // --conHC P 2 C   is    spin 2 -> cold should be positive
+        // --conHC N 2 C   is    spin 2 -> cold should be negative
         } else if (argAsString == "--objHC" || argAsString == "--conHC") {
 
             // Determine which spins we're dealing with
