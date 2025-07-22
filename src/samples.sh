@@ -28,50 +28,94 @@ systemSize="2 2"
 #done
 
 # Mag without z vs number of measurements
-echo "file & magnoz" | tee -a data/measure.dat
+#echo "file & magnoz" | tee -a data/measure.dat
+#A=20
+#M=25
+#for shots in 1000 5000 10000 50000 100000 500000 1000000 5000000 10000000 50000000 -1
+#do
+
+    ## SDP plus level 1 shots
+    #./run -N "sdp+shots1" -s M --2d ${systemSize} --precomputed -S 1 -M ${M} -A ${A} --objZ --noz --shots ${shots} --all 1 -B | tee -a data/measure.dat
+
+    ## SDP plus level 2 shots
+    #./run -N "sdp+shots2" -s M --2d ${systemSize} --precomputed -S 1 -M ${M} -A ${A} --objZ --noz --shots ${shots} --all 2 -B | tee -a data/measure.dat
+
+    ## SDP plus level 3 shots
+    #./run -N "sdp+shots3" -s M --2d ${systemSize} --precomputed -S 1 -M ${M} -A ${A} --objZ --noz --shots ${shots} --all 3 -B | tee -a data/measure.dat
+
+    ## SDP plus level 4 shots
+    #./run -N "sdp+shots4" -s M --2d ${systemSize} --precomputed -S 1 -M ${M} -A ${A} --objZ --noz --shots ${shots} --all 4 -B | tee -a data/measure.dat
+
+    ## SDP plus 10 automatic
+    #./run -N "sdp+auto10" -s M --2d ${systemSize} --precomputed -S 1 -M ${M} -A ${A} --objZ --noz --shots ${shots} --auto 10 -B | tee -a data/measure.dat
+
+    ## SDP plus 50 automatic
+    #./run -N "sdp+auto50" -s M --2d ${systemSize} --precomputed -S 1 -M ${M} -A ${A} --objZ --noz --shots ${shots} --auto 50 -B | tee -a data/measure.dat
+
+#done
+
+# Heat current vs number of measurements
+echo "file & heat" | tee -a data/measure.dat
 A=20
 M=25
-for shots in 1000 5000 10000 50000 100000 500000 1000000 5000000 10000000 50000000 -1
+./run -N "sdp" -s M --2d ${systemSize} -M ${M} -A ${A} --objHC H -B | tee -a data/measure.dat
+for shots in 1000 5000 10000 50000 100000 500000 1000000 5000000 10000000 -1
 do
 
+    # Only 200 automatic
+    #./run -N "auto200" -s M --2d ${systemSize} --precomputed -S 1 --objHC H --noz --shots ${shots} --auto 200 -B | tee -a data/measure.dat
+
+    # Only level 4 shots
+    #./run -N "shots4" -s M --2d ${systemSize} --precomputed -S 1 --objHC H --noz --shots ${shots} --all 4 -B | tee -a data/measure.dat
+
     # SDP plus level 1 shots
-    ./run -N "sdp+shots1" -s M --2d ${systemSize} --precomputed -S 1 -M ${M} -A ${A} --objZ --noz --shots ${shots} --all 1 -B | tee -a data/measure.dat
+    #./run -N "sdp+shots1" -s M --2d ${systemSize} --precomputed -S 1 -M ${M} -A ${A} --objHC H --noz --shots ${shots} --all 1 -B | tee -a data/measure.dat
 
     # SDP plus level 2 shots
-    ./run -N "sdp+shots2" -s M --2d ${systemSize} --precomputed -S 1 -M ${M} -A ${A} --objZ --noz --shots ${shots} --all 2 -B | tee -a data/measure.dat
+    #./run -N "sdp+shots2" -s M --2d ${systemSize} --precomputed -S 1 -M ${M} -A ${A} --objHC H --noz --shots ${shots} --all 2 -B | tee -a data/measure.dat
 
     # SDP plus level 3 shots
-    ./run -N "sdp+shots3" -s M --2d ${systemSize} --precomputed -S 1 -M ${M} -A ${A} --objZ --noz --shots ${shots} --all 3 -B | tee -a data/measure.dat
+    ./run -N "sdp+shots3" -s M --2d ${systemSize} --precomputed -S 1 -M ${M} -A ${A} --objHC H --noz --shots ${shots} --all 3 -B | tee -a data/measure.dat
 
     # SDP plus level 4 shots
-    ./run -N "sdp+shots4" -s M --2d ${systemSize} --precomputed -S 1 -M ${M} -A ${A} --objZ --noz --shots ${shots} --all 4 -B | tee -a data/measure.dat
+    ./run -N "sdp+shots4" -s M --2d ${systemSize} --precomputed -S 1 -M ${M} -A ${A} --objHC H --noz --shots ${shots} --all 4 -B | tee -a data/measure.dat
 
     # SDP plus 10 automatic
-    ./run -N "sdp+auto10" -s M --2d ${systemSize} --precomputed -S 1 -M ${M} -A ${A} --objZ --noz --shots ${shots} --auto 10 -B | tee -a data/measure.dat
+    #./run -N "sdp+auto10" -s M --2d ${systemSize} --precomputed -S 1 -M ${M} -A ${A} --objHC H --noz --shots ${shots} --auto 10 -B | tee -a data/measure.dat
+
+    # SDP plus 20 automatic
+    ./run -N "sdp+auto20" -s M --2d ${systemSize} --precomputed -S 1 -M ${M} -A ${A} --objHC H --noz --shots ${shots} --auto 20 -B | tee -a data/measure.dat
 
     # SDP plus 50 automatic
-    ./run -N "sdp+auto50" -s M --2d ${systemSize} --precomputed -S 1 -M ${M} -A ${A} --objZ --noz --shots ${shots} --auto 50 -B | tee -a data/measure.dat
+    ./run -N "sdp+auto50" -s M --2d ${systemSize} --precomputed -S 1 -M ${M} -A ${A} --objHC H --noz --shots ${shots} --auto 50 -B | tee -a data/measure.dat
+
+    # SDP plus 100 automatic
+    #./run -N "sdp+auto100" -s M --2d ${systemSize} --precomputed -S 1 -M ${M} -A ${A} --objHC H --noz --shots ${shots} --auto 100 -B | tee -a data/measure.dat
+
+    # SDP plus 200 automatic
+    #./run -N "sdp+auto200" -s M --2d ${systemSize} --precomputed -S 1 -M ${M} -A ${A} --objHC H --noz --shots ${shots} --auto 200 -B | tee -a data/measure.dat
 
 done
+
 
 # Purity versus number of measurements
-echo "file & purity" | tee -a data/measure.dat
-A=25
-M=50
-for shots in 1000 5000 10000 50000 100000 500000 1000000 5000000 10000000 50000000 -1
-do
+#echo "file & purity" | tee -a data/measure.dat
+#A=25
+#M=50
+#for shots in 1000 5000 10000 50000 100000 500000 1000000 5000000 10000000 50000000 -1
+#do
 
-    # only level 1 shots
-    ./run -N "shots1" -s M --2d ${systemSize} --precomputed --millis -S 1 --objPurity --shots ${shots} --all 1 -B | tee -a data/measure.dat
+    ## only level 1 shots
+    #./run -N "shots1" -s M --2d ${systemSize} --precomputed --millis -S 1 --objPurity --shots ${shots} --all 1 -B | tee -a data/measure.dat
 
-    # only level 4 shots
-    ./run -N "shots4" -s M --2d ${systemSize} --precomputed --millis -S 1 --objPurity --shots ${shots} --all 4 -B | tee -a data/measure.dat
+    ## only level 4 shots
+    #./run -N "shots4" -s M --2d ${systemSize} --precomputed --millis -S 1 --objPurity --shots ${shots} --all 4 -B | tee -a data/measure.dat
 
-    # SDP plus level 1 shots
-    ./run -N "sdp+shots1" -s M --2d ${systemSize} --precomputed --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --all 1 -B | tee -a data/measure.dat
+    ## SDP plus level 1 shots
+    #./run -N "sdp+shots1" -s M --2d ${systemSize} --precomputed --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --all 1 -B | tee -a data/measure.dat
 
-    # SDP plus level 4 shots
-    ./run -N "sdp+shots4" -s M --2d ${systemSize} --precomputed --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --all 4 -B | tee -a data/measure.dat
+    ## SDP plus level 4 shots
+    #./run -N "sdp+shots4" -s M --2d ${systemSize} --precomputed --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --all 4 -B | tee -a data/measure.dat
 
-done
+#done
 

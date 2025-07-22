@@ -64,7 +64,7 @@ with open('data/measure.dat', 'r') as file:
                         "linear": parts[1],
                         "rdm": parts[2],
                         "sym": parts[3],
-                        "shots": "None",
+                        "shots": "-1",
                         "diff": parts[4],
                         "time": parts[5],
                         "note": parts[6],
@@ -101,7 +101,9 @@ with open('data/measure.dat', 'r') as file:
             filename = parts[1]
 
 # Plot the data
-for filename in set(point["filename"] for point in points):
+filenames = set(point["filename"] for point in points)
+notes = set(point["note"] for point in points)
+for filename in filenames:
     plt.figure(figsize=(10, 6))
     plt.clf()
     plt.xlabel("Number of Shots")
@@ -109,8 +111,10 @@ for filename in set(point["filename"] for point in points):
         plt.ylabel("Purity Lower Bound")
     elif "mag" in filename:
         plt.ylabel("Magnetization Bounds")
+    elif "heat" in filename:
+        plt.ylabel("Heat Current Bounds")
     plt.grid(True)
-    for note in set(point["note"] for point in points):
+    for note in notes:
         x = []
         yLower = []
         yUpper = []
@@ -131,8 +135,6 @@ for filename in set(point["filename"] for point in points):
         x = [x[i] for i in sorted_indices]
         yLower = [yLower[i] for i in sorted_indices]
         yUpper = [yUpper[i] for i in sorted_indices]
-        if len(x) == 0:
-            continue
         line = plt.plot(x, yLower, label=note)
         if yLineLower is not None:
             plt.axhline(y=yLineLower, linestyle='--', color=line[0].get_color())
