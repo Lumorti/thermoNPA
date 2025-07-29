@@ -1,5 +1,6 @@
 #!/usr/env/python3
 import matplotlib.pyplot as plt
+import math
 
 # Extract only the first number from a string
 def extractFirstNumber(s):
@@ -100,10 +101,46 @@ with open('data/measure.dat', 'r') as file:
         elif parts[0] == 'file':
             filename = parts[1]
 
-# Plot the data
+# The different datasets
 filenames = set(point["filename"] for point in points)
 notes = set(point["note"] for point in points)
+
+# 3d plot with time on y, shots on x, and bounds on z
 for filename in filenames:
+    if "3d" in filename:
+        for note in notes:
+            fig, ax = plt.subplots(subplot_kw={"projection": "3d"}, figsize=(10, 6))
+            xData = []
+            yData = []
+            zData = []
+            for point in points:
+                if point["note"] == note and point["filename"] == filename:
+                    if note == "sdp":
+                        point["shotsVal"] = 0
+                    if point["shotsVal"] == -1:
+                        continue
+                    xData.append(point["shotsVal"])
+                    yData.append(point["timeVal"])
+                    # zData.append(math.log(point["diffUpperVal"] - point["diffLowerVal"]))
+                    zData.append(point["diffUpperVal"] - point["diffLowerVal"])
+            sorted_indices = sorted(range(len(xData)), key=lambda i: xData[i])
+            xData = [xData[i] for i in sorted_indices]
+            yData = [yData[i] for i in sorted_indices]
+            zData = [zData[i] for i in sorted_indices]
+            # ax.plot_surface(xData, yData, zData, label=note, alpha=0.5)
+            ax.scatter(xData, yData, zData, label=note, alpha=0.5)
+            ax.set_xlabel("Number of Shots")
+            ax.set_ylabel("Time (s)")
+            ax.set_zlabel("Bounds Difference")
+            ax.set_title(f"3D Plot for {filename} - {note}")
+            ax.legend([note])
+            plt.savefig('data/estimation_' + filename + '_' + note + '.png', bbox_inches='tight')
+            plt.show()
+
+# Plot the data
+for filename in filenames:
+    if "3d" in filename:
+        continue
     plt.figure(figsize=(10, 6))
     plt.clf()
     plt.xlabel("Number of Shots")
@@ -111,6 +148,8 @@ for filename in filenames:
         plt.ylabel("Purity Lower Bound")
     elif "mag" in filename:
         plt.ylabel("Magnetization Bounds")
+    elif "energy" in filename:
+        plt.ylabel("Energy Lower Bound")
     elif "heat" in filename:
         plt.ylabel("Heat Current Bounds")
     plt.grid(True)
@@ -138,7 +177,7 @@ for filename in filenames:
         line = plt.plot(x, yLower, label=note)
         if yLineLower is not None:
             plt.axhline(y=yLineLower, linestyle='--', color=line[0].get_color())
-        if filename != "purity":
+        if filename != "purity" and filename != "energy":
             line = plt.plot(x, yUpper, color=line[0].get_color())
             if yLineUpper is not None:
                 plt.axhline(y=yLineUpper, linestyle='--', color=line[0].get_color())
