@@ -110,6 +110,8 @@ int main(int argc, char* argv[]) {
     bool usingHeatCurrent = false;
     bool benchmark = false;
     bool checkObj = false;
+    bool symSample = false;
+    std::vector<Poly> zeroConsForSampling;
     int level = 0;
     int precision = 10;
     int lindbladLevel = 0;
@@ -1802,6 +1804,10 @@ int main(int argc, char* argv[]) {
         } else if (argAsString == "-H") {
             noLindbladian = true;
 
+        // If sampling from the symmetries
+        } else if (argAsString == "--sym") {
+            symSample = true;
+
         // Output the help
         } else if (argAsString == "-h" || argAsString == "--help") {
             std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
@@ -1834,6 +1840,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  --nox           Exclude any X terms from the sampling" << std::endl;
             std::cout << "  --noy           Exclude any Y terms from the sampling" << std::endl;
             std::cout << "  --noz           Exclude any Z terms from the sampling" << std::endl;
+            std::cout << "  --sym           Sample from the symmetries" << std::endl;
             std::cout << "Constraint options:" << std::endl;
             std::cout << "  -m <int>        Level of the moment matrix" << std::endl;
             std::cout << "  -l <int>        Level of the moments to put in the Lindbladian" << std::endl;
@@ -1875,7 +1882,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  --many  <int>" << std::endl;
             std::cout << "  --manyr <int>" << std::endl;
             std::cout << "  --manyv <int> <dbl> <dbl>" << std::endl;
-            std::cout << "  --2d <int> <int>" << std::endl;
+            std::cout << "  --2d <int> <int> (n.b. width then height)" << std::endl;
             std::cout << "  --2dtwo <int> <int>" << std::endl;
             std::cout << "  --tensor <int>" << std::endl;
             std::cout << "  --david <dbl> <int>" << std::endl;
@@ -2602,11 +2609,29 @@ int main(int argc, char* argv[]) {
 
     }
 
-    // Add symmetry constraints
+    // If using the symmetries to sample from TODO
     int numSyms = 0;
-    for (auto sym : symmetriesMap) {
-        constraintsZero.push_back(Poly(sym.first)-Poly(sym.second));
-        numSyms++;
+    if (symSample) {
+
+        // Add symmetry constraints
+        for (auto sym : symmetriesMap) {
+            Poly newCon = Poly(sym.first)-Poly(sym.second);
+            if (newCon.size() > 0 && !newCon.isZero()) {
+                zeroConsForSampling.push_back(newCon);
+            }
+        }
+
+    } else {
+
+        // Add symmetry constraints
+        for (auto sym : symmetriesMap) {
+            Poly newCon = Poly(sym.first)-Poly(sym.second);
+            if (newCon.size() > 0 && !newCon.isZero()) {
+                constraintsZero.push_back(newCon);
+                numSyms++;
+            }
+        }
+
     }
 
     // Pauli matrices
@@ -3103,217 +3128,165 @@ int main(int argc, char* argv[]) {
     // If we take fake samples
     if (numSamples != 0) {
 
-        // Pauli matrices
-        int matSize = 1 << numQubits;
-        Eigen::SparseMatrix<std::complex<double>> X(2, 2);
-        Eigen::SparseMatrix<std::complex<double>> Y(2, 2);
-        Eigen::SparseMatrix<std::complex<double>> Z(2, 2);
-        Eigen::SparseMatrix<std::complex<double>> iden1(1, 1);
-        Eigen::SparseMatrix<std::complex<double>> iden2(2, 2);
-        Eigen::SparseMatrix<std::complex<double>> idenFull(matSize, matSize);
-        X.insert(0, 1) = 1;
-        X.insert(1, 0) = 1;
-        Y.insert(0, 1) = std::complex<double>(0, -1);
-        Y.insert(1, 0) = std::complex<double>(0, 1);
-        Z.insert(0, 0) = 1;
-        Z.insert(1, 1) = -1;
-        iden1.insert(0, 0) = 1;
-        iden2.insert(0, 0) = 1;
-        iden2.insert(1, 1) = 1;
-        for (int i = 0; i < matSize; i++) {
-            idenFull.insert(i, i) = 1;
-        }
-        X.makeCompressed();
-        Y.makeCompressed();
-        Z.makeCompressed();
-        iden1.makeCompressed();
-        iden2.makeCompressed();
-        idenFull.makeCompressed();
+        // If simulating samples from symmetries TODO
+        if (symSample) {
 
-        // The state we want to find
-        Eigen::SparseMatrix<std::complex<double>> groundTruth(matSize, matSize);
-
-        // Pauli operators on the state
-        std::vector<Eigen::SparseMatrix<std::complex<double>>> Xs(numQubits);
-        std::vector<Eigen::SparseMatrix<std::complex<double>>> Ys(numQubits);
-        std::vector<Eigen::SparseMatrix<std::complex<double>>> Zs(numQubits);
-        for (int i = 0; i < numQubits; i++) {
-            Xs[i] = iden1;
-            Ys[i] = iden1;
-            Zs[i] = iden1;
-            for (int j = 0; j < numQubits; j++) {
-                if (j == i) {
-                    Xs[i] = kroneckerProduct(Xs[i], X).eval();
-                    Ys[i] = kroneckerProduct(Ys[i], Y).eval();
-                    Zs[i] = kroneckerProduct(Zs[i], Z).eval();
-                } else {
-                    Xs[i] = kroneckerProduct(Xs[i], iden2).eval();
-                    Ys[i] = kroneckerProduct(Ys[i], iden2).eval();
-                    Zs[i] = kroneckerProduct(Zs[i], iden2).eval();
+            // Get the list of Pauli strings that we would actually measure
+            std::set<Mon> sampleOperators;
+            for (auto& con : zeroConsForSampling) {
+                for (auto& term : con) {
+                    sampleOperators.insert(term.first);
                 }
-
             }
-            Xs[i].makeCompressed();
-            Ys[i].makeCompressed();
-            Zs[i].makeCompressed();
-        }
 
-        // If precomputed, load the ground truth
-        if (precomputed) {
+            // If we're taking samples to a total number of shots
+            if (numShots == -1) {
+                numSamples = -1;
+            } else if (numShots != 0) {
+                numSamples = numShots / sampleOperators.size();
+            } else {
+                numShots = numSamples * sampleOperators.size();
+            }
+
+            // Verbose output
+            int totalSamples = sampleOperators.size() * numSamples;
             if (verbosity >= 1) {
-                std::cout << "Loading precomputed ground truth" << std::endl;
-            }
-            std::string filename = "state.dat";
-            std::ifstream inFile(filename);
-            if (!inFile.is_open()) {
-                throw std::runtime_error("Could not open ground truth file: " + filename);
-            }
-            std::string line;
-            while (std::getline(inFile, line)) {
-                std::istringstream iss(line);
-                int row, col;
-                double real, imag;
-                if (!(iss >> row >> col >> real >> imag)) {break;}
-                groundTruth.insert(row, col) = std::complex<double>(real, imag);
+                std::cout << "Taking " << numSamples << " samples of " << sampleOperators.size() << " operators" << std::endl;
+                std::cout << "Total measurements: " << totalSamples << std::endl;
             }
             if (verbosity >= 3) {
-                std::cout << "Ground truth matrix:" << std::endl;
-                std::cout << Eigen::MatrixXcd(groundTruth) << std::endl;
+                std::cout << "Sample operators: " << std::endl;
+                for (auto mon : sampleOperators) {
+                    std::cout << mon << std::endl;
+                }
             }
-            inFile.close();
 
-        // Otherwise we need to solve for the ground truth
+            // Errors
+            double K = sampleOperators.size();
+            double delta = 1.0 - percentile / 100.0;
+            double epsilon = std::sqrt(2 * std::log((2.0 * K) / delta) / numSamples);
+            if (verbosity >= 2) {
+                std::cout << "K = " << K << std::endl;
+                std::cout << "delta = " << delta << std::endl;
+                std::cout << "epsilon = " << epsilon << std::endl;
+            }
+
+            // Add the constraint that each symmetry should be between -epsilon and epsilon
+            if (numSamples == -1) {
+                for (auto& con : zeroConsForSampling) {
+                    Poly newCon1 = con - Poly(epsilon);
+                    constraintsZero.push_back(newCon1);
+                }
+            } else {
+                for (auto& con : zeroConsForSampling) {
+                    Poly newCon1 = con + Poly(epsilon);
+                    Poly newCon2 = Poly(epsilon) - con;
+                    constraintsPositive.push_back(newCon1);
+                    constraintsPositive.push_back(newCon2);
+                }
+            }
+
         } else {
 
-            // If it's an energy problem TODO
-            if (noLindbladian) {
+            // Pauli matrices
+            int matSize = 1 << numQubits;
+            Eigen::SparseMatrix<std::complex<double>> X(2, 2);
+            Eigen::SparseMatrix<std::complex<double>> Y(2, 2);
+            Eigen::SparseMatrix<std::complex<double>> Z(2, 2);
+            Eigen::SparseMatrix<std::complex<double>> iden1(1, 1);
+            Eigen::SparseMatrix<std::complex<double>> iden2(2, 2);
+            Eigen::SparseMatrix<std::complex<double>> idenFull(matSize, matSize);
+            X.insert(0, 1) = 1;
+            X.insert(1, 0) = 1;
+            Y.insert(0, 1) = std::complex<double>(0, -1);
+            Y.insert(1, 0) = std::complex<double>(0, 1);
+            Z.insert(0, 0) = 1;
+            Z.insert(1, 1) = -1;
+            iden1.insert(0, 0) = 1;
+            iden2.insert(0, 0) = 1;
+            iden2.insert(1, 1) = 1;
+            for (int i = 0; i < matSize; i++) {
+                idenFull.insert(i, i) = 1;
+            }
+            X.makeCompressed();
+            Y.makeCompressed();
+            Z.makeCompressed();
+            iden1.makeCompressed();
+            iden2.makeCompressed();
+            idenFull.makeCompressed();
 
-                // Construct the Hamiltonian
-                Poly H = Poly();
-                for (int i=0; i<numQubits; i++) {
-                    for (int j=0; j<numQubits; j++) {
-                        H += hamiltonianInter[i][j];
-                    }
-                }
-                H.reduce();
+            // The state we want to find
+            Eigen::SparseMatrix<std::complex<double>> groundTruth(matSize, matSize);
 
-                // Form the explicit Hamiltonian
-                Eigen::SparseMatrix<std::complex<double>> HMat(matSize, matSize);
-                for (auto& term : H) {
-                    Mon monom = term.first;
-                    std::complex<double> coeff = term.second;
-                    Eigen::SparseMatrix<std::complex<double>> tempOp(matSize, matSize);
-                    for (int j = 0; j < matSize; j++) {
-                        tempOp.insert(j, j) = 1;
+            // Pauli operators on the state
+            std::vector<Eigen::SparseMatrix<std::complex<double>>> Xs(numQubits);
+            std::vector<Eigen::SparseMatrix<std::complex<double>>> Ys(numQubits);
+            std::vector<Eigen::SparseMatrix<std::complex<double>>> Zs(numQubits);
+            for (int i = 0; i < numQubits; i++) {
+                Xs[i] = iden1;
+                Ys[i] = iden1;
+                Zs[i] = iden1;
+                for (int j = 0; j < numQubits; j++) {
+                    if (j == i) {
+                        Xs[i] = kroneckerProduct(Xs[i], X).eval();
+                        Ys[i] = kroneckerProduct(Ys[i], Y).eval();
+                        Zs[i] = kroneckerProduct(Zs[i], Z).eval();
+                    } else {
+                        Xs[i] = kroneckerProduct(Xs[i], iden2).eval();
+                        Ys[i] = kroneckerProduct(Ys[i], iden2).eval();
+                        Zs[i] = kroneckerProduct(Zs[i], iden2).eval();
                     }
-                    for (int j = monom.size() - 1; j >= 0; j--) {
-                        char letter = monom[j].first;
-                        int index = monom[j].second - 1;
-                        if (letter == 'X') {
-                            tempOp = (Xs[index] * tempOp).eval();
-                        } else if (letter == 'Y') {
-                            tempOp = (Ys[index] * tempOp).eval();
-                        } else if (letter == 'Z') {
-                            tempOp = (Zs[index] * tempOp).eval();
-                        }
-                    }
-                    tempOp.makeCompressed();
-                    HMat += coeff * tempOp;
-                }
 
-                // If verbose, output the Hamiltonian
-                if (verbosity >= 3) {
-                    std::cout << "Hamiltonian:" << H << std::endl;
-                    std::cout << "Hamiltonian matrix:" << std::endl;
-                    Eigen::MatrixXcd HMatDense = HMat;
-                    std::cout << HMatDense << std::endl;
                 }
+                Xs[i].makeCompressed();
+                Ys[i].makeCompressed();
+                Zs[i].makeCompressed();
+            }
 
-                // Solve the eigenvalue problem
-                Eigen::SelfAdjointEigenSolver<Eigen::SparseMatrix<std::complex<double>>> es(HMat);
-                Eigen::VectorXcd eigenValues = es.eigenvalues();
-                Eigen::MatrixXcd eigenVectors = es.eigenvectors();
-                std::complex<double> smallestEigenvalue = 100000;
-                int bestInd = -1;
-                for (int i = 0; i < eigenValues.size(); i++) {
-                    if (eigenValues[i].real() < smallestEigenvalue.real()) {
-                        smallestEigenvalue = eigenValues[i];
-                        bestInd = i;
-                    }
-                }
-                Eigen::VectorXcd groundTruthVec = eigenVectors.col(bestInd);
-                groundTruth = Eigen::SparseMatrix<std::complex<double>>(matSize, matSize);
-                for (int i = 0; i < matSize; i++) {
-                    for (int j = 0; j < matSize; j++) {
-                        groundTruth.insert(i, j) = groundTruthVec[i] * std::conj(groundTruthVec[j]);
-                    }
-                }
-                groundTruth.makeCompressed();
+            // If precomputed, load the ground truth
+            if (precomputed) {
                 if (verbosity >= 1) {
-                    std::cout << "Smallest eigenvalue: " << smallestEigenvalue << std::endl;
+                    std::cout << "Loading precomputed ground truth" << std::endl;
+                }
+                std::string filename = "state.dat";
+                std::ifstream inFile(filename);
+                if (!inFile.is_open()) {
+                    throw std::runtime_error("Could not open ground truth file: " + filename);
+                }
+                std::string line;
+                while (std::getline(inFile, line)) {
+                    std::istringstream iss(line);
+                    int row, col;
+                    double real, imag;
+                    if (!(iss >> row >> col >> real >> imag)) {break;}
+                    groundTruth.insert(row, col) = std::complex<double>(real, imag);
                 }
                 if (verbosity >= 3) {
                     std::cout << "Ground truth matrix:" << std::endl;
                     std::cout << Eigen::MatrixXcd(groundTruth) << std::endl;
                 }
+                inFile.close();
 
+            // Otherwise we need to solve for the ground truth
             } else {
 
-                // Save the old problem
-                std::vector<Poly> prevConsZero = constraintsZero;
+                // If it's an energy problem
+                if (noLindbladian) {
 
-                // First we need to solve exactly the problem
-                std::set<Mon> monomsUsed;
-                std::vector<Mon> monomsUsedVec;
-                std::vector<std::vector<std::vector<Poly>>> momentMatrices = {};
-                std::vector<Mon> variables = {};
-                for (int i=0; i<numQubits; i++) {
-                    variables.push_back(Mon("<X" + std::to_string(i+1) + ">"));
-                    variables.push_back(Mon("<Y" + std::to_string(i+1) + ">"));
-                    variables.push_back(Mon("<Z" + std::to_string(i+1) + ">"));
-                }
-                addSingleMonomials(variables, objective);
-                int fullLevel = numQubits;
-                std::vector<Poly> variablesToPut = generateMonomials(variables, fullLevel, verbosity);
-                for (size_t i=0; i<extraMonomialsLim.size(); i++) {
-                    variablesToPut.push_back(Poly(extraMonomialsLim[i]));
-                }
-                for (size_t i=0; i<variablesToPut.size(); i++) {
-                    std::pair<std::complex<double>, Mon> reducedMon = variablesToPut[i].getKey().reduce();
-                    if (!monomsUsed.count(reducedMon.second)) {
-                        std::pair<char,int> oldMon('A', 0);
-                        Mon newPoly(reducedMon.second);
-                        Poly newConstraint = lindbladian.replaced(oldMon, newPoly);
-                        if (!newConstraint.isZero()) {
-                            constraintsZero.push_back(newConstraint);
+                    // Construct the Hamiltonian
+                    Poly H = Poly();
+                    for (int i=0; i<numQubits; i++) {
+                        for (int j=0; j<numQubits; j++) {
+                            H += hamiltonianInter[i][j];
                         }
-                        monomsUsed.insert(variablesToPut[i].getKey());
-                        monomsUsedVec.push_back(variablesToPut[i].getKey());
                     }
-                }
+                    H.reduce();
 
-                // Solve
-                std::map<Mon, std::complex<double>> results;
-                double res = solveEigen(objective, constraintsZero, 0, numCores, &results);
-                if (verbosity >= 2) {
-                    std::cout << "Exact solver result: " << res << std::endl;
-                }
-                if (verbosity >= 3) {
-                    for (const auto& [monom, value] : results) {
-                        std::cout << monom << " = " << value << std::endl;
-                    }
-                }
-                
-                // Restore the old problem
-                constraintsZero = prevConsZero;
-
-                // Form the ground truth from the results
-                for (const auto& [monom, value] : results) {
-
-                    // If it's non-zero
-                    if (std::abs(value) > 1e-10) {
-
-                        // Loop over the monomial to form the operator
+                    // Form the explicit Hamiltonian
+                    Eigen::SparseMatrix<std::complex<double>> HMat(matSize, matSize);
+                    for (auto& term : H) {
+                        Mon monom = term.first;
+                        std::complex<double> coeff = term.second;
                         Eigen::SparseMatrix<std::complex<double>> tempOp(matSize, matSize);
                         for (int j = 0; j < matSize; j++) {
                             tempOp.insert(j, j) = 1;
@@ -3330,110 +3303,213 @@ int main(int argc, char* argv[]) {
                             }
                         }
                         tempOp.makeCompressed();
-
-                        // Add the operator to the ground truth
-                        groundTruth += value * tempOp;
-
+                        HMat += coeff * tempOp;
                     }
 
-                }
+                    // If verbose, output the Hamiltonian
+                    if (verbosity >= 3) {
+                        std::cout << "Hamiltonian:" << H << std::endl;
+                        std::cout << "Hamiltonian matrix:" << std::endl;
+                        Eigen::MatrixXcd HMatDense = HMat;
+                        std::cout << HMatDense << std::endl;
+                    }
 
-                // Add the identity and normalize
-                Eigen::SparseMatrix<std::complex<double>> iden(matSize, matSize);
-                for (int i = 0; i < matSize; i++) {
-                    iden.insert(i, i) = 1;
-                }
-                groundTruth += iden;
-                groundTruth /= (1 << (numQubits));
-                groundTruth.makeCompressed();
-
-            }
-
-            // If precomputing, save this to file
-            if (precompute) {
-                std::string filename = "state.dat";
-                std::ofstream outFile(filename);
-                outFile.precision(15);
-                if (outFile.is_open()) {
-                    for (int k = 0; k < groundTruth.outerSize(); ++k) {
-                        for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(groundTruth, k); it; ++it) {
-                            outFile << it.row() << " " << it.col() << " " << it.value().real() << " " << it.value().imag() << "\n";
+                    // Solve the eigenvalue problem
+                    Eigen::SelfAdjointEigenSolver<Eigen::SparseMatrix<std::complex<double>>> es(HMat);
+                    Eigen::VectorXcd eigenValues = es.eigenvalues();
+                    Eigen::MatrixXcd eigenVectors = es.eigenvectors();
+                    std::complex<double> smallestEigenvalue = 100000;
+                    int bestInd = -1;
+                    for (int i = 0; i < eigenValues.size(); i++) {
+                        if (eigenValues[i].real() < smallestEigenvalue.real()) {
+                            smallestEigenvalue = eigenValues[i];
+                            bestInd = i;
                         }
                     }
-                    outFile.close();
+                    Eigen::VectorXcd groundTruthVec = eigenVectors.col(bestInd);
+                    groundTruth = Eigen::SparseMatrix<std::complex<double>>(matSize, matSize);
+                    for (int i = 0; i < matSize; i++) {
+                        for (int j = 0; j < matSize; j++) {
+                            groundTruth.insert(i, j) = groundTruthVec[i] * std::conj(groundTruthVec[j]);
+                        }
+                    }
+                    groundTruth.makeCompressed();
                     if (verbosity >= 1) {
-                        std::cout << "Ground truth saved to: " << filename << std::endl;
+                        std::cout << "Smallest eigenvalue: " << smallestEigenvalue << std::endl;
                     }
+                    if (verbosity >= 3) {
+                        std::cout << "Ground truth matrix:" << std::endl;
+                        std::cout << Eigen::MatrixXcd(groundTruth) << std::endl;
+                    }
+
                 } else {
-                    std::cerr << "Error opening file for writing: " << filename << std::endl;
+
+                    // Save the old problem
+                    std::vector<Poly> prevConsZero = constraintsZero;
+
+                    // First we need to solve exactly the problem
+                    std::set<Mon> monomsUsed;
+                    std::vector<Mon> monomsUsedVec;
+                    std::vector<std::vector<std::vector<Poly>>> momentMatrices = {};
+                    std::vector<Mon> variables = {};
+                    for (int i=0; i<numQubits; i++) {
+                        variables.push_back(Mon("<X" + std::to_string(i+1) + ">"));
+                        variables.push_back(Mon("<Y" + std::to_string(i+1) + ">"));
+                        variables.push_back(Mon("<Z" + std::to_string(i+1) + ">"));
+                    }
+                    addSingleMonomials(variables, objective);
+                    int fullLevel = numQubits;
+                    std::vector<Poly> variablesToPut = generateMonomials(variables, fullLevel, verbosity);
+                    for (size_t i=0; i<extraMonomialsLim.size(); i++) {
+                        variablesToPut.push_back(Poly(extraMonomialsLim[i]));
+                    }
+                    for (size_t i=0; i<variablesToPut.size(); i++) {
+                        std::pair<std::complex<double>, Mon> reducedMon = variablesToPut[i].getKey().reduce();
+                        if (!monomsUsed.count(reducedMon.second)) {
+                            std::pair<char,int> oldMon('A', 0);
+                            Mon newPoly(reducedMon.second);
+                            Poly newConstraint = lindbladian.replaced(oldMon, newPoly);
+                            if (!newConstraint.isZero()) {
+                                constraintsZero.push_back(newConstraint);
+                            }
+                            monomsUsed.insert(variablesToPut[i].getKey());
+                            monomsUsedVec.push_back(variablesToPut[i].getKey());
+                        }
+                    }
+
+                    // Solve
+                    std::map<Mon, std::complex<double>> results;
+                    double res = solveEigen(objective, constraintsZero, 0, numCores, &results);
+                    if (verbosity >= 2) {
+                        std::cout << "Exact solver result: " << res << std::endl;
+                    }
+                    if (verbosity >= 3) {
+                        for (const auto& [monom, value] : results) {
+                            std::cout << monom << " = " << value << std::endl;
+                        }
+                    }
+                    
+                    // Restore the old problem
+                    constraintsZero = prevConsZero;
+
+                    // Form the ground truth from the results
+                    for (const auto& [monom, value] : results) {
+
+                        // If it's non-zero
+                        if (std::abs(value) > 1e-10) {
+
+                            // Loop over the monomial to form the operator
+                            Eigen::SparseMatrix<std::complex<double>> tempOp(matSize, matSize);
+                            for (int j = 0; j < matSize; j++) {
+                                tempOp.insert(j, j) = 1;
+                            }
+                            for (int j = monom.size() - 1; j >= 0; j--) {
+                                char letter = monom[j].first;
+                                int index = monom[j].second - 1;
+                                if (letter == 'X') {
+                                    tempOp = (Xs[index] * tempOp).eval();
+                                } else if (letter == 'Y') {
+                                    tempOp = (Ys[index] * tempOp).eval();
+                                } else if (letter == 'Z') {
+                                    tempOp = (Zs[index] * tempOp).eval();
+                                }
+                            }
+                            tempOp.makeCompressed();
+
+                            // Add the operator to the ground truth
+                            groundTruth += value * tempOp;
+
+                        }
+
+                    }
+
+                    // Add the identity and normalize
+                    Eigen::SparseMatrix<std::complex<double>> iden(matSize, matSize);
+                    for (int i = 0; i < matSize; i++) {
+                        iden.insert(i, i) = 1;
+                    }
+                    groundTruth += iden;
+                    groundTruth /= (1 << (numQubits));
+                    groundTruth.makeCompressed();
+
                 }
-                return 0;
-            }
 
-        }
-
-        // Check that this is positive and has trace 1
-        //Eigen::SelfAdjointEigenSolver<Eigen::SparseMatrix<std::complex<double>>> es(groundTruth);
-        //Eigen::VectorXcd eigenValues = es.eigenvalues();
-        //Eigen::MatrixXcd eigenVectors = es.eigenvectors();
-        //std::complex<double> smallestEigenvalue = eigenValues(0).real();
-        //std::complex<double> matTrace = 0;
-        //for (int i = 0; i < matSize; i++) {
-            //matTrace += groundTruth.coeff(i, i);
-        //}
-        //if (verbosity >= 2) {
-            //std::cout << "Smallest eigenvalue: " << eigenValues(0).real() << std::endl;
-            //std::cout << "Trace: " << matTrace.real() << std::endl;
-        //}
-
-        // The samples we should take
-        std::set<Mon> sampleOperators;
-        if (sampleChoice == "all") {
-            std::vector<Mon> variables = {};
-            for (int i=0; i<numQubits; i++) {
-                variables.push_back(Mon("<X" + std::to_string(i+1) + ">"));
-                variables.push_back(Mon("<Y" + std::to_string(i+1) + ">"));
-                variables.push_back(Mon("<Z" + std::to_string(i+1) + ">"));
-            }
-            std::vector<Poly> variablesToPut = generateMonomials(variables, maxSampleDegree, verbosity);
-            for (size_t i=0; i<variablesToPut.size(); i++) {
-                sampleOperators.insert(variablesToPut[i].getKey());
-            }
-
-        // If we should sample only the energy
-        } else if (sampleChoice == "energy") {
-
-            // Construct the Hamiltonian
-            Poly H = Poly();
-            for (int i=0; i<numQubits; i++) {
-                for (int j=0; j<numQubits; j++) {
-                    H += hamiltonianInter[i][j];
+                // If precomputing, save this to file
+                if (precompute) {
+                    std::string filename = "state.dat";
+                    std::ofstream outFile(filename);
+                    outFile.precision(15);
+                    if (outFile.is_open()) {
+                        for (int k = 0; k < groundTruth.outerSize(); ++k) {
+                            for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(groundTruth, k); it; ++it) {
+                                outFile << it.row() << " " << it.col() << " " << it.value().real() << " " << it.value().imag() << "\n";
+                            }
+                        }
+                        outFile.close();
+                        if (verbosity >= 1) {
+                            std::cout << "Ground truth saved to: " << filename << std::endl;
+                        }
+                    } else {
+                        std::cerr << "Error opening file for writing: " << filename << std::endl;
+                    }
+                    return 0;
                 }
-            }
-            H.reduce();
 
-            // Add all of these terms to the sample operators
-            for (auto term : H) {
-                Mon mon = term.first;
-                sampleOperators.insert(mon);
             }
 
-        // If we should try to determine the best set
-        } else if (sampleChoice == "auto") {
+            // Check that this is positive and has trace 1
+            //Eigen::SelfAdjointEigenSolver<Eigen::SparseMatrix<std::complex<double>>> es(groundTruth);
+            //Eigen::VectorXcd eigenValues = es.eigenvalues();
+            //Eigen::MatrixXcd eigenVectors = es.eigenvectors();
+            //std::complex<double> smallestEigenvalue = eigenValues(0).real();
+            //std::complex<double> matTrace = 0;
+            //for (int i = 0; i < matSize; i++) {
+                //matTrace += groundTruth.coeff(i, i);
+            //}
+            //if (verbosity >= 2) {
+                //std::cout << "Smallest eigenvalue: " << eigenValues(0).real() << std::endl;
+                //std::cout << "Trace: " << matTrace.real() << std::endl;
+            //}
 
-            // Count how many times each Pauli string appears in the constraints
-            std::map<Mon, int> monCount;
-            std::vector<Mon> monList;
-            for (auto term : objective) {
-                if (monCount.count(term.first)) {
-                    monCount[term.first]++;
-                } else {
-                    monCount[term.first] = 1;
-                    monList.push_back(term.first);
+            // The samples we should take
+            std::set<Mon> sampleOperators;
+            if (sampleChoice == "all") {
+                std::vector<Mon> variables = {};
+                for (int i=0; i<numQubits; i++) {
+                    variables.push_back(Mon("<X" + std::to_string(i+1) + ">"));
+                    variables.push_back(Mon("<Y" + std::to_string(i+1) + ">"));
+                    variables.push_back(Mon("<Z" + std::to_string(i+1) + ">"));
                 }
-            }
-            for (auto con : constraintsZero) {
-                for (auto term : con) {
+                std::vector<Poly> variablesToPut = generateMonomials(variables, maxSampleDegree, verbosity);
+                for (size_t i=0; i<variablesToPut.size(); i++) {
+                    sampleOperators.insert(variablesToPut[i].getKey());
+                }
+
+            // If we should sample only the energy
+            } else if (sampleChoice == "energy") {
+
+                // Construct the Hamiltonian
+                Poly H = Poly();
+                for (int i=0; i<numQubits; i++) {
+                    for (int j=0; j<numQubits; j++) {
+                        H += hamiltonianInter[i][j];
+                    }
+                }
+                H.reduce();
+
+                // Add all of these terms to the sample operators
+                for (auto term : H) {
+                    Mon mon = term.first;
+                    sampleOperators.insert(mon);
+                }
+
+            // If we should try to determine the best set
+            } else if (sampleChoice == "auto") {
+
+                // Count how many times each Pauli string appears in the constraints
+                std::map<Mon, int> monCount;
+                std::vector<Mon> monList;
+                for (auto term : objective) {
                     if (monCount.count(term.first)) {
                         monCount[term.first]++;
                     } else {
@@ -3441,252 +3517,263 @@ int main(int argc, char* argv[]) {
                         monList.push_back(term.first);
                     }
                 }
-            }
-            for (auto con : constraintsPositive) {
-                for (auto term : con) {
-                    if (monCount.count(term.first)) {
-                        monCount[term.first]++;
-                    } else {
-                        monCount[term.first] = 1;
-                        monList.push_back(term.first);
+                for (auto con : constraintsZero) {
+                    for (auto term : con) {
+                        if (monCount.count(term.first)) {
+                            monCount[term.first]++;
+                        } else {
+                            monCount[term.first] = 1;
+                            monList.push_back(term.first);
+                        }
                     }
                 }
-            }
-            for (auto mat : momentMatrices) {
-                for (int i=0; i<mat.size(); i++) {
-                    for (int j=0; j<mat.size(); j++) {
-                        for (auto term : mat[i][j]) {
-                            if (monCount.count(term.first)) {
-                                monCount[term.first]++;
-                            } else {
-                                monCount[term.first] = 1;
-                                monList.push_back(term.first);
+                for (auto con : constraintsPositive) {
+                    for (auto term : con) {
+                        if (monCount.count(term.first)) {
+                            monCount[term.first]++;
+                        } else {
+                            monCount[term.first] = 1;
+                            monList.push_back(term.first);
+                        }
+                    }
+                }
+                for (auto mat : momentMatrices) {
+                    for (int i=0; i<mat.size(); i++) {
+                        for (int j=0; j<mat.size(); j++) {
+                            for (auto term : mat[i][j]) {
+                                if (monCount.count(term.first)) {
+                                    monCount[term.first]++;
+                                } else {
+                                    monCount[term.first] = 1;
+                                    monList.push_back(term.first);
+                                }
                             }
                         }
                     }
                 }
+                if (verbosity >= 3) {
+                    std::cout << "Monomial counts size: " << monCount.size() << std::endl;
+                }
+
+                // Delete the trivial monomial
+                monCount.erase(Mon());
+
+                // Sort the above map and take the top N monomials
+                //std::vector<std::pair<Mon, int>> monCountVec(monCount.begin(), monCount.end());
+                //std::sort(monCountVec.begin(), monCountVec.end(), [](const std::pair<Mon, int>& a, const std::pair<Mon, int>& b) {
+                    //return a.second > b.second;
+                //});
+                //for (int i = 0; i < std::min(maxPaulis, (int)monCountVec.size()); i++) {
+                    //sampleOperators.insert(monCountVec[i].first);
+                //}
+                
+                // Just take the first N monomials
+                for (int i = 0; i < std::min(maxPaulis, (int)monList.size()); i++) {
+                    sampleOperators.insert(monList[i]);
+                }
+
+            // Just samples from the objective
+            } else if (sampleChoice == "onlyobj") {
+                for (auto term : objective) {
+                    Mon mon = term.first;
+                    sampleOperators.insert(mon);
+                }
+
             }
-            if (verbosity >= 3) {
-                std::cout << "Monomial counts size: " << monCount.size() << std::endl;
-            }
 
-            // Delete the trivial monomial
-            monCount.erase(Mon());
-
-            // Sort the above map and take the top N monomials
-            //std::vector<std::pair<Mon, int>> monCountVec(monCount.begin(), monCount.end());
-            //std::sort(monCountVec.begin(), monCountVec.end(), [](const std::pair<Mon, int>& a, const std::pair<Mon, int>& b) {
-                //return a.second > b.second;
-            //});
-            //for (int i = 0; i < std::min(maxPaulis, (int)monCountVec.size()); i++) {
-                //sampleOperators.insert(monCountVec[i].first);
-            //}
-            
-            // Just take the first N monomials
-            for (int i = 0; i < std::min(maxPaulis, (int)monList.size()); i++) {
-                sampleOperators.insert(monList[i]);
-            }
-
-        // Just samples from the objective
-        } else if (sampleChoice == "onlyobj") {
-            for (auto term : objective) {
-                Mon mon = term.first;
-                sampleOperators.insert(mon);
-            }
-
-        }
-
-        // Simplfy all, also remove any T monomials
-        std::set<Mon> sampleOperatorsNew;
-        for (auto mon : sampleOperators) {
-            std::pair<std::complex<double>, Mon> reducedMon = mon.reduce();
-            if (!reducedMon.second.contains('T')) {
-                sampleOperatorsNew.insert(reducedMon.second);
-            }
-        }
-        sampleOperators = sampleOperatorsNew;
-
-        // If exluding the objective
-        if (excludeObjective) {
-            for (auto term : objective) {
-                Mon mon = term.first;
-                sampleOperators.erase(mon);
-            }
-        }
-
-        // If exluding X terms
-        if (excludeX) {
-            std::set<Mon> newOps;
+            // Simplfy all, also remove any T monomials
+            std::set<Mon> sampleOperatorsNew;
             for (auto mon : sampleOperators) {
-                if (!mon.contains('X')) {
-                    newOps.insert(mon);
+                std::pair<std::complex<double>, Mon> reducedMon = mon.reduce();
+                if (!reducedMon.second.contains('T')) {
+                    sampleOperatorsNew.insert(reducedMon.second);
                 }
             }
-            sampleOperators = newOps;
-        }
+            sampleOperators = sampleOperatorsNew;
 
-        // If exluding Y terms
-        if (excludeY) {
-            std::set<Mon> newOps;
-            for (auto mon : sampleOperators) {
-                if (!mon.contains('Y')) {
-                    newOps.insert(mon);
-                }
-            }
-            sampleOperators = newOps;
-        }
-
-        // If exluding Z terms
-        if (excludeZ) {
-            std::set<Mon> newOps;
-            for (auto mon : sampleOperators) {
-                if (!mon.contains('Z')) {
-                    newOps.insert(mon);
-                }
-            }
-            sampleOperators = newOps;
-        }
-
-        // Remove the trivial monomial
-        if (sampleOperators.count(Mon())) {
-            sampleOperators.erase(Mon());
-        }
-
-        // If we're taking samples to a total number of shots
-        if (numShots == -1) {
-            numSamples = -1;
-        } else if (numShots != 0) {
-            numSamples = numShots / sampleOperators.size();
-        } else {
-            numShots = numSamples * sampleOperators.size();
-        }
-
-        // Verbose output
-        int totalSamples = sampleOperators.size() * numSamples;
-        if (verbosity >= 1) {
-            std::cout << "Taking " << numSamples << " samples of " << sampleOperators.size() << " operators" << std::endl;
-            std::cout << "Total measurements: " << totalSamples << std::endl;
-        }
-        if (verbosity >= 3) {
-            std::cout << "Sample operators: " << std::endl;
-            for (auto mon : sampleOperators) {
-                std::cout << mon << std::endl;
-            }
-        }
-
-        // Errors
-        double K = sampleOperators.size();
-        double delta = 1.0 - percentile / 100.0;
-        double epsilon = std::sqrt(2 * std::log((2.0 * K) / delta) / numSamples);
-        if (verbosity >= 2) {
-            std::cout << "K = " << K << std::endl;
-            std::cout << "delta = " << delta << std::endl;
-            std::cout << "epsilon = " << epsilon << std::endl;
-        }
-
-        // Take samples
-        samples = {};
-        for (auto mon : sampleOperators) {
-
-            // Construct the operator
-            Eigen::SparseMatrix<std::complex<double>> op = Eigen::SparseMatrix<std::complex<double>>(matSize, matSize);
-            for (int i = 0; i < matSize; i++) {
-                op.insert(i, i) = 1;
-            }
-            for (int i = mon.size()-1; i >= 0; i--) {
-                char pauli = mon[i].first;
-                int ind = mon[i].second-1;
-                if (pauli == 'X') {
-                    op = op * Xs[ind];
-                } else if (pauli == 'Y') {
-                    op = op * Ys[ind];
-                } else if (pauli == 'Z') {
-                    op = op * Zs[ind];
-                }
-            }
-            op.makeCompressed();
-            
-            // Get the true expectation value
-            double trueExpectation = Eigen::MatrixXcd(op * groundTruth).trace().real();
-
-            // Get the eigendecomposition of the operator
-            Eigen::SelfAdjointEigenSolver<Eigen::SparseMatrix<std::complex<double>>> esOp(op);
-            Eigen::VectorXcd opEvals = esOp.eigenvalues();
-            Eigen::MatrixXcd opEvecs = esOp.eigenvectors();
-
-            // Get the positive part of the operator
-            Eigen::MatrixXcd opPos = Eigen::MatrixXcd::Zero(matSize, matSize);
-            for (int i = 0; i < opEvals.size(); i++) {
-                if (opEvals(i).real() > 0) {
-                    opPos += opEvals(i) * opEvecs.col(i) * opEvecs.col(i).adjoint();
+            // If exluding the objective
+            if (excludeObjective) {
+                for (auto term : objective) {
+                    Mon mon = term.first;
+                    sampleOperators.erase(mon);
                 }
             }
 
-            // If -1 given as the number of samples, use the exact
-            if (numSamples == -1) {
-                constraintsZero.push_back(Poly(1, mon) - Poly(trueExpectation));
-                samples[mon] = trueExpectation;
-                continue;
-            }
-            
-            // The probability of getting a 1 is trace(opPos * rho)
-            double prob1 = (opPos * groundTruth).trace().real();
-            double expFromProb = 2 * prob1 - 1;
-
-            // Flip a coin
-            double avg = 0;
-            for (int i = 0; i < numSamples; i++) {
-                double r = rand(0, 1);
-                if (r < prob1) {
-                    avg += 1;
-                } else {
-                    avg += 0;
+            // If exluding X terms
+            if (excludeX) {
+                std::set<Mon> newOps;
+                for (auto mon : sampleOperators) {
+                    if (!mon.contains('X')) {
+                        newOps.insert(mon);
+                    }
                 }
+                sampleOperators = newOps;
             }
-            avg /= numSamples;
-            avg = 2 * avg - 1;
-            samples[mon] = avg;
 
-            // Bound each quantity
-            double lower = avg - epsilon;
-            double upper = avg + epsilon;
-            constraintsPositive.push_back(Poly(1, mon) - Poly(lower));
-            constraintsPositive.push_back(Poly(-1, mon) - Poly(-upper));
+            // If exluding Y terms
+            if (excludeY) {
+                std::set<Mon> newOps;
+                for (auto mon : sampleOperators) {
+                    if (!mon.contains('Y')) {
+                        newOps.insert(mon);
+                    }
+                }
+                sampleOperators = newOps;
+            }
+
+            // If exluding Z terms
+            if (excludeZ) {
+                std::set<Mon> newOps;
+                for (auto mon : sampleOperators) {
+                    if (!mon.contains('Z')) {
+                        newOps.insert(mon);
+                    }
+                }
+                sampleOperators = newOps;
+            }
+
+            // Remove the trivial monomial
+            if (sampleOperators.count(Mon())) {
+                sampleOperators.erase(Mon());
+            }
+
+            // If we're taking samples to a total number of shots
+            if (numShots == -1) {
+                numSamples = -1;
+            } else if (numShots != 0) {
+                numSamples = numShots / sampleOperators.size();
+            } else {
+                numShots = numSamples * sampleOperators.size();
+            }
 
             // Verbose output
+            int totalSamples = sampleOperators.size() * numSamples;
+            if (verbosity >= 1) {
+                std::cout << "Taking " << numSamples << " samples of " << sampleOperators.size() << " operators" << std::endl;
+                std::cout << "Total measurements: " << totalSamples << std::endl;
+            }
             if (verbosity >= 3) {
-                std::cout << "True expectation value of " << mon << " = " << trueExpectation << std::endl;
-                std::cout << "Expectation value of " << mon << " from samples = " << avg << std::endl;
-                std::cout << "Bounding " << mon << " to [" << lower << ", " << upper << "]" << std::endl;
-            }
-
-        }
-
-        // Trivially bound the objective using the above samples
-        double minVal = 0;
-        double maxVal = 0;
-        for (auto term : objective) {
-            Mon mon = term.first;
-            double coeff = std::real(term.second);
-            if (mon.size() == 0) {
-                minVal += coeff;
-                maxVal += coeff;
-            } else if (samples.find(mon) != samples.end()) {
-                double sample = samples[mon];
-                if (coeff > 0) {
-                    maxVal += coeff * std::min(sample + epsilon, 1.0);
-                    minVal += coeff * std::max(sample - epsilon, -1.0);
-                } else {
-                    maxVal += coeff * std::max(sample - epsilon, -1.0);
-                    minVal += coeff * std::min(sample + epsilon, 1.0);
+                std::cout << "Sample operators: " << std::endl;
+                for (auto mon : sampleOperators) {
+                    std::cout << mon << std::endl;
                 }
-            } else {
-                minVal -= std::abs(coeff);
-                maxVal += std::abs(coeff);
             }
-        }
-        if (verbosity >= 1) {
-            std::cout << "Objective bounds from measurement data: [" << minVal << ", " << maxVal << "]" << std::endl;
+
+            // Errors
+            double K = sampleOperators.size();
+            double delta = 1.0 - percentile / 100.0;
+            double epsilon = std::sqrt(2 * std::log((2.0 * K) / delta) / numSamples);
+            if (verbosity >= 2) {
+                std::cout << "K = " << K << std::endl;
+                std::cout << "delta = " << delta << std::endl;
+                std::cout << "epsilon = " << epsilon << std::endl;
+            }
+
+            // Take samples
+            samples = {};
+            for (auto mon : sampleOperators) {
+
+                // Construct the operator
+                Eigen::SparseMatrix<std::complex<double>> op = Eigen::SparseMatrix<std::complex<double>>(matSize, matSize);
+                for (int i = 0; i < matSize; i++) {
+                    op.insert(i, i) = 1;
+                }
+                for (int i = mon.size()-1; i >= 0; i--) {
+                    char pauli = mon[i].first;
+                    int ind = mon[i].second-1;
+                    if (pauli == 'X') {
+                        op = op * Xs[ind];
+                    } else if (pauli == 'Y') {
+                        op = op * Ys[ind];
+                    } else if (pauli == 'Z') {
+                        op = op * Zs[ind];
+                    }
+                }
+                op.makeCompressed();
+                
+                // Get the true expectation value
+                double trueExpectation = Eigen::MatrixXcd(op * groundTruth).trace().real();
+
+                // Get the eigendecomposition of the operator
+                Eigen::SelfAdjointEigenSolver<Eigen::SparseMatrix<std::complex<double>>> esOp(op);
+                Eigen::VectorXcd opEvals = esOp.eigenvalues();
+                Eigen::MatrixXcd opEvecs = esOp.eigenvectors();
+
+                // Get the positive part of the operator
+                Eigen::MatrixXcd opPos = Eigen::MatrixXcd::Zero(matSize, matSize);
+                for (int i = 0; i < opEvals.size(); i++) {
+                    if (opEvals(i).real() > 0) {
+                        opPos += opEvals(i) * opEvecs.col(i) * opEvecs.col(i).adjoint();
+                    }
+                }
+
+                // If -1 given as the number of samples, use the exact
+                if (numSamples == -1) {
+                    constraintsZero.push_back(Poly(1, mon) - Poly(trueExpectation));
+                    samples[mon] = trueExpectation;
+                    continue;
+                }
+                
+                // The probability of getting a 1 is trace(opPos * rho)
+                double prob1 = (opPos * groundTruth).trace().real();
+                double expFromProb = 2 * prob1 - 1;
+
+                // Flip a coin
+                double avg = 0;
+                for (int i = 0; i < numSamples; i++) {
+                    double r = rand(0, 1);
+                    if (r < prob1) {
+                        avg += 1;
+                    } else {
+                        avg += 0;
+                    }
+                }
+                avg /= numSamples;
+                avg = 2 * avg - 1;
+                samples[mon] = avg;
+
+                // Bound each quantity
+                double lower = avg - epsilon;
+                double upper = avg + epsilon;
+                constraintsPositive.push_back(Poly(1, mon) - Poly(lower));
+                constraintsPositive.push_back(Poly(-1, mon) - Poly(-upper));
+
+                // Verbose output
+                if (verbosity >= 3) {
+                    std::cout << "True expectation value of " << mon << " = " << trueExpectation << std::endl;
+                    std::cout << "Expectation value of " << mon << " from samples = " << avg << std::endl;
+                    std::cout << "Bounding " << mon << " to [" << lower << ", " << upper << "]" << std::endl;
+                }
+
+            }
+
+            // Trivially bound the objective using the above samples
+            double minVal = 0;
+            double maxVal = 0;
+            for (auto term : objective) {
+                Mon mon = term.first;
+                double coeff = std::real(term.second);
+                if (mon.size() == 0) {
+                    minVal += coeff;
+                    maxVal += coeff;
+                } else if (samples.find(mon) != samples.end()) {
+                    double sample = samples[mon];
+                    if (coeff > 0) {
+                        maxVal += coeff * std::min(sample + epsilon, 1.0);
+                        minVal += coeff * std::max(sample - epsilon, -1.0);
+                    } else {
+                        maxVal += coeff * std::max(sample - epsilon, -1.0);
+                        minVal += coeff * std::min(sample + epsilon, 1.0);
+                    }
+                } else {
+                    minVal -= std::abs(coeff);
+                    maxVal += std::abs(coeff);
+                }
+            }
+            if (verbosity >= 1) {
+                std::cout << "Objective bounds from measurement data: [" << minVal << ", " << maxVal << "]" << std::endl;
+            }
+
         }
 
     }
