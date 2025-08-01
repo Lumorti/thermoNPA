@@ -141,6 +141,8 @@ for filename in filenames:
 for filename in filenames:
     if "3d" in filename:
         continue
+
+    # Set up the figure
     plt.figure(figsize=(10, 6))
     plt.clf()
     plt.xlabel("Number of Shots")
@@ -153,7 +155,12 @@ for filename in filenames:
     elif "heat" in filename:
         plt.ylabel("Heat Current Bounds")
     plt.grid(True)
+    noteToColor = {}
+
+    # For each constraint set
     for note in notes:
+
+        # Get the dataset
         x = []
         yLower = []
         yUpper = []
@@ -170,17 +177,40 @@ for filename in filenames:
                 x.append(point["shotsVal"])
                 yLower.append(point["diffLowerVal"])
                 yUpper.append(point["diffUpperVal"])
+
+        # Skip if no data for this note and this file
+        if len(x) == 0 or len(yLower) == 0 or len(yUpper) == 0:
+            continue
+
+        # Sort the dataset
         sorted_indices = sorted(range(len(x)), key=lambda i: x[i])
         x = [x[i] for i in sorted_indices]
         yLower = [yLower[i] for i in sorted_indices]
         yUpper = [yUpper[i] for i in sorted_indices]
+
+        # Plot the line
         line = plt.plot(x, yLower, label=note)
+
+        # Check if the color has already been used
+        color = line[0].get_color()
+        noteNoPercent = note[:note.find(',')]
+        if noteToColor.get(noteNoPercent) is None:
+            noteToColor[noteNoPercent] = color
+        else:
+            color = noteToColor[noteNoPercent]
+            line[0].set_color(color)
+
+        # If we need a true bound
         if yLineLower is not None:
-            plt.axhline(y=yLineLower, linestyle='--', color=line[0].get_color())
+            plt.axhline(y=yLineLower, linestyle='--', color=color)
+
+        # If we need an upper bound too
         if filename != "purity" and filename != "energy":
             line = plt.plot(x, yUpper, color=line[0].get_color())
             if yLineUpper is not None:
-                plt.axhline(y=yLineUpper, linestyle='--', color=line[0].get_color())
+                plt.axhline(y=yLineUpper, linestyle='--', color=color)
+
+    # Finish the plot
     plt.xscale('log')
     ax = plt.gca()
     handles, labels = ax.get_legend_handles_labels()

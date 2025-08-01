@@ -20,6 +20,13 @@
 // PolyNC
 #include "../../PolyNC/src/polync.h"
  
+// Pauli definitions TODO
+Eigen::SparseMatrix<std::complex<double>> pauliI(2,2);
+Eigen::SparseMatrix<std::complex<double>> pauliX(2,2);
+Eigen::SparseMatrix<std::complex<double>> pauliY(2,2);
+Eigen::SparseMatrix<std::complex<double>> pauliZ(2,2);
+std::map<int, std::string> letterMap = {{0, "I"}, {1, "X"}, {2, "Y"}, {3, "Z"}};
+
 // https://stackoverflow.com/questions/2647858/multiplying-complex-with-constant-in-c
 template <typename T>
 struct identity_t { typedef T type; };
@@ -63,6 +70,35 @@ std::complex<double> trace(const Eigen::SparseMatrix<std::complex<double>>& mat)
         trace += mat.coeff(k, k);
     }
     return trace;
+}
+
+// Generate a Pauli string matrix on demand TODO
+Eigen::SparseMatrix<std::complex<double>> generatePauliMatrix(int numQubits, std::vector<int> pauliInds) {
+
+    // The matrix starts as 1x1 identity
+    Eigen::SparseMatrix<std::complex<double>> mat(1, 1);
+    mat.insert(0, 0) = 1;
+
+    // For each ind, tensor product with that Pauli
+    for (int i=0; i<numQubits; ++i) {
+        Eigen::SparseMatrix<std::complex<double>> pauliMat;
+        if (pauliInds[i] == 0) {
+            pauliMat = pauliI;
+        } else if (pauliInds[i] == 1) {
+            pauliMat = pauliX;
+        } else if (pauliInds[i] == 2) {
+            pauliMat = pauliY;
+        } else if (pauliInds[i] == 3) {
+            pauliMat = pauliZ;
+        } else {
+            throw std::invalid_argument("Invalid Pauli index: " + std::to_string(pauliInds[i]));
+        }
+        mat = Eigen::kroneckerProduct(mat, pauliMat).eval();
+    }
+
+    // Return the resulting matrix
+    return mat;
+
 }
 
 // Partial trace of a density matrix
@@ -112,6 +148,7 @@ int main(int argc, char* argv[]) {
     bool checkObj = false;
     bool symSample = false;
     std::vector<Poly> zeroConsForSampling;
+    std::string stateFile = "state.dat";
     int level = 0;
     int precision = 10;
     int lindbladLevel = 0;
@@ -137,7 +174,7 @@ int main(int argc, char* argv[]) {
     bool excludeY = false;
     bool excludeZ = false;
     bool outputLindbladAsLaTeX = false;
-    int percentile = 95;
+    double percentile = 95;
     Poly objective("<Z1>");
     std::map<Mon, double> samples;
     Poly pseudoObjective;
@@ -162,6 +199,20 @@ int main(int argc, char* argv[]) {
     std::vector<Poly> constraintsZero;
     std::vector<Poly> constraintsPositive;
     std::vector<std::pair<std::vector<int>,std::vector<int>>> symmetries;
+
+    // Pauli definitions
+    pauliI.insert(0,0) = 1;
+    pauliI.insert(1,1) = 1;
+    pauliI.makeCompressed();
+    pauliX.insert(0,1) = 1;
+    pauliX.insert(1,0) = 1;
+    pauliX.makeCompressed();
+    pauliY.insert(0,1) = std::complex<double>(0,-1);
+    pauliY.insert(1,0) = std::complex<double>(0,1);
+    pauliY.makeCompressed();
+    pauliZ.insert(0,0) = 1;
+    pauliZ.insert(1,1) = -1;
+    pauliZ.makeCompressed();
 
     // Set the precision
     std::cout << std::setprecision(precision);
@@ -1755,11 +1806,31 @@ int main(int argc, char* argv[]) {
 
         // If precomputing the solution
         } else if (argAsString == "--precompute") {
+            if (i+1 >= argc || argv[i+1][0] == '-') {
+                stateFile = "state.dat";
+            } else {
+                stateFile = std::string(argv[i+1]);
+                i++;
+            }
+            if (stateFile.substr(stateFile.size()-4) != ".dat") {
+                stateFile += ".dat";
+            }
             precompute = true;
-            numSamples = 1;
+            checkObj = true;
+            findMinimal = true;
+            findMinimalAmount = 0;
 
         // If using a precomputed solution
         } else if (argAsString == "--precomputed") {
+            if (i+1 >= argc || argv[i+1][0] == '-') {
+                stateFile = "state.dat";
+            } else {
+                stateFile = std::string(argv[i+1]);
+                i++;
+            }
+            if (stateFile.substr(stateFile.size()-4) != ".dat") {
+                stateFile += ".dat";
+            }
             precomputed = true;
 
         // If setting the output precision
@@ -1812,69 +1883,71 @@ int main(int argc, char* argv[]) {
         } else if (argAsString == "-h" || argAsString == "--help") {
             std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
             std::cout << "Options:" << std::endl;
-            std::cout << "  -S <str>        Seed for the random number generator" << std::endl;
-            std::cout << "  -C <int>        Number of cores to use" << std::endl;
-            std::cout << "  -c <int>        Add some number of extra constraints to reduce the num of vars" << std::endl;
-            std::cout << "  -t <dbl>        Set the tolerance (used in various places)" << std::endl;
-            std::cout << "  -P              Take the current objective as a pseudo-objective" << std::endl;
-            std::cout << "  -v <int>        Verbosity level" << std::endl;
-            std::cout << "  -B              benchmarking mode" << std::endl;
-            std::cout << "  -X              output the Lindbladian in LaTeX form" << std::endl;
-            std::cout << "  -F              output the final moments to file (monoms.csv)" << std::endl;
-            std::cout << "  -H              consider it as a Hamiltonian minimization problem" << std::endl;
-            std::cout << "  -o              check the final results by reconstructing the full state" << std::endl;
-            std::cout << "  --prec <int>    set the output precision (default 10)" << std::endl;
-            std::cout << "  -N <str>        add a note to the run (use with benchmarking mode)" << std::endl;
-            std::cout << "  --millis        output all times in milliseconds (i.e. don't auto convert)" << std::endl;
-            std::cout << "  --precompute    solve the system exactly, saving the state to state.dat" << std::endl;
-            std::cout << "  --precomputed   load the known optimum state from state.dat" << std::endl;
+            std::cout << "  -S <str>            Seed for the random number generator" << std::endl;
+            std::cout << "  -C <int>            Number of cores to use" << std::endl;
+            std::cout << "  -c <int>            Add some number of extra constraints to reduce the num of vars" << std::endl;
+            std::cout << "  -t <dbl>            Set the tolerance (used in various places)" << std::endl;
+            std::cout << "  -P                  Take the current objective as a pseudo-objective" << std::endl;
+            std::cout << "  -v <int>            Verbosity level" << std::endl;
+            std::cout << "  -B                  Benchmarking mode" << std::endl;
+            std::cout << "  -X                  Output the Lindbladian in LaTeX form" << std::endl;
+            std::cout << "  -F                  Output the final moments to file (monoms.csv)" << std::endl;
+            std::cout << "  -H                  Consider it as a Hamiltonian minimization problem" << std::endl;
+            std::cout << "  -o                  Check the final results by reconstructing the full state" << std::endl;
+            std::cout << "  --prec <int>        Set the output precision (default 10)" << std::endl;
+            std::cout << "  -N <str>            Add a note to the run (use with benchmarking mode)" << std::endl;
+            std::cout << "  --millis            Output all times in milliseconds (i.e. don't auto convert)" << std::endl;
+            std::cout << "  --precompute  <str> Solve the system exactly, saving the state to a file" << std::endl;
+            std::cout << "  --precomputed <str> Load the known optimum state from a file" << std::endl;
             std::cout << "Sampling options:" << std::endl;
-            std::cout << "  --samples <int> Solve exactly, take this many samples per Pauli string" << std::endl;
-            std::cout << "  --shots   <int> Same as above, but limit the total number of measurements" << std::endl;
-            std::cout << "  -p <int>        Percentile for the error (e.g. 95)" << std::endl;
-            std::cout << "  --all <int>     Samples from all Pauli strings evenly up to this degree" << std::endl;
-            std::cout << "  --onlyobj       Sample only from the objective" << std::endl;
-            std::cout << "  --energy        Sample only the energy" << std::endl;
-            std::cout << "  --auto <int>    Samples from a subset Pauli strings" << std::endl;
-            std::cout << "  --noobj         Exclude the objective from the sampling" << std::endl;
-            std::cout << "  --nox           Exclude any X terms from the sampling" << std::endl;
-            std::cout << "  --noy           Exclude any Y terms from the sampling" << std::endl;
-            std::cout << "  --noz           Exclude any Z terms from the sampling" << std::endl;
-            std::cout << "  --sym           Sample from the symmetries" << std::endl;
+            std::cout << "  --samples <int>     Solve exactly, take this many samples per Pauli string" << std::endl;
+            std::cout << "  --shots   <int>     Same as above, but limit the total number of measurements" << std::endl;
+            std::cout << "  -p <int>            Percentile for the error (e.g. 95)" << std::endl;
+            std::cout << "  --all <int>         Samples from all Pauli strings evenly up to this degree" << std::endl;
+            std::cout << "  --onlyobj           Sample only from the objective" << std::endl;
+            std::cout << "  --energy            Sample only the energy" << std::endl;
+            std::cout << "  --auto <int>        Samples from a subset Pauli strings" << std::endl;
+            std::cout << "  --noobj             Exclude the objective from the sampling" << std::endl;
+            std::cout << "  --nox               Exclude any X terms from the sampling" << std::endl;
+            std::cout << "  --noy               Exclude any Y terms from the sampling" << std::endl;
+            std::cout << "  --noz               Exclude any Z terms from the sampling" << std::endl;
+            std::cout << "  --sym               Sample from the symmetries" << std::endl;
             std::cout << "Constraint options:" << std::endl;
-            std::cout << "  -m <int>        Level of the moment matrix" << std::endl;
-            std::cout << "  -l <int>        Level of the moments to put in the Lindbladian" << std::endl;
-            std::cout << "  -e <mon>        Add an extra monomial to the top row of the moment matrix" << std::endl;
-            std::cout << "  -E <mon>        Add an extra monomial to the list of Lindbladian replacements" << std::endl;
-            std::cout << "  -M <int>        Try to generate the minimal set of linear constraints" << std::endl;
-            std::cout << "  -A <int>        Try to generate the minimal moment matrix" << std::endl;
-            std::cout << "  -r <int>        Insist that the reconstructed density matrix be positive" << std::endl;
-            std::cout << "  -R              Try removing random constraints" << std::endl;
-            std::cout << "  -y <ints>       Add a symetry between two groups e.g. -y 1,2 3,4" << std::endl;
-            std::cout << "  -Y              Assume full symmetry between all qubits" << std::endl;
-            std::cout << "  -I <ints>       Only put operators with these qubits into the Lindbladian" << std::endl;
-            std::cout << "  -T              Add tracing-out constraints between density mats" << std::endl;
-            std::cout << "  -i <int>        1 => ignore imag, 2 => alternate imag handling" << std::endl;
+            std::cout << "  -m <int>            Level of the moment matrix" << std::endl;
+            std::cout << "  -l <int>            Level of the moments to put in the Lindbladian" << std::endl;
+            std::cout << "  -e <mon>            Add an extra monomial to the top row of the moment matrix" << std::endl;
+            std::cout << "  -E <mon>            Add an extra monomial to the list of Lindbladian replacements" << std::endl;
+            std::cout << "  -M <int>            Try to generate the minimal set of linear constraints" << std::endl;
+            std::cout << "  -A <int>            Try to generate the minimal moment matrix" << std::endl;
+            std::cout << "  -r <int>            Insist that the reconstructed density matrix be positive" << std::endl;
+            std::cout << "  -R                  Try removing random constraints" << std::endl;
+            std::cout << "  -y <ints>           Add a symetry between two groups e.g. -y 1,2 3,4" << std::endl;
+            std::cout << "  -Y                  Assume full symmetry between all qubits" << std::endl;
+            std::cout << "  -I <ints>           Only put operators with these qubits into the Lindbladian" << std::endl;
+            std::cout << "  -T                  Add tracing-out constraints between density mats" << std::endl;
+            std::cout << "  -i <int>            1 => ignore imag, 2 => alternate imag handling" << std::endl;
             std::cout << "  --conHC P/N     same as objHC, but constraint to be positive/negative" << std::endl;
             std::cout << "Solver options:" << std::endl;
-            std::cout << "  -s G            Use Gurobi as the solver" << std::endl;
-            std::cout << "  -s E            Use Eigen as the solver" << std::endl;
-            std::cout << "  -s M            Use MOSEK as the solver" << std::endl;
-            std::cout << "  -s S            Use SCS as the solver" << std::endl;
-            std::cout << "  -s N            Don't solve after generating" << std::endl;
+            std::cout << "  -s G                Use Gurobi as the solver" << std::endl;
+            std::cout << "  -s E                Use Eigen as the solver" << std::endl;
+            std::cout << "  -s M                Use MOSEK as the solver" << std::endl;
+            std::cout << "  -s S                Use SCS as the solver" << std::endl;
+            std::cout << "  -s N                Don't solve after generating" << std::endl;
             std::cout << "Objective options:" << std::endl;
-            std::cout << "  -O --obj <str>  Manually set the objective" << std::endl;
-            std::cout << "  --objX          Use avg sigma_X as the objective" << std::endl;
-            std::cout << "  --objY          Use avg sigma_Y as the objective" << std::endl;
-            std::cout << "  --objZ          Use avg sigma_Z as the objective" << std::endl;
-            std::cout << "  --objXYZ        Sum of all three above objectives" << std::endl;
-            std::cout << "  --objHC H/C     Heat current for either the hot or cold bath" << std::endl;
-            std::cout << "  --objRand <int> Random objective up to a certain order" << std::endl;
-            std::cout << "  --objPurity     Try to minimize the purity of the state" << std::endl;
-            std::cout << "  --objEnergy     Try to minimize the energy of the state" << std::endl;
+            std::cout << "  -O --obj <str>      Manually set the objective" << std::endl;
+            std::cout << "  --objX              Use avg sigma_X as the objective" << std::endl;
+            std::cout << "  --objY              Use avg sigma_Y as the objective" << std::endl;
+            std::cout << "  --objZ              Use avg sigma_Z as the objective" << std::endl;
+            std::cout << "  --objXYZ            Sum of all three above objectives" << std::endl;
+            std::cout << "  --objHC H/C         Heat current for either the hot or cold bath" << std::endl;
+            std::cout << "  --objRand <int>     Random objective up to a certain order" << std::endl;
+            std::cout << "  --objPurity         Try to minimize the purity of the state" << std::endl;
+            std::cout << "  --objEnergy         Try to minimize the energy of the state" << std::endl;
             std::cout << "Limbliadian choices:" << std::endl;
-            std::cout << "  -L <str>        Manually set the Lindbladian" << std::endl;
-            std::cout << "  --file <str>    Read the Lindbladian from a file" << std::endl;
+            std::cout << "  -L <str>            Manually set the Lindbladian" << std::endl;
+            std::cout << "  --file <str>        Read the Lindbladian from a file" << std::endl;
+            std::cout << "  --2d <int> <int>    (n.b. width then height)" << std::endl;
+            std::cout << "  --2dtwo <int> <int>" << std::endl;
             std::cout << "  --pauli <dbl> <dbl> <dbl>" << std::endl;
             std::cout << "  --second <int> <dbl>" << std::endl;
             std::cout << "  --two" << std::endl;
@@ -1882,8 +1955,6 @@ int main(int argc, char* argv[]) {
             std::cout << "  --many  <int>" << std::endl;
             std::cout << "  --manyr <int>" << std::endl;
             std::cout << "  --manyv <int> <dbl> <dbl>" << std::endl;
-            std::cout << "  --2d <int> <int> (n.b. width then height)" << std::endl;
-            std::cout << "  --2dtwo <int> <int>" << std::endl;
             std::cout << "  --tensor <int>" << std::endl;
             std::cout << "  --david <dbl> <int>" << std::endl;
             std::cout << "  --davidr <dbl> <int>" << std::endl;
@@ -2609,7 +2680,7 @@ int main(int argc, char* argv[]) {
 
     }
 
-    // If using the symmetries to sample from TODO
+    // If using the symmetries to sample from
     int numSyms = 0;
     if (symSample) {
 
@@ -2635,23 +2706,6 @@ int main(int argc, char* argv[]) {
     }
 
     // Pauli matrices
-    Eigen::SparseMatrix<std::complex<double>> pauliI(2,2);
-    pauliI.insert(0,0) = 1;
-    pauliI.insert(1,1) = 1;
-    pauliI.makeCompressed();
-    Eigen::SparseMatrix<std::complex<double>> pauliX(2,2);
-    pauliX.insert(0,1) = 1;
-    pauliX.insert(1,0) = 1;
-    pauliX.makeCompressed();
-    Eigen::SparseMatrix<std::complex<double>> pauliY(2,2);
-    pauliY.insert(0,1) = std::complex<double>(0,-1);
-    pauliY.insert(1,0) = std::complex<double>(0,1);
-    pauliY.makeCompressed();
-    Eigen::SparseMatrix<std::complex<double>> pauliZ(2,2);
-    pauliZ.insert(0,0) = 1;
-    pauliZ.insert(1,1) = -1;
-    pauliZ.makeCompressed();
-    std::map<int, std::string> letterMap = {{0, "I"}, {1, "X"}, {2, "Y"}, {3, "Z"}};
     std::map<std::vector<int>, Eigen::SparseMatrix<std::complex<double>>> pauliMap;
     for (int i=0; i<4; i++) {
         std::vector<int> key = {i};
@@ -3150,6 +3204,7 @@ int main(int argc, char* argv[]) {
 
             // Verbose output
             int totalSamples = sampleOperators.size() * numSamples;
+            totalSamples = std::abs(totalSamples);
             if (verbosity >= 1) {
                 std::cout << "Taking " << numSamples << " samples of " << sampleOperators.size() << " operators" << std::endl;
                 std::cout << "Total measurements: " << totalSamples << std::endl;
@@ -3248,7 +3303,7 @@ int main(int argc, char* argv[]) {
                 if (verbosity >= 1) {
                     std::cout << "Loading precomputed ground truth" << std::endl;
                 }
-                std::string filename = "state.dat";
+                std::string filename = stateFile;
                 std::ifstream inFile(filename);
                 if (!inFile.is_open()) {
                     throw std::runtime_error("Could not open ground truth file: " + filename);
@@ -3348,6 +3403,9 @@ int main(int argc, char* argv[]) {
                     std::vector<Poly> prevConsZero = constraintsZero;
 
                     // First we need to solve exactly the problem
+                    if (verbosity >= 1) {
+                        std::cout << "Genenerating variable set for exact solution" << std::endl;
+                    }
                     std::set<Mon> monomsUsed;
                     std::vector<Mon> monomsUsedVec;
                     std::vector<std::vector<std::vector<Poly>>> momentMatrices = {};
@@ -3362,6 +3420,9 @@ int main(int argc, char* argv[]) {
                     std::vector<Poly> variablesToPut = generateMonomials(variables, fullLevel, verbosity);
                     for (size_t i=0; i<extraMonomialsLim.size(); i++) {
                         variablesToPut.push_back(Poly(extraMonomialsLim[i]));
+                    }
+                    if (verbosity >= 1) {
+                        std::cout << "Generating equation set for exact solution with " << variablesToPut.size() << " variables" << std::endl;
                     }
                     for (size_t i=0; i<variablesToPut.size(); i++) {
                         std::pair<std::complex<double>, Mon> reducedMon = variablesToPut[i].getKey().reduce();
@@ -3379,6 +3440,9 @@ int main(int argc, char* argv[]) {
 
                     // Solve
                     std::map<Mon, std::complex<double>> results;
+                    if (verbosity >= 1) {
+                        std::cout << "Solving exact problem with " << constraintsZero.size() << " constraints" << std::endl;
+                    }
                     double res = solveEigen(objective, constraintsZero, 0, numCores, &results);
                     if (verbosity >= 2) {
                         std::cout << "Exact solver result: " << res << std::endl;
@@ -3393,6 +3457,9 @@ int main(int argc, char* argv[]) {
                     constraintsZero = prevConsZero;
 
                     // Form the ground truth from the results
+                    if (verbosity >= 1) {
+                        std::cout << "Forming ground truth from results" << std::endl;
+                    }
                     for (const auto& [monom, value] : results) {
 
                         // If it's non-zero
@@ -3434,26 +3501,7 @@ int main(int argc, char* argv[]) {
 
                 }
 
-                // If precomputing, save this to file
-                if (precompute) {
-                    std::string filename = "state.dat";
-                    std::ofstream outFile(filename);
-                    outFile.precision(15);
-                    if (outFile.is_open()) {
-                        for (int k = 0; k < groundTruth.outerSize(); ++k) {
-                            for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(groundTruth, k); it; ++it) {
-                                outFile << it.row() << " " << it.col() << " " << it.value().real() << " " << it.value().imag() << "\n";
-                            }
-                        }
-                        outFile.close();
-                        if (verbosity >= 1) {
-                            std::cout << "Ground truth saved to: " << filename << std::endl;
-                        }
-                    } else {
-                        std::cerr << "Error opening file for writing: " << filename << std::endl;
-                    }
-                    return 0;
-                }
+                
 
             }
 
@@ -3967,7 +4015,7 @@ int main(int argc, char* argv[]) {
 
         // Reconstruct the full matrix
         int fullMatSize = 1 << numQubits;
-        Eigen::MatrixXcd reconMatrix(fullMatSize, fullMatSize);
+        Eigen::SparseMatrix<std::complex<double>> reconMatrix(fullMatSize, fullMatSize);
 
         // For each Pauli string in the results
         for (auto& [monom, value] : results) {
@@ -4002,7 +4050,7 @@ int main(int argc, char* argv[]) {
                 }
 
                 // The corresponding matrix
-                Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[inds];
+                Eigen::SparseMatrix<std::complex<double>> mat = generatePauliMatrix(numQubits, inds);
 
                 // Add it, scaled by the value
                 reconMatrix += value * mat;
@@ -4011,16 +4059,19 @@ int main(int argc, char* argv[]) {
 
         }
 
+        // Put it in sparse form
+        reconMatrix.makeCompressed();
+
         // Normalize
         reconMatrix /= fullMatSize;
 
         // Ensure that the result is positive and has trace 1
-        Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> es(reconMatrix);
+        Eigen::SelfAdjointEigenSolver<Eigen::SparseMatrix<std::complex<double>>> es(reconMatrix);
         Eigen::VectorXcd eigenValues = es.eigenvalues();
         std::complex<double> smallestEigenvalue = eigenValues(0).real();
         std::complex<double> matTrace = 0;
         for (int i = 0; i < fullMatSize; i++) {
-            matTrace += reconMatrix(i, i);
+            matTrace += reconMatrix.coeff(i, i);
         }
         if (verbosity >= 1) {
             std::cout << "Smallest eigenvalue: " << eigenValues(0).real() << std::endl;
@@ -4028,9 +4079,34 @@ int main(int argc, char* argv[]) {
         }
 
         // Check the purity
-        double purity = (reconMatrix * reconMatrix).trace().real();
+        Eigen::SparseMatrix<std::complex<double>> reconMatrixSquared = reconMatrix * reconMatrix.adjoint();
+        double purity = 0;
+        for (int i = 0; i < fullMatSize; i++) {
+            purity += reconMatrixSquared.coeff(i, i).real();
+        }
         if (verbosity >= 1) {
             std::cout << "Purity: " << purity << std::endl;
+        }
+
+        // If precomputing, save it to a file TODO
+        if (precompute) {
+            std::string filename = stateFile;
+            std::ofstream outFile(filename);
+            outFile.precision(15);
+            if (outFile.is_open()) {
+                for (int k = 0; k < reconMatrix.outerSize(); ++k) {
+                    for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(reconMatrix, k); it; ++it) {
+                        outFile << it.row() << " " << it.col() << " " << it.value().real() << " " << it.value().imag() << "\n";
+                    }
+                }
+                outFile.close();
+                if (verbosity >= 1) {
+                    std::cout << "Optimum state saved to: " << filename << std::endl;
+                }
+            } else {
+                std::cerr << "Error opening file for writing: " << filename << std::endl;
+            }
+            return 0;
         }
 
     }
