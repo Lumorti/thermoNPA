@@ -8,6 +8,7 @@
 #include <chrono>
 #include <map>
 #include <fstream>
+#include <random>
 
 // Import OpenMP
 #include <omp.h>
@@ -20,7 +21,7 @@
 // PolyNC
 #include "../../PolyNC/src/polync.h"
  
-// Pauli definitions TODO
+// Pauli definitions
 Eigen::SparseMatrix<std::complex<double>> pauliI(2,2);
 Eigen::SparseMatrix<std::complex<double>> pauliX(2,2);
 Eigen::SparseMatrix<std::complex<double>> pauliY(2,2);
@@ -95,6 +96,7 @@ Eigen::SparseMatrix<std::complex<double>> generatePauliMatrix(int numQubits, std
         }
         mat = Eigen::kroneckerProduct(mat, pauliMat).eval();
     }
+    mat.makeCompressed();
 
     // Return the resulting matrix
     return mat;
@@ -1817,6 +1819,7 @@ int main(int argc, char* argv[]) {
             }
             precompute = true;
             checkObj = true;
+            //lindbladLevel = numQubits;
             findMinimal = true;
             findMinimalAmount = 0;
 
@@ -2208,9 +2211,6 @@ int main(int argc, char* argv[]) {
         // If given zero, set to what seems to be the minimum needed
         if (findMinimalAmount == 0) {
             findMinimalAmount = std::pow(4, numQubits) - 1;
-            if (findMinimalAmount < 0) {
-                findMinimalAmount = 100000000;
-            }
             if (verbosity >= 1) {
                 std::cout << "Auto setting constraint limit to: " << findMinimalAmount << std::endl;
             }
@@ -2264,7 +2264,7 @@ int main(int argc, char* argv[]) {
                 }
 
                 // Stop if we're fully constrained
-                if (monomsInConstraints.size()-1 == constraintsZero.size() && constraintsZero.size() > 2) {
+                if (!precompute && ratio >= 1.0 && constraintsZero.size() > 2) {
                     break;
                 }
 
@@ -3180,7 +3180,7 @@ int main(int argc, char* argv[]) {
     }
 
     // If we take fake samples
-    if (numSamples != 0) {
+    if (numSamples != 0 && !precompute) {
 
         // If simulating samples from symmetries TODO
         if (symSample) {
@@ -3501,8 +3501,6 @@ int main(int argc, char* argv[]) {
 
                 }
 
-                
-
             }
 
             // Check that this is positive and has trace 1
@@ -3696,6 +3694,7 @@ int main(int argc, char* argv[]) {
 
             // Verbose output
             int totalSamples = sampleOperators.size() * numSamples;
+            totalSamples = std::abs(totalSamples);
             if (verbosity >= 1) {
                 std::cout << "Taking " << numSamples << " samples of " << sampleOperators.size() << " operators" << std::endl;
                 std::cout << "Total measurements: " << totalSamples << std::endl;
@@ -3742,19 +3741,6 @@ int main(int argc, char* argv[]) {
                 // Get the true expectation value
                 double trueExpectation = Eigen::MatrixXcd(op * groundTruth).trace().real();
 
-                // Get the eigendecomposition of the operator
-                Eigen::SelfAdjointEigenSolver<Eigen::SparseMatrix<std::complex<double>>> esOp(op);
-                Eigen::VectorXcd opEvals = esOp.eigenvalues();
-                Eigen::MatrixXcd opEvecs = esOp.eigenvectors();
-
-                // Get the positive part of the operator
-                Eigen::MatrixXcd opPos = Eigen::MatrixXcd::Zero(matSize, matSize);
-                for (int i = 0; i < opEvals.size(); i++) {
-                    if (opEvals(i).real() > 0) {
-                        opPos += opEvals(i) * opEvecs.col(i) * opEvecs.col(i).adjoint();
-                    }
-                }
-
                 // If -1 given as the number of samples, use the exact
                 if (numSamples == -1) {
                     constraintsZero.push_back(Poly(1, mon) - Poly(trueExpectation));
@@ -3762,21 +3748,26 @@ int main(int argc, char* argv[]) {
                     continue;
                 }
                 
+                // Get the positive part of the operator
+                Eigen::SparseMatrix<std::complex<double>> iden = Eigen::SparseMatrix<std::complex<double>>(matSize, matSize);
+                for (int i = 0; i < matSize; i++) {
+                    iden.insert(i, i) = 1;
+                }
+                iden.makeCompressed();
+                Eigen::MatrixXcd opPos = (op + iden) / 2.0;
+
                 // The probability of getting a 1 is trace(opPos * rho)
                 double prob1 = (opPos * groundTruth).trace().real();
                 double expFromProb = 2 * prob1 - 1;
 
-                // Flip a coin
-                double avg = 0;
-                for (int i = 0; i < numSamples; i++) {
-                    double r = rand(0, 1);
-                    if (r < prob1) {
-                        avg += 1;
-                    } else {
-                        avg += 0;
-                    }
-                }
-                avg /= numSamples;
+                // Determine the average from this many samples
+                std::random_device rd;
+                std::mt19937 gen(rd());
+                std::binomial_distribution<> binom(numSamples, prob1);
+                int success_count = binom(gen);
+                double avg = static_cast<double>(success_count) / numSamples;
+
+                // Scale and save this value
                 avg = 2 * avg - 1;
                 samples[mon] = avg;
 
@@ -3789,6 +3780,7 @@ int main(int argc, char* argv[]) {
                 // Verbose output
                 if (verbosity >= 3) {
                     std::cout << "True expectation value of " << mon << " = " << trueExpectation << std::endl;
+                    std::cout << "Expectation from probability = " << expFromProb << std::endl;
                     std::cout << "Expectation value of " << mon << " from samples = " << avg << std::endl;
                     std::cout << "Bounding " << mon << " to [" << lower << ", " << upper << "]" << std::endl;
                 }
@@ -3908,7 +3900,7 @@ int main(int argc, char* argv[]) {
 
     // Auto detect the best solver
     if (solver == "auto") {
-        if (numCons == numVars) {
+        if (numCons >= numVars) {
             solver = "eigen";
         } else {
             solver = "mosek";
@@ -3956,18 +3948,20 @@ int main(int argc, char* argv[]) {
         std::cout << "Trivial bounds: " << trivialMin << " <= obj <= " << trivialMax << std::endl;
     }
 
-    // Solve
-    std::pair<double,double> bounds;
+    // Solve the relaxation
+    std::pair<double,double> bounds = {-1000000, 1000000};
     std::map<Mon, std::complex<double>> results;
-    if (solver == "scs") {
-        bounds = boundSCS(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity, {-1,1}, &results);
-    } else if (solver == "mosek" || maxMatSize > 1) {
-        bounds = boundMOSEK(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity, {-1,1}, imagType, &results, quadCone);
-    } else if (solver == "gurobi") {
-        bounds = boundGurobi(objective, constraintsZero, verbosity, &results);
-    } else if (solver == "eigen") {
-        double res = solveEigen(objective, constraintsZero, verbosity, numCores, &results);
-        bounds = {res, res};
+    if (!(precompute && noLindbladian)) {
+        if (solver == "scs") {
+            bounds = boundSCS(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity, {-1,1}, &results);
+        } else if (solver == "mosek" || maxMatSize > 1) {
+            bounds = boundMOSEK(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity, {-1,1}, imagType, &results, quadCone);
+        } else if (solver == "gurobi") {
+            bounds = boundGurobi(objective, constraintsZero, verbosity, &results);
+        } else if (solver == "eigen") {
+            double res = solveEigen(objective, constraintsZero, verbosity, numCores, &results);
+            bounds = {res, res};
+        }
     }
     double lowerBound = bounds.first;
     double upperBound = bounds.second;
@@ -4011,17 +4005,30 @@ int main(int argc, char* argv[]) {
     }
 
     // If told to check the final results by reconstructing the full matrix
+    // (also used when precompute is called)
     if (checkObj) {
 
         // Reconstruct the full matrix
         int fullMatSize = 1 << numQubits;
-        Eigen::SparseMatrix<std::complex<double>> reconMatrix(fullMatSize, fullMatSize);
+        Eigen::MatrixXcd reconMatrix = Eigen::MatrixXcd::Zero(fullMatSize, fullMatSize);
 
-        // For each Pauli string in the results
-        for (auto& [monom, value] : results) {
+        // If precomputing a Hamiltonian we should diagonalize it here TODO
+        if (precompute && noLindbladian) {
 
-            // If the monomial is not trivial
-            if (!monom.contains('T')) {
+            // Construct the Hamiltonian
+            Poly H = Poly();
+            for (int i=0; i<numQubits; i++) {
+                for (int j=0; j<numQubits; j++) {
+                    H += hamiltonianInter[i][j];
+                }
+            }
+            H.reduce();
+
+            // Form the explicit Hamiltonian
+            Eigen::SparseMatrix<std::complex<double>> HMat(fullMatSize, fullMatSize);
+            for (auto& term : H) {
+                Mon monom = term.first;
+                std::complex<double> coeff = term.second;
 
                 // Turn X1Y2I3 -> {1, 2, 0}
                 std::vector<int> inds(numQubits, 0);
@@ -4039,7 +4046,7 @@ int main(int argc, char* argv[]) {
 
                 // Verbose output
                 if (verbosity >= 3) {
-                    std::cout << monom << " = " << value  << " (";
+                    std::cout << monom << " = " << coeff  << " (";
                     for (int i = 0; i < numQubits; i++) {
                         std::cout << inds[i];
                         if (i < numQubits - 1) {
@@ -4053,25 +4060,128 @@ int main(int argc, char* argv[]) {
                 Eigen::SparseMatrix<std::complex<double>> mat = generatePauliMatrix(numQubits, inds);
 
                 // Add it, scaled by the value
-                reconMatrix += value * mat;
+                HMat += coeff * mat;
+
+            }
+            HMat.makeCompressed();
+
+            // If verbose, output the Hamiltonian
+            if (verbosity >= 3) {
+                std::cout << "Hamiltonian:" << H << std::endl;
+                std::cout << "Hamiltonian matrix:" << std::endl;
+                Eigen::MatrixXcd HMatDense = HMat;
+                std::cout << HMatDense << std::endl;
+            }
+
+            // Solve the eigenvalue problem
+            if (verbosity >= 1) {
+                std::cout << "Diagonalizing the Hamiltonian (" << fullMatSize << "x" << fullMatSize << ")..." << std::endl;
+            }
+            omp_set_num_threads(numCores);
+            Eigen::setNbThreads(numCores);
+            Eigen::SelfAdjointEigenSolver<Eigen::SparseMatrix<std::complex<double>>> es(HMat);
+            Eigen::VectorXcd eigenValues = es.eigenvalues();
+            Eigen::MatrixXcd eigenVectors = es.eigenvectors();
+
+            // Get the smallest eigenvalue and its corresponding eigenvector
+            std::complex<double> smallestEigenvalue = 100000;
+            int bestInd = -1;
+            for (int i = 0; i < eigenValues.size(); i++) {
+                if (eigenValues[i].real() < smallestEigenvalue.real()) {
+                    smallestEigenvalue = eigenValues[i];
+                    bestInd = i;
+                }
+            }
+            lowerBound = smallestEigenvalue.real();
+            upperBound = lowerBound;
+            bounds = {lowerBound, upperBound};
+            diff = 0;
+            error = 0;
+            if (verbosity >= 1) {
+                std::cout << "Minimum energy of H: " << lowerBound << std::endl;
+            }
+
+            // Form the full matrix
+            if (verbosity >= 1) {
+                std::cout << "Reconstructing the full matrix..." << std::endl;
+            }
+            Eigen::VectorXcd groundTruthVec = eigenVectors.col(bestInd);
+            reconMatrix = groundTruthVec * groundTruthVec.adjoint();
+
+        } else {
+
+            // Make sure we have enough vars to reconstruct the matrix
+            int numNeeded = std::pow(4, numQubits) - 1;
+            if (results.size() < numNeeded) {
+                std::cerr << "Not enough variables to reconstruct the full matrix (" << results.size() << " < " << numNeeded << ")" << std::endl;
+                return 1;
+            }
+
+            // For each Pauli string in the results
+            for (auto& [monom, value] : results) {
+
+                // If the monomial is not trivial
+                if (!monom.contains('T')) {
+
+                    // Turn X1Y2I3 -> {1, 2, 0}
+                    std::vector<int> inds(numQubits, 0);
+                    for (int i = 0; i < monom.size(); i++) {
+                        char letter = monom[i].first;
+                        int index = monom[i].second - 1;
+                        if (letter == 'X') {
+                            inds[index] = 1;
+                        } else if (letter == 'Y') {
+                            inds[index] = 2;
+                        } else if (letter == 'Z') {
+                            inds[index] = 3;
+                        }
+                    }
+
+                    // Verbose output
+                    if (verbosity >= 3) {
+                        std::cout << monom << " = " << value  << " (";
+                        for (int i = 0; i < numQubits; i++) {
+                            std::cout << inds[i];
+                            if (i < numQubits - 1) {
+                                std::cout << ", ";
+                            }
+                        }
+                        std::cout << ")" << std::endl;
+                    }
+
+                    // The corresponding matrix
+                    Eigen::SparseMatrix<std::complex<double>> mat = generatePauliMatrix(numQubits, inds);
+
+                    // Add it, scaled by the value
+                    reconMatrix += value * mat;
+
+                }
 
             }
 
+            // Normalize
+            reconMatrix /= fullMatSize;
+
         }
 
-        // Put it in sparse form
-        reconMatrix.makeCompressed();
-
-        // Normalize
-        reconMatrix /= fullMatSize;
+        // Output the full matrix
+        if (verbosity >= 3) {
+            std::cout << "Full matrix:" << std::endl;
+            std::cout << Eigen::MatrixXcd(reconMatrix) << std::endl;
+        }
 
         // Ensure that the result is positive and has trace 1
-        Eigen::SelfAdjointEigenSolver<Eigen::SparseMatrix<std::complex<double>>> es(reconMatrix);
+        if (verbosity >= 1) {
+            std::cout << "Checking the eigenspectra of the full density matrix..." << std::endl;
+        }
+        omp_set_num_threads(numCores);
+        Eigen::setNbThreads(numCores);
+        Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> es(reconMatrix);
         Eigen::VectorXcd eigenValues = es.eigenvalues();
         std::complex<double> smallestEigenvalue = eigenValues(0).real();
         std::complex<double> matTrace = 0;
         for (int i = 0; i < fullMatSize; i++) {
-            matTrace += reconMatrix.coeff(i, i);
+            matTrace += reconMatrix(i, i);
         }
         if (verbosity >= 1) {
             std::cout << "Smallest eigenvalue: " << eigenValues(0).real() << std::endl;
@@ -4079,24 +4189,27 @@ int main(int argc, char* argv[]) {
         }
 
         // Check the purity
-        Eigen::SparseMatrix<std::complex<double>> reconMatrixSquared = reconMatrix * reconMatrix.adjoint();
+        Eigen::MatrixXcd reconMatrixSquared = reconMatrix * reconMatrix.adjoint();
         double purity = 0;
         for (int i = 0; i < fullMatSize; i++) {
-            purity += reconMatrixSquared.coeff(i, i).real();
+            purity += reconMatrixSquared(i, i).real();
         }
         if (verbosity >= 1) {
             std::cout << "Purity: " << purity << std::endl;
         }
 
-        // If precomputing, save it to a file TODO
+        // If precomputing, save it to a file
         if (precompute) {
+            if (verbosity >= 1) {
+                std::cout << "Saving the optimum state to file..." << std::endl;
+            }
             std::string filename = stateFile;
             std::ofstream outFile(filename);
             outFile.precision(15);
             if (outFile.is_open()) {
-                for (int k = 0; k < reconMatrix.outerSize(); ++k) {
-                    for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(reconMatrix, k); it; ++it) {
-                        outFile << it.row() << " " << it.col() << " " << it.value().real() << " " << it.value().imag() << "\n";
+                for (int i = 0; i < fullMatSize; i++) {
+                    for (int j = 0; j < fullMatSize; j++) {
+                        outFile << i << " " << j << " " << reconMatrix(i, j).real() << " " << reconMatrix(i, j).imag() << "\n";
                     }
                 }
                 outFile.close();

@@ -1,6 +1,6 @@
 CXX=g++
 CXXFLAGS=-fmax-errors=3 -O3 -march=native -fopenmp -pipe
-DEBUGFLAGS=-g -O0 -fmax-errors=3 -march=native -fopenmp -pipe
+DEBUGFLAGS=-g -Og -fmax-errors=3 -fopenmp -pipe
 LIBSEIGEN= -I${EIGENHOME}
 LIBSMOSEK= -I${MSKHOME}/h -L${MSKHOME}/bin -Wl,-rpath-link,${MSKHOME}/bin -Wl,-rpath=${MSKHOME}/bin -lmosek64 -lfusion64
 LIBSOPTIM= -I${OPTIMHOME}/header_only_version/ 
@@ -12,10 +12,10 @@ ASOBJ=$(FILES:.cpp=.o)
 
 all: run 
 
-run: src/main.cpp
+run: src/main.cpp ../PolyNC/builds/polyncPauli.o
 	$(CXX) $(CXXFLAGS) -o run src/main.cpp ../PolyNC/builds/polyncPauli.o $(LIBS)
 
-debug: src/main.cpp
+debug: src/main.cpp ../PolyNC/builds/polyncPauli.o
 	$(CXX) $(DEBUGFLAGS) -o run src/main.cpp ../PolyNC/builds/polyncPauli.o $(LIBS)
 
 clean:
