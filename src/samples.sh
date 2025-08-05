@@ -62,9 +62,9 @@ for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 1000000
 do
 
     # Only level 2 shots
-    ./run -N "all2, 68%" -s M -p 68 --2d ${systemSize} --precomputed ${filename} --millis -S 1 --objPurity --shots ${shots} --all 2 -B | tee -a data/measure.dat
-    ./run -N "all2, 95%" -s M -p 95 --2d ${systemSize} --precomputed ${filename} --millis -S 1 --objPurity --shots ${shots} --all 2 -B | tee -a data/measure.dat
-    ./run -N "all2, 99.7%" -s M -p 99.7 --2d ${systemSize} --precomputed ${filename} --millis -S 1 --objPurity --shots ${shots} --all 2 -B | tee -a data/measure.dat
+    #./run -N "all2, 68%" -s M -p 68 --2d ${systemSize} --precomputed ${filename} --millis -S 1 --objPurity --shots ${shots} --all 2 -B | tee -a data/measure.dat
+    #./run -N "all2, 95%" -s M -p 95 --2d ${systemSize} --precomputed ${filename} --millis -S 1 --objPurity --shots ${shots} --all 2 -B | tee -a data/measure.dat
+    #./run -N "all2, 99.7%" -s M -p 99.7 --2d ${systemSize} --precomputed ${filename} --millis -S 1 --objPurity --shots ${shots} --all 2 -B | tee -a data/measure.dat
 
     # Only level 3 shots
     ./run -N "all3, 68%" -s M -p 68 --2d ${systemSize} --precomputed ${filename} --millis -S 1 --objPurity --shots ${shots} --all 3 -B | tee -a data/measure.dat
@@ -77,9 +77,9 @@ do
     #./run -N "all4, 99.7%" -s M -p 99.7 --2d ${systemSize} --precomputed ${filename} --millis -S 1 --objPurity --shots ${shots} --all 4 -B | tee -a data/measure.dat
 
     # SDP plus level 2 shots
-    ./run -N "sdp+all2, 68%" -s M -p 68 --2d ${systemSize} --precomputed ${filename} --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --all 2 -B | tee -a data/measure.dat
-    ./run -N "sdp+all2, 95%" -s M -p 95 --2d ${systemSize} --precomputed ${filename} --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --all 2 -B | tee -a data/measure.dat
-    ./run -N "sdp+all2, 99.7%" -s M -p 99.7 --2d ${systemSize} --precomputed ${filename} --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --all 2 -B | tee -a data/measure.dat
+    #./run -N "sdp+all2, 68%" -s M -p 68 --2d ${systemSize} --precomputed ${filename} --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --all 2 -B | tee -a data/measure.dat
+    #./run -N "sdp+all2, 95%" -s M -p 95 --2d ${systemSize} --precomputed ${filename} --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --all 2 -B | tee -a data/measure.dat
+    #./run -N "sdp+all2, 99.7%" -s M -p 99.7 --2d ${systemSize} --precomputed ${filename} --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --all 2 -B | tee -a data/measure.dat
 
     # SDP plus level 3 shots
     ./run -N "sdp+all3, 68%" -s M -p 68 --2d ${systemSize} --precomputed ${filename} --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --all 3 -B | tee -a data/measure.dat
@@ -100,6 +100,11 @@ do
     ./run -N "sdp+auto100, 68%" -p 68 -s M --2d ${systemSize} --precomputed ${filename} --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --auto 100 -B | tee -a data/measure.dat
     ./run -N "sdp+auto100, 95%" -p 95 -s M --2d ${systemSize} --precomputed ${filename} --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --auto 100 -B | tee -a data/measure.dat
     ./run -N "sdp+auto100, 99.7%" -p 99.7 -s M --2d ${systemSize} --precomputed ${filename} --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --auto 100 -B | tee -a data/measure.dat
+
+    # SDP plus auto 300
+    ./run -N "sdp+auto300, 68%" -p 68 -s M --2d ${systemSize} --precomputed ${filename} --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --auto 300 -B | tee -a data/measure.dat
+    ./run -N "sdp+auto300, 95%" -p 95 -s M --2d ${systemSize} --precomputed ${filename} --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --auto 300 -B | tee -a data/measure.dat
+    ./run -N "sdp+auto300, 99.7%" -p 99.7 -s M --2d ${systemSize} --precomputed ${filename} --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --auto 300 -B | tee -a data/measure.dat
 
 done
 
@@ -161,5 +166,21 @@ do
     ./run -N "sdp+auto300, 99.7%" -s M -p 99.7 --2d ${systemSize} --precomputed ${filename} -S 1 -A ${A} -H --shots ${shots} --auto 300 -B | tee -a data/measure.dat
 
 done
+
+
+# Heat current for large systems using symmetries
+echo "file & large" | tee -a data/measure.dat
+systemSize="50 2"
+for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
+do
+
+    # SDP plus symmetry
+    ./run -N "sdp+sym, 68%" -p 68 -s M --2d ${systemSize} -S 1 -A ${A} -H --shots ${shots} --all 2 -B | tee -a data/measure.dat
+    ./run -N "sdp+sym, 95%" -p 95 -s M --2d ${systemSize} -S 1 -A ${A} -H --shots ${shots} --all 2 -B | tee -a data/measure.dat
+    ./run -N "sdp+sym, 99.7%" -p 99.7 -s M --2d ${systemSize} -S 1 -A ${A} -H --shots ${shots} --all 2 -B | tee -a data/measure.dat
+
+done
+
+
 
 

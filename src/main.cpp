@@ -73,7 +73,7 @@ std::complex<double> trace(const Eigen::SparseMatrix<std::complex<double>>& mat)
     return trace;
 }
 
-// Generate a Pauli string matrix on demand TODO
+// Generate a Pauli string matrix on demand
 Eigen::SparseMatrix<std::complex<double>> generatePauliMatrix(int numQubits, std::vector<int> pauliInds) {
 
     // The matrix starts as 1x1 identity
@@ -149,6 +149,7 @@ int main(int argc, char* argv[]) {
     bool benchmark = false;
     bool checkObj = false;
     bool symSample = false;
+    bool allSymmetries = false;
     std::vector<Poly> zeroConsForSampling;
     std::string stateFile = "state.dat";
     int level = 0;
@@ -748,33 +749,31 @@ int main(int argc, char* argv[]) {
             lindbladian.convertToPaulis();
             lindbladian.reduce();
 
-            // Construct the Limbadlian as a polynomial from plus/minus
-            //lindbladian = Poly();
-            //for (int i=1; i<=numQubits; i++) {
-                //lindbladian += Poly(-imag*epsilons[i-1], "<A0P" + std::to_string(i) + "M" + std::to_string(i) + ">");
-                //lindbladian += Poly(imag*epsilons[i-1], "<P" + std::to_string(i) + "M" + std::to_string(i) + "A0>");
-            //}
-            //for (int i=1; i<=numQubits; i++) {
-                //for (int j=i+1; j<=numQubits; j++) {
-                    //double coeff = gs[i-1][j-1];
-                    //lindbladian += Poly(-imag*coeff, "<A0P" + std::to_string(i) + "M" + std::to_string(j) + ">");
-                    //lindbladian += Poly(-imag*coeff, "<A0M" + std::to_string(i) + "P" + std::to_string(j) + ">");
-                    //lindbladian += Poly(imag*coeff, "<P" + std::to_string(i) + "M" + std::to_string(j) + "A0>");
-                    //lindbladian += Poly(imag*coeff, "<M" + std::to_string(i) + "P" + std::to_string(j) + "A0>");
-                //}
-            //}
-            //for (int i=1; i<=numQubits; i++) {
-                //double coeffPlus = gamma_plus[i-1];
-                //double coeffMinus = gamma_minus[i-1];
-                //lindbladian += Poly(coeffPlus, "<M" + std::to_string(i) + "A0P" + std::to_string(i) + ">");
-                //lindbladian += Poly(-0.5*coeffPlus, "<A0M" + std::to_string(i) + "P" + std::to_string(i) + ">");
-                //lindbladian += Poly(-0.5*coeffPlus, "<M" + std::to_string(i) + "P" + std::to_string(i) + "A0>");
-                //lindbladian += Poly(coeffMinus, "<P" + std::to_string(i) + "A0M" + std::to_string(i) + ">");
-                //lindbladian += Poly(-0.5*coeffMinus, "<A0P" + std::to_string(i) + "M" + std::to_string(i) + ">");
-                //lindbladian += Poly(-0.5*coeffMinus, "<P" + std::to_string(i) + "M" + std::to_string(i) + "A0>");
-            //}
-            //lindbladian.clean();
-            //lindbladian.convertToPaulis();
+            // Add symmetries TODO
+            if (allSymmetries) {
+
+                // Top and bottom rows should be equal
+                int rowInd1 = 0;
+                int rowInd2 = gridHeight - 1;
+                std::cout << rowInd1 << " " << rowInd2 << std::endl;
+                while (rowInd1 < rowInd2) {
+                    std::vector<int> topInds;
+                    for (int i=0; i<gridWidth; i++) {
+                        topInds.push_back(rowInd1*gridWidth + i + 1);
+                    }
+                    std::vector<int> bottomInds;
+                    for (int i=0; i<gridWidth; i++) {
+                        bottomInds.push_back(rowInd2*gridWidth + i + 1);
+                    }
+                    symmetries.push_back({topInds, bottomInds});
+                    if (verbosity >= 1) {
+                        std::cout << "Adding symmetry: " << topInds << " <-> " << bottomInds << std::endl;
+                    }
+                    rowInd1++;
+                    rowInd2--;
+                }
+
+            }
 
         // Simple phase transition example
         } else if (argAsString == "--phase1") {
@@ -1372,6 +1371,15 @@ int main(int argc, char* argv[]) {
             lindbladianHot.cycleToAndRemove('R', 1);
             lindbladianHot.reduce();
 
+            // Note the symmetries
+            if (allSymmetries) {
+                for (int i=1; i<=numQubits; i++) {
+                    for (int j=i+1; j<=numQubits; j++) {
+                        symmetries.push_back({{i}, {j}});
+                    }
+                }
+            }
+
         // Lindbladian from quasiperiodic systems paper
         } else if (argAsString == "--quasi") {
 
@@ -1925,7 +1933,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  -r <int>            Insist that the reconstructed density matrix be positive" << std::endl;
             std::cout << "  -R                  Try removing random constraints" << std::endl;
             std::cout << "  -y <ints>           Add a symetry between two groups e.g. -y 1,2 3,4" << std::endl;
-            std::cout << "  -Y                  Assume full symmetry between all qubits" << std::endl;
+            std::cout << "  -Y                  Use all known symmetries (use before the Lindbladian flag)" << std::endl;
             std::cout << "  -I <ints>           Only put operators with these qubits into the Lindbladian" << std::endl;
             std::cout << "  -T                  Add tracing-out constraints between density mats" << std::endl;
             std::cout << "  -i <int>            1 => ignore imag, 2 => alternate imag handling" << std::endl;
@@ -1981,11 +1989,7 @@ int main(int argc, char* argv[]) {
 
         // If using all symmetries
         } else if (argAsString == "-Y") {
-            for (int i=1; i<=numQubits; i++) {
-                for (int j=i+1; j<=numQubits; j++) {
-                    symmetries.push_back({{i}, {j}});
-                }
-            }
+            allSymmetries = true;
 
         // If auto generating the moment matrix
         } else if (argAsString == "-A") {
@@ -2684,7 +2688,7 @@ int main(int argc, char* argv[]) {
     int numSyms = 0;
     if (symSample) {
 
-        // Add symmetry constraints
+        // Note the symmetries for later sampling
         for (auto sym : symmetriesMap) {
             Poly newCon = Poly(sym.first)-Poly(sym.second);
             if (newCon.size() > 0 && !newCon.isZero()) {
@@ -4012,7 +4016,7 @@ int main(int argc, char* argv[]) {
         int fullMatSize = 1 << numQubits;
         Eigen::MatrixXcd reconMatrix = Eigen::MatrixXcd::Zero(fullMatSize, fullMatSize);
 
-        // If precomputing a Hamiltonian we should diagonalize it here TODO
+        // If precomputing a Hamiltonian we should diagonalize it here
         if (precompute && noLindbladian) {
 
             // Construct the Hamiltonian
