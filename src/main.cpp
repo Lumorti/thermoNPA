@@ -3778,8 +3778,12 @@ int main(int argc, char* argv[]) {
                 // Bound each quantity
                 double lower = avg - epsilon;
                 double upper = avg + epsilon;
-                constraintsPositive.push_back(Poly(1, mon) - Poly(lower));
-                constraintsPositive.push_back(Poly(-1, mon) - Poly(-upper));
+                if (std::abs(lower) < 1) {
+                    constraintsPositive.push_back(Poly(1, mon) - Poly(lower));
+                }
+                if (std::abs(upper) < 1) {
+                    constraintsPositive.push_back(Poly(-1, mon) - Poly(-upper));
+                }
 
                 // Verbose output
                 if (verbosity >= 3) {

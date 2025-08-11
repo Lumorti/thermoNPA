@@ -3,15 +3,17 @@
 # Data generation for the measurement project
 > data/measure.dat
 
-# Pre-compute the steady state
+# System settings
 systemSize="3 3"
+A=50
+M=1000
+
+# Pre-compute the steady state
 filename="data/2d_3x3.dat"
 #./run --2d ${systemSize} --precompute ${filename}
 
 # Heat current without Z vs number of measurements
 echo "file & heat" | tee -a data/measure.dat
-A=50
-M=1000
 ./run -N "sdp" -s M --2d ${systemSize} -M ${M} -A ${A} --objHC H -B | tee -a data/measure.dat
 for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
 do
@@ -56,8 +58,6 @@ done
 
 # Purity versus number of measurements
 echo "file & purity" | tee -a data/measure.dat
-A=50
-M=1000
 for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
 do
 
@@ -109,21 +109,25 @@ do
 done
 
 # Pre-compute the ground state
-systemSize="3 3"
 filename="data/2d_3x3_H.dat"
 #./run --2d ${systemSize} --precompute ${filename} -H
 
 # Ground state energy vs number of measurements
 echo "file & energy" | tee -a data/measure.dat
-A=50
 ./run -N "sdp" -s M --2d ${systemSize} -A ${A} -H -B | tee -a data/measure.dat
 for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
 do
 
-    # Just level 2 shots
-    #./run -N "all2, 68%" -s M -p 68 --2d ${systemSize} --precomputed ${filename} -H -S 1 --shots ${shots} --all 2 -B | tee -a data/measure.dat
-    #./run -N "all2, 95%" -s M -p 95 --2d ${systemSize} --precomputed ${filename} -H -S 1 --shots ${shots} --all 2 -B | tee -a data/measure.dat
-    #./run -N "all2, 99.7%" -s M -p 99.7 --2d ${systemSize} --precomputed ${filename} -H -S 1 --shots ${shots} --all 2 -B | tee -a data/measure.dat
+    # Just level 2 shots (these are left as comments using // in the data file)
+    val=$(./run -N "all2, 68%" -s M -p 68 --2d ${systemSize} --precomputed ${filename} -H -S 1 --shots ${shots} --all 2 -B)
+    val=$(echo "//${val}")
+    echo ${val} | tee -a data/measure.dat
+    val=$(./run -N "all2, 95%" -s M -p 95 --2d ${systemSize} --precomputed ${filename} -H -S 1 --shots ${shots} --all 2 -B)
+    val=$(echo "//${val}")
+    echo ${val} | tee -a data/measure.dat
+    val=$(./run -N "all2, 99.7%" -s M -p 99.7 --2d ${systemSize} --precomputed ${filename} -H -S 1 --shots ${shots} --all 2 -B)
+    val=$(echo "//${val}")
+    echo ${val} | tee -a data/measure.dat
 
     # Just level 3 shots
     #./run -N "all3, 68%" -s M -p 68 --2d ${systemSize} --precomputed ${filename} -H -S 1 --shots ${shots} --all 3 -B | tee -a data/measure.dat
@@ -169,17 +173,17 @@ done
 
 
 # Heat current for large systems using symmetries
-echo "file & large" | tee -a data/measure.dat
-systemSize="50 2"
-for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
-do
+#echo "file & large" | tee -a data/measure.dat
+#systemSize="50 2"
+#for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
+#do
 
-    # SDP plus symmetry
-    ./run -N "sdp+sym, 68%" -p 68 -s M --2d ${systemSize} -S 1 -A ${A} -H --shots ${shots} --all 2 -B | tee -a data/measure.dat
-    ./run -N "sdp+sym, 95%" -p 95 -s M --2d ${systemSize} -S 1 -A ${A} -H --shots ${shots} --all 2 -B | tee -a data/measure.dat
-    ./run -N "sdp+sym, 99.7%" -p 99.7 -s M --2d ${systemSize} -S 1 -A ${A} -H --shots ${shots} --all 2 -B | tee -a data/measure.dat
+    ## SDP plus symmetry
+    #./run -N "sdp+sym, 68%" -p 68 -s M --2d ${systemSize} -S 1 -A ${A} -H --shots ${shots} --all 2 -B | tee -a data/measure.dat
+    #./run -N "sdp+sym, 95%" -p 95 -s M --2d ${systemSize} -S 1 -A ${A} -H --shots ${shots} --all 2 -B | tee -a data/measure.dat
+    #./run -N "sdp+sym, 99.7%" -p 99.7 -s M --2d ${systemSize} -S 1 -A ${A} -H --shots ${shots} --all 2 -B | tee -a data/measure.dat
 
-done
+#done
 
 
 

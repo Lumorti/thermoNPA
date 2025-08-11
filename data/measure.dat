@@ -360,3 +360,7 @@ auto (51x51) & None  & None & None & all order-2 (-1) & [-9.0225306437, -9.02253
 auto (51x51) & None  & None & None & auto (-1) & [-9.0225306437, -9.0225306437] (0.0\%) & 2.47s & sdp+auto300, 68% \\ \hline
 auto (51x51) & None  & None & None & auto (-1) & [-9.0225306437, -9.0225306437] (0.0\%) & 2.44s & sdp+auto300, 95% \\ \hline
 auto (51x51) & None  & None & None & auto (-1) & [-9.0225306437, -9.0225306437] (0.0\%) & 2.50s & sdp+auto300, 99.7% \\ \hline
+//None & None & None & None & all order-2 (10000) & [-9.0516516491, -2.3064234871] (37.22\%) & 1m39s & all2, 68% \\ \hline
+//None & None & None & None & all order-2 (50000) & [-9.0357713707, -6.0404939412] (16.53\%) & 1m38s & all2, 68% \\ \hline
+//None & None & None & None & all order-2 (100000) & [-9.0318662708, -6.9138852889] (11.69\%) & 1m38s & all2, 68% \\ \hline
+//None & None & None & None & all order-2 (500000) & [-9.0268017350, -8.0809431032] (5.22\%) & 1m41s & all2, 68% \\ \hline

@@ -35,6 +35,10 @@ with open('data/measure.dat', 'r') as file:
     filename = ""
     for line in file:
 
+        # Ignore commented lines
+        if line.startswith('#') or line.startswith('//') or line.startswith('%'):
+            continue
+
         # Split the line into parts
         parts = line.split('&')
         for i in range(len(parts)):
@@ -103,15 +107,23 @@ with open('data/measure.dat', 'r') as file:
 
 # The different datasets
 filenames = set(point["filename"] for point in points)
+filenames = sorted(filenames)
 notes = set(point["note"] for point in points)
+notes = sorted(notes)
+
+# Colors for the plots
+prop_cycle = plt.rcParams['axes.prop_cycle']
+colors = prop_cycle.by_key()['color']
+
+# Set the font size
+plt.rcParams.update({'font.size': 15})
+plt.rcParams.update({'font.family': 'serif'})
 
 # Plot the data
 for filename in filenames:
-    if "3d" in filename:
-        continue
 
     # Set up the figure
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(7, 5))
     plt.clf()
     plt.xlabel("Number of Shots")
     if filename == "purity":
@@ -119,11 +131,12 @@ for filename in filenames:
     elif "mag" in filename:
         plt.ylabel("Magnetization Bounds")
     elif "energy" in filename:
-        plt.ylabel("Ground-state Energy Bounds")
+        plt.ylabel("Ground-state Energy Lower Bound")
     elif "heat" in filename:
         plt.ylabel("Heat Current Bounds")
     plt.grid(True)
     noteToColor = {}
+    nextCol = 0
 
     # For each constraint set
     for note in notes:
@@ -156,17 +169,25 @@ for filename in filenames:
         yLower = [yLower[i] for i in sorted_indices]
         yUpper = [yUpper[i] for i in sorted_indices]
 
-        # Plot the line
-        line = plt.plot(x, yLower, label=note)
-
         # Check if the color has already been used
-        color = line[0].get_color()
-        noteNoPercent = note[:note.find(',')]
-        if noteToColor.get(noteNoPercent) is None:
+        commaLoc = note.find(',')
+        if commaLoc != -1:
+            noteNoPercent = note[:commaLoc]
+        else:
+            noteNoPercent = note
+        firstTime = noteNoPercent not in noteToColor.keys()
+        if firstTime:
+            color = colors[nextCol]
             noteToColor[noteNoPercent] = color
+            nextCol += 1
         else:
             color = noteToColor[noteNoPercent]
-            line[0].set_color(color)
+
+        # Plot the line
+        if firstTime:
+            line = plt.plot(x, yLower, label=noteNoPercent, color=color)
+        else:
+            line = plt.plot(x, yLower, color=color)
 
         # If we need a true bound
         if yLineLower is not None:
@@ -174,7 +195,7 @@ for filename in filenames:
 
         # If we need an upper bound too
         if filename != "purity" and filename != "energy":
-            line = plt.plot(x, yUpper, color=line[0].get_color())
+            line = plt.plot(x, yUpper, color=color)
             if yLineUpper is not None:
                 plt.axhline(y=yLineUpper, linestyle='--', color=color)
 
@@ -183,8 +204,10 @@ for filename in filenames:
     ax = plt.gca()
     handles, labels = ax.get_legend_handles_labels()
     labels, handles = zip(*sorted(zip(labels, handles), key=lambda t: t[0]))
+    # ax.legend(handles, labels, loc='center right')
     ax.legend(handles, labels)
-    plt.savefig('data/estimation_' + filename + '.png', bbox_inches='tight')
+    plt.tight_layout()
+    plt.savefig('data/estimation_' + filename + '.pdf', bbox_inches='tight')
     plt.show()
 
 
