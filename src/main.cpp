@@ -589,7 +589,7 @@ int main(int argc, char* argv[]) {
             lindbladianCold.convertToPaulis();
 
         // 2D Lindbladian test
-        } else if (argAsString == "--2d" || argAsString == "--2dtwo") {
+        } else if (argAsString == "--2d" || argAsString == "--2dtfiperiodic" || argAsString == "--2dtfi" || argAsString == "--2dtwo") {
 
             // Defining quantities
             double gamma_c = 1.1e-2;
@@ -616,6 +616,11 @@ int main(int argc, char* argv[]) {
             double gamma_h_minus = gamma_h * (n_h + 1.0);
             double gamma_c_plus = gamma_c * n_c;
             double gamma_c_minus = gamma_c * (n_c + 1.0);
+
+            // For the tfi, higher g
+            if (argAsString == "--2dtfi" || argAsString == "--2dtfiperiodic") {
+                g = 0.5;
+            }
 
             // Connectivity: 2D grid - nearest neighbours
             std::vector<double> gamma_plus(numQubits, 0);
@@ -667,7 +672,27 @@ int main(int argc, char* argv[]) {
                     gs[i][otherInd] = g;
                     gs[otherInd][i] = g;
                 }
+
+                // If y-periodic
+                if (argAsString == "--2dtfiperiodic") {
+                    if (yLoc == 0) {
+                        int otherInd = xLoc + (gridHeight-1)*gridWidth;
+                        gs[i][otherInd] = g;
+                        gs[otherInd][i] = g;
+                    } else if (yLoc == gridHeight-1) {
+                        int otherInd = xLoc;
+                        gs[i][otherInd] = g;
+                        gs[otherInd][i] = g;
+                    }
+                }
                 
+            }
+
+            // For the tfi, make all epsilon the same
+            if (argAsString == "--2dtfi" || argAsString == "--2dtfiperiodic") {
+                for (int i=0; i<numQubits; i++) {
+                    epsilons[i] = epsilon_h;
+                }
             }
 
             // The Hamiltonian
@@ -685,6 +710,16 @@ int main(int argc, char* argv[]) {
                         }
                     }
                 }
+            } else if (argAsString == "--2dtfi" || argAsString == "--2dtfiperiodic") {
+                for (int i=1; i<=numQubits; i++) {
+                    hamiltonianInter[i-1][i-1] = Poly(epsilons[i-1], "<X" + std::to_string(i) + ">");
+                }
+                for (int i=1; i<=numQubits; i++) {
+                    for (int j=i+1; j<=numQubits; j++) {
+                        hamiltonianInter[i-1][j-1] = Poly(gs[i-1][j-1], "<Z" + std::to_string(i) + "Z" + std::to_string(j) + ">");
+                        hamiltonianInter[j-1][i-1] = hamiltonianInter[i-1][j-1];
+                    }
+                }
             } else {
                 for (int i=1; i<=numQubits; i++) {
                     hamiltonianInter[i-1][i-1] = Poly(epsilons[i-1], "<Z" + std::to_string(i) + ">");
@@ -696,8 +731,8 @@ int main(int argc, char* argv[]) {
                     }
                 }
             }
-            for (int i=0; i<2; i++) {
-                for (int j=0; j<2; j++) {
+            for (int i=0; i<numQubits; i++) {
+                for (int j=0; j<numQubits; j++) {
                     hamiltonianInter[i][j].convertToPaulis();
                 }
             }
@@ -749,28 +784,55 @@ int main(int argc, char* argv[]) {
             lindbladian.convertToPaulis();
             lindbladian.reduce();
 
-            // Add symmetries TODO
+            // Add symmetries
             if (allSymmetries) {
 
-                // Top and bottom rows should be equal
-                int rowInd1 = 0;
-                int rowInd2 = gridHeight - 1;
-                std::cout << rowInd1 << " " << rowInd2 << std::endl;
-                while (rowInd1 < rowInd2) {
-                    std::vector<int> topInds;
-                    for (int i=0; i<gridWidth; i++) {
-                        topInds.push_back(rowInd1*gridWidth + i + 1);
+                // For the periodic case
+                if (argAsString == "--2dtfiperiodic") {
+
+                    // All rows should be equal
+                    int rowInd = 0;
+                    std::vector<int> rowInds;
+                    for (int j=0; j<gridWidth; j++) {
+                        rowInds.push_back(rowInd*gridWidth + j + 1);
                     }
-                    std::vector<int> bottomInds;
-                    for (int i=0; i<gridWidth; i++) {
-                        bottomInds.push_back(rowInd2*gridWidth + i + 1);
+                    for (int i=0; i<gridHeight; i++) {
+                        if (i == rowInd) {
+                            continue;
+                        }
+                        std::vector<int> rowIndsOther;
+                        for (int j=0; j<gridWidth; j++) {
+                            rowIndsOther.push_back(i*gridWidth + j + 1);
+                        }
+                        symmetries.push_back({rowInds, rowIndsOther});
+                        if (verbosity >= 1) {
+                            std::cout << "Adding symmetry: " << rowInds << " <-> " << rowIndsOther << std::endl;
+                        }
                     }
-                    symmetries.push_back({topInds, bottomInds});
-                    if (verbosity >= 1) {
-                        std::cout << "Adding symmetry: " << topInds << " <-> " << bottomInds << std::endl;
+
+                // For all other cases
+                } else {
+
+                    // Top and bottom rows should be equal
+                    int rowInd1 = 0;
+                    int rowInd2 = gridHeight - 1;
+                    while (rowInd1 < rowInd2) {
+                        std::vector<int> topInds;
+                        for (int i=0; i<gridWidth; i++) {
+                            topInds.push_back(rowInd1*gridWidth + i + 1);
+                        }
+                        std::vector<int> bottomInds;
+                        for (int i=0; i<gridWidth; i++) {
+                            bottomInds.push_back(rowInd2*gridWidth + i + 1);
+                        }
+                        symmetries.push_back({topInds, bottomInds});
+                        if (verbosity >= 1) {
+                            std::cout << "Adding symmetry: " << topInds << " <-> " << bottomInds << std::endl;
+                        }
+                        rowInd1++;
+                        rowInd2--;
                     }
-                    rowInd1++;
-                    rowInd2--;
+
                 }
 
             }
@@ -1959,6 +2021,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  --file <str>        Read the Lindbladian from a file" << std::endl;
             std::cout << "  --2d <int> <int>    (n.b. width then height)" << std::endl;
             std::cout << "  --2dtwo <int> <int>" << std::endl;
+            std::cout << "  --2dtfi <int> <int>" << std::endl;
             std::cout << "  --pauli <dbl> <dbl> <dbl>" << std::endl;
             std::cout << "  --second <int> <dbl>" << std::endl;
             std::cout << "  --two" << std::endl;
@@ -3186,7 +3249,7 @@ int main(int argc, char* argv[]) {
     // If we take fake samples
     if (numSamples != 0 && !precompute) {
 
-        // If simulating samples from symmetries TODO
+        // If simulating samples from symmetries
         if (symSample) {
 
             // Get the list of Pauli strings that we would actually measure

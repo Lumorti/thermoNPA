@@ -21,13 +21,13 @@ echo "" > data/tensorchain.tex
 
 # For the 2D case
 echo "" > data/2d.tex
-./run -s M -i 1 --2d 5 2 -M 1000 -B | tee -a data/2d.tex
-./run -s M -i 1 --2d 5 2 -M 10000 -B | tee -a data/2d.tex
-./run -s M -i 1 --2d 5 2 -M 10000 -A 100 -B | tee -a data/2d.tex
-./run -s M -i 1 --2d 5 2 -M 10000 -r 4 -B | tee -a data/2d.tex
-./run -s M -i 1 --2d 5 2 -M 10000 -r 4 -y 1 6 -y 2 7 -y 3 8 -y 4 9 -y 5 10 -B | tee -a data/2d.tex
-./run -s M -i 1 --2d 5 2 -M 50000 -r 4 -y 1 6 -y 2 7 -y 3 8 -y 4 9 -y 5 10 -B | tee -a data/2d.tex
-./run -s M -i 1 --2d 5 2 -M 100000 -r 4 -y 1 6 -y 2 7 -y 3 8 -y 4 9 -y 5 10 -B | tee -a data/2d.tex
+./run -s M -i 1 --2dtwo 5 2 -M 1000 -B | tee -a data/2d.tex
+./run -s M -i 1 --2dtwo 5 2 -M 10000 -B | tee -a data/2d.tex
+./run -s M -i 1 --2dtwo 5 2 -M 10000 -A 100 -B | tee -a data/2d.tex
+./run -s M -i 1 --2dtwo 5 2 -M 10000 -r 4 -B | tee -a data/2d.tex
+./run -s M -i 1 --2dtwo 5 2 -M 10000 -r 4 -y 1 6 -y 2 7 -y 3 8 -y 4 9 -y 5 10 -B | tee -a data/2d.tex
+./run -s M -i 1 --2dtwo 5 2 -M 50000 -r 4 -y 1 6 -y 2 7 -y 3 8 -y 4 9 -y 5 10 -B | tee -a data/2d.tex
+./run -s M -i 1 --2dtwo 5 2 -M 100000 -r 4 -y 1 6 -y 2 7 -y 3 8 -y 4 9 -y 5 10 -B | tee -a data/2d.tex
 
 # Graph versus system size
 echo "" > data/graph1.dat
