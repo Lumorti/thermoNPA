@@ -183,6 +183,7 @@ int main(int argc, char* argv[]) {
     Poly pseudoObjective;
     int verbosity = 1;
     std::string solver = "auto";
+    std::string modelName = "default";
     std::complex<double> knownIdeal = 0.0;
     bool idealIsKnown = false;
     bool findMinimal = false;
@@ -420,6 +421,7 @@ int main(int argc, char* argv[]) {
 
         // Two-body Lindbladian
         } else if (argAsString == "--two" || argAsString == "--twov") {
+            modelName = argAsString;
 
             // Defining quantities
             double gamma_c = 1.1e-2;
@@ -588,8 +590,54 @@ int main(int argc, char* argv[]) {
             lindbladianCold += Poly(-0.5*gamma_c_minus, "<P2M2A0>");
             lindbladianCold.convertToPaulis();
 
+        // Majumdar-Ghost model TODO
+        } else if (argAsString == "--mg") {
+            modelName = argAsString;
+
+            // Defining quantities
+            double J = 1;
+
+            // We should be given the number of qubits
+            numQubits = std::stoi(argv[i+1]);
+            i++;
+        
+            // H = J \sum S_j S_{j+1} + (J/2) \sum S_j S_{j+2}
+            hamiltonianInter = std::vector<std::vector<Poly>>(numQubits, std::vector<Poly>(numQubits, Poly()));
+            for (int i=0; i<numQubits-1; i++) {
+                hamiltonianInter[i][i+1] = Poly(J, "<X" + std::to_string(i+1) + "X" + std::to_string(i+2) + ">");
+            }
+            for (int i=0; i<numQubits-2; i++) {
+                hamiltonianInter[i][i+2] = Poly(J/2.0, "<X" + std::to_string(i+1) + "X" + std::to_string(i+3) + ">");
+            }
+
+            // Full Hamiltonian
+            Poly H = Poly();
+            for (int i=0; i<numQubits; i++) {
+                for (int j=i; j<numQubits; j++) {
+                    H += hamiltonianInter[i][j];
+                }
+            }
+            H.reduce();
+            objective = H;
+            useEnergy = true;
+
+            // No baths
+            lindbladianHot = Poly();
+            lindbladianCold = Poly();
+
+            // Lindbladian = -i[H, rho] + \sum (sigma_minus*rho*sigma_plus - 0.5*sigma_plus*sigma_minus*rho - 0.5*rho*sigma_plus*sigma_minus)
+            Poly rho("<R1>");
+            lindbladian = -imag*H.commutator(rho);
+            lindbladian = Poly("<A0>") * lindbladian;
+            lindbladian.cycleToAndRemove('R', 1);
+            lindbladian += lindbladianHot;
+            lindbladian += lindbladianCold;
+            lindbladian.convertToPaulis();
+            lindbladian.reduce();
+
         // 2D Lindbladian test
         } else if (argAsString == "--2d" || argAsString == "--2dtfiperiodic" || argAsString == "--2dtfi" || argAsString == "--2dtwo") {
+            modelName = argAsString;
 
             // Defining quantities
             double gamma_c = 1.1e-2;
@@ -839,6 +887,7 @@ int main(int argc, char* argv[]) {
 
         // Simple phase transition example
         } else if (argAsString == "--phase1") {
+            modelName = argAsString;
 
             double gamma = std::stod(argv[i+1]);
             i++;
@@ -865,6 +914,7 @@ int main(int argc, char* argv[]) {
         // Jin "Cluster Mean-Field Approach to the Steady-State Phase Diagram of Dissipative Spin Systems"
         // Lee "Unconventional magnetism via optical pumping of interacting spin systems"
         } else if (argAsString == "--phase2") {
+            modelName = argAsString;
 
             // Parameters
             int latticeWidth = std::stoi(argv[i+1]);
@@ -940,12 +990,14 @@ int main(int argc, char* argv[]) {
 
         // TODO https://journals.aps.org/pra/pdf/10.1103/PhysRevA.98.042118?casa_token=CFcuEJLHI8IAAAAA%3AQA26OCFU-TCiLQGncKG3TRRu9FW-Bf5mfgdspWRoCLiLa-1UJN9qLSBlSy9qqyfGQPAvs4e54FXAwcwp
         } else if (argAsString == "--phase3") {
+            modelName = argAsString;
 
         // For an arbitrary connectivity, given as a file
         // This file should have the number of qubits on the first line
         // Then each line should have two integers detailing connectivity (e.g. "3 6")
         // For baths, use -1 for the cold and -2 for the hot
         } else if (argAsString == "--file") {
+            modelName = argAsString;
 
             // Get the filename
             std::string filename = argv[i+1];
@@ -1097,6 +1149,7 @@ int main(int argc, char* argv[]) {
 
         // The Lindbladian from David
         } else if (argAsString == "--david" || argAsString == "--davidr") {
+            modelName = argAsString;
 
             // Parameters
             double g = std::stod(argv[i+1]);
@@ -1171,6 +1224,7 @@ int main(int argc, char* argv[]) {
 
         // The Lindbladian from David but 2D
         } else if (argAsString == "--david2d" || argAsString == "--david2dr") {
+            modelName = argAsString;
 
             // Parameters
             double g = std::stod(argv[i+1]);
@@ -1292,6 +1346,7 @@ int main(int argc, char* argv[]) {
 
         // A 1.5D chain
         } else if (argAsString == "--1.5d" || argAsString == "--1.5dr") {
+            modelName = argAsString;
 
             // Parameters
             double g = std::stod(argv[i+1]);
@@ -1355,6 +1410,7 @@ int main(int argc, char* argv[]) {
 
         // The Lindbladian from the tensor paper
         } else if (argAsString == "--tensor") {
+            modelName = argAsString;
 
             // Defining quantities
             double J = 0.5;
@@ -1444,6 +1500,7 @@ int main(int argc, char* argv[]) {
 
         // Lindbladian from quasiperiodic systems paper
         } else if (argAsString == "--quasi") {
+            modelName = argAsString;
 
             // System params
             numQubits = std::stoi(argv[i+1]);
@@ -1496,6 +1553,7 @@ int main(int argc, char* argv[]) {
 
         // Many-body Lindbladian
         } else if (argAsString == "--many" || argAsString == "--manyv" || argAsString == "--manyr") {
+            modelName = argAsString;
 
             // Defining quantities
             double gamma_c = 1.1e-2;
@@ -1701,6 +1759,7 @@ int main(int argc, char* argv[]) {
         // --conHC P 2 C   is    spin 2 -> cold should be positive
         // --conHC N 2 C   is    spin 2 -> cold should be negative
         } else if (argAsString == "--objHC" || argAsString == "--conHC") {
+            modelName = argAsString;
             usingHeatCurrent = true;
 
             // Determine which spins we're dealing with
@@ -2022,6 +2081,8 @@ int main(int argc, char* argv[]) {
             std::cout << "  --2d <int> <int>    (n.b. width then height)" << std::endl;
             std::cout << "  --2dtwo <int> <int>" << std::endl;
             std::cout << "  --2dtfi <int> <int>" << std::endl;
+            std::cout << "  --2dtfiperiodic <int> <int>" << std::endl;
+            std::cout << "  --mg <int>" << std::endl;
             std::cout << "  --pauli <dbl> <dbl> <dbl>" << std::endl;
             std::cout << "  --second <int> <dbl>" << std::endl;
             std::cout << "  --two" << std::endl;
@@ -2343,20 +2404,44 @@ int main(int argc, char* argv[]) {
 
                 // Otherwise we're looping, need to break out of the cycle
                 } else {
+                    bool found = false;
+
+                    // Try removing a term from the start of a monomial
                     for (auto& mon : monomsInConstraints) {
                         if (mon.size() >= 2) {
                             Mon reducedMon = mon;
                             reducedMon.monomial.erase(reducedMon.monomial.begin());
                             if (!monomsUsed.count(reducedMon)) {
                                 monToAdd = reducedMon;
+                                found = true;
                                 break;
                             }
                         }
                     }
-                    if (verbosity >= 2) {
+
+                    // Try combining two terms
+                    if (!found) {
+                        for (auto it1 = monomsInConstraints.begin(); it1 != monomsInConstraints.end(); ++it1) {
+                            for (auto it2 = std::next(it1); it2 != monomsInConstraints.end(); ++it2) {
+                                Mon combinedMon = (*it1) * (*it2);
+                                if (!monomsUsed.count(combinedMon)) {
+                                    monToAdd = combinedMon;
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (found) {
+                                break;
+                            }
+                        }
+                    }
+
+                    // If we found something new, output
+                    if (verbosity >= 2 && found) {
                         std::cout << std::endl;
                         std::cout << "Starting new cycle with monomial: " << monToAdd << std::endl;
                     }
+
                 }
 
                 // If we can't find anything else, break
@@ -2405,6 +2490,12 @@ int main(int argc, char* argv[]) {
                     }
                 }
 
+            }
+
+            // Final output
+            double ratio = double(constraintsZero.size()) / (monomsInConstraints.size()-1);
+            if (verbosity >= 1) {
+                std::cout << constraintsZero.size() << " / " << findMinimalAmount << " (" << ratio << ")               " << std::endl;
             }
 
         // If a value not given, binary search
@@ -2530,12 +2621,6 @@ int main(int argc, char* argv[]) {
             }
             constraintsZero = constraintsZeroCopy;
 
-        }
-
-        // Final output
-        double ratio = double(constraintsZero.size()) / (monomsUsed.size()-1);
-        if (verbosity >= 1) {
-            std::cout << constraintsZero.size() << " / " << findMinimalAmount << " (" << ratio << ")               " << std::endl;
         }
 
     }
@@ -3585,6 +3670,9 @@ int main(int argc, char* argv[]) {
             //}
 
             // The samples we should take
+            if (verbosity >= 1) {
+                std::cout << "Generating sample operators" << std::endl;
+            }
             std::set<Mon> sampleOperators;
             if (sampleChoice == "all") {
                 std::vector<Mon> variables = {};
@@ -4184,8 +4272,10 @@ int main(int argc, char* argv[]) {
             // Make sure we have enough vars to reconstruct the matrix
             int numNeeded = std::pow(4, numQubits) - 1;
             if (results.size() < numNeeded) {
-                std::cerr << "Not enough variables to reconstruct the full matrix (" << results.size() << " < " << numNeeded << ")" << std::endl;
-                return 1;
+                std::cout << "Warning: not enough variables to reconstruct the full matrix (" << results.size() << " < " << numNeeded << ")" << std::endl;
+            }
+            if (results.find(Mon()) == results.end()) {
+                results[Mon()] = std::complex<double>(1.0, 0.0);
             }
 
             // For each Pauli string in the results

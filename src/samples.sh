@@ -2,6 +2,7 @@
 
 # Data generation for the measurement project
 > data/measure.dat
+> data/precomputes.log
 
 # System settings
 systemSize="3 3"
@@ -10,7 +11,11 @@ M=1000
 
 # Pre-compute the steady state
 filename="data/2d_3x3.dat"
-./run --2dtfi ${systemSize} --precompute ${filename}
+./run --2dtfi ${systemSize} --precompute ${filename} | tee -a data/precomputes.log
+
+# Pre-compute the ground state
+filename="data/2d_3x3_H.dat"
+./run --2dtfi ${systemSize} --precompute ${filename} -H | tee -a data/precomputes.log
 
 # Heat current without Z vs number of measurements
 echo "file & heat" | tee -a data/measure.dat
@@ -36,7 +41,6 @@ do
 
 done
 
-
 # Purity versus number of measurements
 echo "file & purity" | tee -a data/measure.dat
 for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
@@ -59,10 +63,6 @@ do
     ./run -B -N "sdp+auto300, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --auto 300 | tee -a data/measure.dat
 
 done
-
-# Pre-compute the ground state
-filename="data/2d_3x3_H.dat"
-./run --2dtfi ${systemSize} --precompute ${filename} -H
 
 # Ground state energy vs number of measurements
 echo "file & energy" | tee -a data/measure.dat
@@ -93,18 +93,18 @@ do
 done
 
 # Ground state energy for large systems using symmetries
-echo "file & large" | tee -a data/measure.dat
-systemSize="3 30"
-./run -B -N "sdp" -s M --2dtfiperiodic ${systemSize} -S 1 -m 3 -H -O "<Z1>+<Z2>+<Z3>+<X1>+<X2>+<X3>" -P --shots ${shots} --sym | tee -a data/measure.dat
-for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
-do
+#echo "file & large" | tee -a data/measure.dat
+#systemSize="3 30"
+#./run -B -N "sdp" -s M --2dtfiperiodic ${systemSize} -S 1 -m 3 -H -O "<Z1>+<Z2>+<Z3>+<X1>+<X2>+<X3>" -P --shots ${shots} --sym | tee -a data/measure.dat
+#for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
+#do
 
-    # SDP plus symmetry
-    ./run -B -N "sdp+sym, 68%" -p 68 -Y -s M --2dtfiperiodic ${systemSize} -S 1 -m 3 -H -O "<Z1>+<Z2>+<Z3>+<X1>+<X2>+<X3>" -P --shots ${shots} --sym | tee -a data/measure.dat
-    ./run -B -N "sdp+sym, 95%" -p 95 -Y -s M --2dtfiperiodic ${systemSize} -S 1 -m 3 -H -O "<Z1>+<Z2>+<Z3>+<X1>+<X2>+<X3>" -P --shots ${shots} --sym | tee -a data/measure.dat
-    ./run -B -N "sdp+sym, 99.7%" -p 99.7 -Y -s M --2dtfiperiodic ${systemSize} -S 1 -m 3 -H -O "<Z1>+<Z2>+<Z3>+<X1>+<X2>+<X3>" -P --shots ${shots} --sym | tee -a data/measure.dat
+    ## SDP plus symmetry
+    #./run -B -N "sdp+sym, 68%" -p 68 -Y -s M --2dtfiperiodic ${systemSize} -S 1 -m 3 -H -O "<Z1>+<Z2>+<Z3>+<X1>+<X2>+<X3>" -P --shots ${shots} --sym | tee -a data/measure.dat
+    #./run -B -N "sdp+sym, 95%" -p 95 -Y -s M --2dtfiperiodic ${systemSize} -S 1 -m 3 -H -O "<Z1>+<Z2>+<Z3>+<X1>+<X2>+<X3>" -P --shots ${shots} --sym | tee -a data/measure.dat
+    #./run -B -N "sdp+sym, 99.7%" -p 99.7 -Y -s M --2dtfiperiodic ${systemSize} -S 1 -m 3 -H -O "<Z1>+<Z2>+<Z3>+<X1>+<X2>+<X3>" -P --shots ${shots} --sym | tee -a data/measure.dat
 
-done
+#done
 
 # Automatically commit once done
 git add .
