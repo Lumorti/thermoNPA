@@ -1,190 +1,6970 @@
 file & heat
-auto (51x51) & auto (1000) & None & None & [-0.0091699070, 0.0077000760] (58.90\%) & 10.97s & sdp \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-2 (10000) & [-0.0071167167, 0.0077000108] (51.74\%) & 26.51s & sdp+all2-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-2 (10000) & [-0.0071195111, 0.0076999835] (51.74\%) & 24.91s & sdp+all2-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (10000) & [-0.0091693106, 0.0077000700] (58.90\%) & 1m21s & sdp+all3-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (10000) & [-0.0091698402, 0.0077002978] (58.91\%) & 1m23s & sdp+all3-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (10000) & [-0.0041351314, 0.0076449782] (41.13\%) & 14.35s & sdp+auto50-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (10000) & [-0.0040256018, 0.0076639649] (40.82\%) & 14.75s & sdp+auto50-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & onlyobj (10000) & [-0.0035624915, 0.0076931882] (39.30\%) & 13.75s & sdp+onlyobj-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & onlyobj (10000) & [-0.0036328256, 0.0076946043] (39.55\%) & 14.66s & sdp+onlyobj-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-2 (50000) & [-0.0047824586, 0.0076460036] (43.40\%) & 26.58s & sdp+all2-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-2 (50000) & [-0.0051767901, 0.0076921182] (44.93\%) & 26.70s & sdp+all2-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (50000) & [-0.0073462782, 0.0076997744] (52.54\%) & 1m22s & sdp+all3-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (50000) & [-0.0074943767, 0.0076998152] (53.05\%) & 1m20s & sdp+all3-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (50000) & [-0.0033548839, 0.0074675933] (37.79\%) & 14.18s & sdp+auto50-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (50000) & [-0.0033233784, 0.0075117208] (37.83\%) & 15.31s & sdp+auto50-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & onlyobj (50000) & [-0.0033963658, 0.0076810424] (38.68\%) & 14.54s & sdp+onlyobj-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & onlyobj (50000) & [-0.0034654299, 0.0076906000] (38.95\%) & 14.44s & sdp+onlyobj-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-2 (100000) & [-0.0040517732, 0.0075626588] (40.55\%) & 26.94s & sdp+all2-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-2 (100000) & [-0.0041828340, 0.0076116650] (41.18\%) & 27.34s & sdp+all2-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (100000) & [-0.0063425528, 0.0076927946] (49.01\%) & 1m23s & sdp+all3-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (100000) & [-0.0064541395, 0.0076999287] (49.42\%) & 1m23s & sdp+all3-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (100000) & [-0.0031433031, 0.0074502621] (36.99\%) & 14.78s & sdp+auto50-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (100000) & [-0.0032972128, 0.0074835006] (37.64\%) & 14.87s & sdp+auto50-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & onlyobj (100000) & [-0.0032865377, 0.0076705064] (38.26\%) & 13.75s & sdp+onlyobj-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & onlyobj (100000) & [-0.0033218366, 0.0076853542] (38.43\%) & 14.27s & sdp+onlyobj-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-2 (500000) & [-0.0027515333, 0.0072214141] (34.82\%) & 28.0s & sdp+all2-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-2 (500000) & [-0.0030290375, 0.0073027348] (36.08\%) & 26.59s & sdp+all2-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (500000) & [-0.0041785691, 0.0075938586] (41.11\%) & 1m22s & sdp+all3-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (500000) & [-0.0045000343, 0.0076223852] (42.33\%) & 1m21s & sdp+all3-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (500000) & [-0.0028814099, 0.0073977414] (35.89\%) & 15.51s & sdp+auto50-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (500000) & [-0.0028793917, 0.0073936803] (35.87\%) & 14.89s & sdp+auto50-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & onlyobj (500000) & [-0.0032067543, 0.0076644008] (37.96\%) & 14.08s & sdp+onlyobj-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & onlyobj (500000) & [-0.0032110480, 0.0076665512] (37.98\%) & 13.03s & sdp+onlyobj-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-2 (1000000) & [-0.0024465603, 0.0071383879] (33.47\%) & 25.94s & sdp+all2-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-2 (1000000) & [-0.0025173056, 0.0071689344] (33.82\%) & 27.78s & sdp+all2-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (1000000) & [-0.0032498570, 0.0074624300] (37.40\%) & 1m21s & sdp+all3-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (1000000) & [-0.0033533191, 0.0075266761] (37.99\%) & 1m22s & sdp+all3-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (1000000) & [-0.0028208012, 0.0073678265] (35.58\%) & 15.71s & sdp+auto50-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (1000000) & [-0.0028292950, 0.0073751147] (35.63\%) & 14.63s & sdp+auto50-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & onlyobj (1000000) & [-0.0031496300, 0.0076569131] (37.73\%) & 15.15s & sdp+onlyobj-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & onlyobj (1000000) & [-0.0031840303, 0.0076615949] (37.87\%) & 14.49s & sdp+onlyobj-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-2 (5000000) & [-0.0020735245, 0.0068536608] (31.17\%) & 27.51s & sdp+all2-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-2 (5000000) & [-0.0020671068, 0.0069362081] (31.44\%) & 26.46s & sdp+all2-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (5000000) & [-0.0020515562, 0.0069780097] (31.53\%) & 1m23s & sdp+all3-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (5000000) & [-0.0022646874, 0.0070198222] (32.42\%) & 1m23s & sdp+all3-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (5000000) & [-0.0027411504, 0.0073377846] (35.19\%) & 14.60s & sdp+auto50-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (5000000) & [-0.0027534963, 0.0073396761] (35.24\%) & 15.65s & sdp+auto50-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & onlyobj (5000000) & [-0.0031404693, 0.0076524881] (37.69\%) & 14.99s & sdp+onlyobj-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & onlyobj (5000000) & [-0.0031371705, 0.0076531713] (37.68\%) & 16.15s & sdp+onlyobj-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-2 (10000000) & [-0.0019352648, 0.0068175965] (30.56\%) & 28.45s & sdp+all2-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-2 (10000000) & [-0.0019937653, 0.0068166988] (30.76\%) & 26.95s & sdp+all2-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (10000000) & [-0.0018350690, 0.0067540315] (29.99\%) & 1m24s & sdp+all3-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (10000000) & [-0.0019660789, 0.0068258509] (30.70\%) & 1m19s & sdp+all3-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (10000000) & [-0.0027186194, 0.0073309227] (35.09\%) & 14.48s & sdp+auto50-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (10000000) & [-0.0027407098, 0.0073321787] (35.17\%) & 15.22s & sdp+auto50-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & onlyobj (10000000) & [-0.0031264422, 0.0076488753] (37.62\%) & 14.60s & sdp+onlyobj-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & onlyobj (10000000) & [-0.0031309687, 0.0076494174] (37.64\%) & 15.15s & sdp+onlyobj-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-2 (50000000) & [-0.0018022013, 0.0067165570] (29.74\%) & 27.77s & sdp+all2-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-2 (50000000) & [-0.0018156733, 0.0067266451] (29.83\%) & 26.64s & sdp+all2-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (50000000) & [-0.0013962446, 0.0064891612] (27.53\%) & 1m23s & sdp+all3-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (50000000) & [-0.0014671505, 0.0064947261] (27.80\%) & 1m21s & sdp+all3-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (50000000) & [-0.0027025781, 0.0073182441] (34.99\%) & 16.04s & sdp+auto50-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (50000000) & [-0.0027076398, 0.0073214721] (35.02\%) & 15.04s & sdp+auto50-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & onlyobj (50000000) & [-0.0031201251, 0.0076473873] (37.60\%) & 15.33s & sdp+onlyobj-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & onlyobj (50000000) & [-0.0031207878, 0.0076480267] (37.60\%) & 14.43s & sdp+onlyobj-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-2 (100000000) & [-0.0017758477, 0.0066862228] (29.55\%) & 27.45s & sdp+all2-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-2 (100000000) & [-0.0017728736, 0.0066997699] (29.58\%) & 26.95s & sdp+all2-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (100000000) & [-0.0013066631, 0.0063991212] (26.91\%) & 1m23s & sdp+all3-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (100000000) & [-0.0013257748, 0.0064304877] (27.08\%) & 1m23s & sdp+all3-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (100000000) & [-0.0026989711, 0.0073152684] (34.97\%) & 14.82s & sdp+auto50-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (100000000) & [-0.0027058487, 0.0073189596] (35.0\%) & 15.60s & sdp+auto50-z, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & onlyobj (100000000) & [-0.0031160996, 0.0076473767] (37.58\%) & 13.88s & sdp+onlyobj-z, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & onlyobj (100000000) & [-0.0031166544, 0.0076468122] (37.58\%) & 14.38s & sdp+onlyobj-z, 99.7% \\ \hline
-auto (51x51) & auto (1003) & None & None & onlyobj (-1) & [-0.0031114409, 0.0076461401] (37.56\%) & 12.82s & sdp+onlyobj-z, 95% \\ \hline
-auto (51x51) & auto (1003) & None & None & onlyobj (-1) & [-0.0031114409, 0.0076461401] (37.56\%) & 13.68s & sdp+onlyobj-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & [-0.0091532337, 0.0077466662] (59.01\%) & 10.53s & sdp \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-2 (10000) & [-0.0041179265, 0.0075224442] (40.64\%) & 26.16s & sdp+all2-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-2 (10000) & [-0.0042721250, 0.0075510964] (41.28\%) & 26.55s & sdp+all2-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (10000) & [-0.0085932645, 0.0077467123] (57.05\%) & 1m23s & sdp+all3-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (10000) & [-0.0089990074, 0.0077465465] (58.47\%) & 1m22s & sdp+all3-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (10000) & [0.0005216029, 0.0067408146] (21.72\%) & 14.16s & sdp+auto50-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (10000) & [-0.0000009425, 0.0069826326] (24.38\%) & 14.47s & sdp+auto50-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & onlyobj (10000) & [0.0008235034, 0.0064575877] (19.67\%) & 11.78s & sdp+onlyobj-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & onlyobj (10000) & [0.0005644406, 0.0066227658] (21.15\%) & 12.97s & sdp+onlyobj-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-2 (50000) & [-0.0004435994, 0.0069852126] (25.94\%) & 28.23s & sdp+all2-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-2 (50000) & [-0.0010225063, 0.0069723496] (27.92\%) & 27.45s & sdp+all2-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (50000) & [-0.0042748959, 0.0075419275] (41.26\%) & 1m23s & sdp+all3-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (50000) & [-0.0045616899, 0.0076203781] (42.54\%) & 1m23s & sdp+all3-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (50000) & [0.0011582640, 0.0063889353] (18.26\%) & 14.43s & sdp+auto50-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (50000) & [0.0009537343, 0.0065082083] (19.39\%) & 14.13s & sdp+auto50-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & onlyobj (50000) & [0.0011921556, 0.0062107444] (17.52\%) & 12.99s & sdp+onlyobj-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & onlyobj (50000) & [0.0011088199, 0.0062612017] (17.99\%) & 14.05s & sdp+onlyobj-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-2 (100000) & [0.0002766352, 0.0066905321] (22.40\%) & 28.89s & sdp+all2-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-2 (100000) & [0.0000230170, 0.0068076413] (23.69\%) & 27.05s & sdp+all2-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (100000) & [-0.0026105440, 0.0073477054] (34.77\%) & 1m23s & sdp+all3-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (100000) & [-0.0025315093, 0.0073784546] (34.60\%) & 1m24s & sdp+all3-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (100000) & [0.0013777417, 0.0062624304] (17.06\%) & 13.53s & sdp+auto50-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (100000) & [0.0012128187, 0.0063527417] (17.95\%) & 14.59s & sdp+auto50-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & onlyobj (100000) & [0.0012557456, 0.0061677339] (17.15\%) & 14.26s & sdp+onlyobj-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & onlyobj (100000) & [0.0012493416, 0.0061658458] (17.17\%) & 12.38s & sdp+onlyobj-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-2 (500000) & [0.0014742846, 0.0062811435] (16.78\%) & 27.89s & sdp+all2-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-2 (500000) & [0.0012772509, 0.0063620200] (17.75\%) & 27.29s & sdp+all2-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (500000) & [0.0001397621, 0.0067484795] (23.08\%) & 1m22s & sdp+all3-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (500000) & [0.0000005532, 0.0067789255] (23.67\%) & 1m24s & sdp+all3-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (500000) & [0.0017023796, 0.0060625937] (15.22\%) & 14.45s & sdp+auto50-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (500000) & [0.0016243948, 0.0061090927] (15.66\%) & 14.57s & sdp+auto50-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & onlyobj (500000) & [0.0014198080, 0.0060409773] (16.14\%) & 13.22s & sdp+onlyobj-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & onlyobj (500000) & [0.0013838734, 0.0060709222] (16.37\%) & 13.19s & sdp+onlyobj-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-2 (1000000) & [0.0019983051, 0.0061608888] (14.53\%) & 27.33s & sdp+all2-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-2 (1000000) & [0.0017697102, 0.0061847808] (15.42\%) & 26.99s & sdp+all2-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (1000000) & [0.0009719083, 0.0065339074] (19.42\%) & 1m24s & sdp+all3-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (1000000) & [0.0006994216, 0.0066588259] (20.81\%) & 1m24s & sdp+all3-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (1000000) & [0.0017898348, 0.0060031436] (14.71\%) & 15.31s & sdp+auto50-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (1000000) & [0.0017393955, 0.0060373970] (15.01\%) & 15.32s & sdp+auto50-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & onlyobj (1000000) & [0.0014478538, 0.0060211135] (15.97\%) & 13.09s & sdp+onlyobj-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & onlyobj (1000000) & [0.0014394488, 0.0060286810] (16.02\%) & 13.70s & sdp+onlyobj-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-2 (5000000) & [0.0027450031, 0.0059462743] (11.18\%) & 27.60s & sdp+all2-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-2 (5000000) & [0.0025916834, 0.0059732876] (11.81\%) & 26.25s & sdp+all2-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (5000000) & [0.0021942940, 0.0061608128] (13.85\%) & 1m21s & sdp+all3-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (5000000) & [0.0019973748, 0.0062272970] (14.77\%) & 1m23s & sdp+all3-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (5000000) & [0.0019123982, 0.0059437971] (14.08\%) & 14.38s & sdp+auto50-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (5000000) & [0.0018756865, 0.0059562249] (14.25\%) & 16.56s & sdp+auto50-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & onlyobj (5000000) & [0.0014971233, 0.0059831867] (15.66\%) & 15.12s & sdp+onlyobj-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & onlyobj (5000000) & [0.0014839909, 0.0059927182] (15.74\%) & 14.26s & sdp+onlyobj-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-2 (10000000) & [0.0029374735, 0.0059094834] (10.38\%) & 28.20s & sdp+all2-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-2 (10000000) & [0.0028811361, 0.0059052684] (10.56\%) & 27.78s & sdp+all2-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (10000000) & [0.0024294939, 0.0060580114] (12.67\%) & 1m23s & sdp+all3-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (10000000) & [0.0024003161, 0.0061192020] (12.99\%) & 1m21s & sdp+all3-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (10000000) & [0.0019254722, 0.0059268116] (13.97\%) & 15.68s & sdp+auto50-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (10000000) & [0.0019159831, 0.0059361466] (14.04\%) & 15.65s & sdp+auto50-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & onlyobj (10000000) & [0.0015031039, 0.0059778840] (15.62\%) & 13.58s & sdp+onlyobj-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & onlyobj (10000000) & [0.0014999277, 0.0059810104] (15.65\%) & 13.74s & sdp+onlyobj-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-2 (50000000) & [0.0033527569, 0.0058246717] (8.63\%) & 27.72s & sdp+all2-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-2 (50000000) & [0.0032938350, 0.0058423217] (8.90\%) & 28.09s & sdp+all2-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (50000000) & [0.0030760383, 0.0059183166] (9.92\%) & 1m24s & sdp+all3-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (50000000) & [0.0030553206, 0.0059319988] (10.04\%) & 1m23s & sdp+all3-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (50000000) & [0.0019681733, 0.0059043295] (13.74\%) & 13.50s & sdp+auto50-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (50000000) & [0.0019610193, 0.0059081877] (13.78\%) & 14.11s & sdp+auto50-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & onlyobj (50000000) & [0.0015168540, 0.0059679292] (15.54\%) & 12.97s & sdp+onlyobj-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & onlyobj (50000000) & [0.0015131050, 0.0059709209] (15.57\%) & 14.0s & sdp+onlyobj-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-2 (100000000) & [0.0034306511, 0.0058054773] (8.29\%) & 27.63s & sdp+all2-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-2 (100000000) & [0.0033934910, 0.0058147565] (8.45\%) & 27.75s & sdp+all2-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (100000000) & [0.0033216119, 0.0058678294] (8.89\%) & 1m23s & sdp+all3-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (100000000) & [0.0032029959, 0.0058851733] (9.37\%) & 1m25s & sdp+all3-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (100000000) & [0.0019784697, 0.0058963919] (13.68\%) & 15.84s & sdp+auto50-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (100000000) & [0.0019742908, 0.0058996559] (13.71\%) & 14.26s & sdp+auto50-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & onlyobj (100000000) & [0.0015208434, 0.0059646314] (15.52\%) & 14.36s & sdp+onlyobj-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & onlyobj (100000000) & [0.0015173750, 0.0059672537] (15.54\%) & 13.48s & sdp+onlyobj-z, 99.7% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1003) & None & None & onlyobj (-1) & [0.0015275617, 0.0059595090] (15.47\%) & 13.89s & sdp+onlyobj-z, 95% \\ \hline
+Initial queue:
+1
+<Z1Z2>
+<Z4Z5>
+<Z8>
+<Z5>
+<X1>
+<Z1Z4>
+<Z7Z8>
+<Z1>
+<Z4Z7>
+<Z2>
+<X4>
+<X7>
+<Z7>
+<Z4>
+
+Monomials used: 
+1
+<X1>
+<Z1>
+<Z2>
+<X4>
+<Z4>
+<Z5>
+<X7>
+<Z7>
+<Z8>
+<Z1Z2>
+<Z1Z4>
+<Z4Z5>
+<Z4Z7>
+<Z7Z8>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1003) & None & None & onlyobj (-1) & [0.0015275617, 0.0059595090] (15.47\%) & 14.23s & sdp+onlyobj-z, 99.7% \\ \hline
 file & purity
-None & None  & None & None & all order-3 (10000) & [0.0547103352, 1.0] (94.53\%) & 222696ms & all3, 95% \\ \hline
-None & None  & None & None & all order-3 (10000) & [0.0547103352, 1.0] (94.53\%) & 222074ms & all3, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (10000) & [0.0019534281, 1.0] (99.80\%) & 227812ms & sdp+all3, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (10000) & [0.0019534281, 1.0] (99.80\%) & 226275ms & sdp+all3, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (10000) & [0.0083635582, 1.0] (99.16\%) & 18205ms & sdp+auto100, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (10000) & [0.0054659066, 1.0] (99.45\%) & 18555ms & sdp+auto100, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (10000) & [0.0037011742, 1.0] (99.63\%) & 35564ms & sdp+auto300, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (10000) & [0.0022593440, 1.0] (99.77\%) & 35378ms & sdp+auto300, 99.7% \\ \hline
-None & None  & None & None & all order-3 (50000) & [0.0195431054, 1.0] (98.05\%) & 222437ms & all3, 95% \\ \hline
-None & None  & None & None & all order-3 (50000) & [0.0274693280, 1.0] (97.25\%) & 222824ms & all3, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (50000) & [0.0019534285, 1.0] (99.80\%) & 228013ms & sdp+all3, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (50000) & [0.0019534286, 1.0] (99.80\%) & 226834ms & sdp+all3, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & auto (50000) & [0.0260078248, 1.0] (97.40\%) & 19638ms & sdp+auto100, 99.7% \\ \hline
-None & None  & None & None & all order-3 (100000) & [0.0024560214, 1.0] (99.75\%) & 222562ms & all3, 95% \\ \hline
-None & None  & None & None & all order-3 (100000) & [0.0020513013, 1.0] (99.79\%) & 223408ms & all3, 99.7% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (100000) & [0.0035211152, 1.0] (99.65\%) & 227930ms & sdp+all3, 95% \\ \hline
-auto (51x51) & auto (1000) & None & None & all order-3 (100000) & [0.0021449443, 1.0] (99.79\%) & 226696ms & sdp+all3, 99.7% \\ \hline
-None & None  & None & None & all order-3 (500000) & [0.0195463181, 1.0] (98.05\%) & 221442ms & all3, 95% \\ \hline
-None & None  & None & None & all order-3 (500000) & [0.0155018059, 1.0] (98.45\%) & 221888ms & all3, 99.7% \\ \hline
-None & None  & None & None & all order-3 (1000000) & [0.0319501623, 1.0] (96.80\%) & 223144ms & all3, 95% \\ \hline
-None & None  & None & None & all order-3 (1000000) & [0.0284530986, 1.0] (97.15\%) & 222478ms & all3, 99.7% \\ \hline
-None & None  & None & None & all order-3 (5000000) & [0.0652852008, 1.0] (93.47\%) & 221864ms & all3, 95% \\ \hline
-None & None  & None & None & all order-3 (5000000) & [0.0616083665, 1.0] (93.84\%) & 221846ms & all3, 99.7% \\ \hline
-None & None  & None & None & all order-3 (10000000) & [0.0763007667, 1.0] (92.37\%) & 223125ms & all3, 95% \\ \hline
-None & None  & None & None & all order-3 (10000000) & [0.0734107978, 1.0] (92.66\%) & 221615ms & all3, 99.7% \\ \hline
-None & None  & None & None & all order-3 (50000000) & [0.0945366881, 1.0] (90.55\%) & 221046ms & all3, 95% \\ \hline
-None & None  & None & None & all order-3 (50000000) & [0.0931269454, 1.0] (90.69\%) & 221953ms & all3, 99.7% \\ \hline
-None & None  & None & None & all order-3 (100000000) & [0.0995805397, 1.0] (90.04\%) & 222303ms & all3, 95% \\ \hline
-None & None  & None & None & all order-3 (100000000) & [0.0981649761, 1.0] (90.18\%) & 221973ms & all3, 99.7% \\ \hline
-None & None  & None & None & all order-3 (-1) & [0.1117095481, 1.0] (88.83\%) & 5909ms & all3, 95% \\ \hline
-None & None  & None & None & all order-3 (-1) & [0.1117095481, 1.0] (88.83\%) & 5825ms & all3, 99.7% \\ \hline
+None & None  & None & None & all order-3 (10000) & [0.0547103352, 1.0] (94.53\%) & 221995ms & all3, 95% \\ \hline
+None & None  & None & None & all order-3 (10000) & [0.0547103352, 1.0] (94.53\%) & 222304ms & all3, 99.7% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (10000) & [0.0019534281, 1.0] (99.80\%) & 227192ms & sdp+all3, 95% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (10000) & [0.0019534281, 1.0] (99.80\%) & 227369ms & sdp+all3, 99.7% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (10000) & [0.0111360874, 1.0] (98.89\%) & 19599ms & sdp+auto100, 95% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (10000) & [0.0077820755, 1.0] (99.22\%) & 18195ms & sdp+auto100, 99.7% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (10000) & [0.0021722191, 1.0] (99.78\%) & 34122ms & sdp+auto300, 95% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (10000) & [0.0020823812, 1.0] (99.79\%) & 35650ms & sdp+auto300, 99.7% \\ \hline
+None & None  & None & None & all order-3 (50000) & [0.0175764731, 1.0] (98.24\%) & 222754ms & all3, 95% \\ \hline
+None & None  & None & None & all order-3 (50000) & [0.0193227100, 1.0] (98.07\%) & 223842ms & all3, 99.7% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (50000) & [0.0019534281, 1.0] (99.80\%) & 228486ms & sdp+all3, 95% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (50000) & [0.0019534281, 1.0] (99.80\%) & 221551ms & sdp+all3, 99.7% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (50000) & [0.0213002255, 1.0] (97.87\%) & 35625ms & sdp+auto300, 95% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & auto (50000) & [0.0142811067, 1.0] (98.57\%) & 35619ms & sdp+auto300, 99.7% \\ \hline
+None & None  & None & None & all order-3 (100000) & [0.0032026564, 1.0] (99.68\%) & 222418ms & all3, 95% \\ \hline
+None & None  & None & None & all order-3 (100000) & [0.0020732492, 1.0] (99.79\%) & 222952ms & all3, 99.7% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (100000) & [0.0033066001, 1.0] (99.67\%) & 230758ms & sdp+all3, 95% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (100000) & [0.0021803763, 1.0] (99.78\%) & 222881ms & sdp+all3, 99.7% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+None & None  & None & None & all order-3 (500000) & [0.0418152354, 1.0] (95.82\%) & 222477ms & all3, 95% \\ \hline
+None & None  & None & None & all order-3 (500000) & [0.0338239959, 1.0] (96.62\%) & 223166ms & all3, 99.7% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (500000) & [0.0515571098, 1.0] (94.84\%) & 229705ms & sdp+all3, 95% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+auto (51x51) & auto (1000) & None & None & all order-3 (500000) & [0.0399199605, 1.0] (96.01\%) & 230880ms & sdp+all3, 99.7% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+None & None  & None & None & all order-3 (1000000) & [0.0653670760, 1.0] (93.46\%) & 223054ms & all3, 95% \\ \hline
+None & None  & None & None & all order-3 (1000000) & [0.0590427174, 1.0] (94.10\%) & 222187ms & all3, 99.7% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+None & None  & None & None & all order-3 (5000000) & [0.1131717074, 1.0] (88.68\%) & 222969ms & all3, 95% \\ \hline
+None & None  & None & None & all order-3 (5000000) & [0.1079730473, 1.0] (89.20\%) & 222847ms & all3, 99.7% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+None & None  & None & None & all order-3 (10000000) & [0.1294207874, 1.0] (87.06\%) & 226084ms & all3, 95% \\ \hline
+None & None  & None & None & all order-3 (10000000) & [0.1245146182, 1.0] (87.55\%) & 222458ms & all3, 99.7% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+None & None  & None & None & all order-3 (50000000) & [0.1534912446, 1.0] (84.65\%) & 222058ms & all3, 95% \\ \hline
+None & None  & None & None & all order-3 (50000000) & [0.1512490261, 1.0] (84.88\%) & 222652ms & all3, 99.7% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+None & None  & None & None & all order-3 (100000000) & [0.1598059894, 1.0] (84.02\%) & 223511ms & all3, 95% \\ \hline
+None & None  & None & None & all order-3 (100000000) & [0.1582710641, 1.0] (84.17\%) & 222696ms & all3, 99.7% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+None & None  & None & None & all order-3 (-1) & [0.1765225887, 1.0] (82.35\%) & 8405ms & all3, 95% \\ \hline
+None & None  & None & None & all order-3 (-1) & [0.1765225887, 1.0] (82.35\%) & 6609ms & all3, 99.7% \\ \hline
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
+Initial queue:
+1
+<Z9>
+<Z8>
+<Y8>
+<X8>
+<Z7>
+<Y6>
+<X6>
+<Z5>
+<Y5>
+<Z6>
+<X1>
+<Y1>
+<Y2>
+<Y7>
+<Z1>
+<X2>
+<X7>
+<X4>
+<Z2>
+<X3>
+<Y3>
+<X9>
+<Y4>
+<Z4>
+<Y9>
+<Z3>
+<X5>
+
+Monomials used: 
+1
+<X1>
+<Y1>
+<Z1>
+<X2>
+<Y2>
+<Z2>
+<X3>
+<Y3>
+<Z3>
+<X4>
+<Y4>
+<Z4>
+<X5>
+<Y5>
+<Z5>
+<X6>
+<Y6>
+<Z6>
+<X7>
+<Y7>
+<Z7>
+<X8>
+<Y8>
+<Z8>
+<X9>
+<Y9>
+<Z9>
+
+Monomials in constraints: 
+1
+
 file & energy
-auto (51x51) & None  & None & None & [-15.0, 15.0] (71.43\%) & 0.43s & sdp \\ \hline
-//None & None & None & None & all order-2 (10000) & [-20.9687620871, 3.7011466868] (58.74\%) & 31.99s & all2, 95% \\ \hline
-//None & None & None & None & all order-2 (10000) & [-21.0, 5.5912986897] (63.31\%) & 31.70s & all2, 99.7% \\ \hline
-auto (51x51) & None  & None & None & onlyobj (10000) & [-14.7497160191, -10.3585335430] (10.46\%) & 4.43s & sdp+onlyobj, 95% \\ \hline
-auto (51x51) & None  & None & None & onlyobj (10000) & [-14.8912516454, -9.4957702849] (12.85\%) & 4.74s & sdp+onlyobj, 99.7% \\ \hline
-auto (51x51) & None  & None & None & all order-2 (10000) & [-14.8212841824, 3.2011466875] (42.91\%) & 31.84s & sdp+all2, 95% \\ \hline
-auto (51x51) & None  & None & None & all order-2 (10000) & [-14.8998988445, 6.6627272597] (51.34\%) & 32.71s & sdp+all2, 99.7% \\ \hline
-auto (51x51) & None  & None & None & auto (10000) & [-14.7610918760, -1.4924771974] (31.59\%) & 19.87s & sdp+auto200, 95% \\ \hline
-auto (51x51) & None  & None & None & auto (10000) & [-14.7524231193, 0.8647806070] (37.18\%) & 19.61s & sdp+auto200, 99.7% \\ \hline
-//None & None & None & None & all order-2 (50000) & [-19.1457808025, -6.3546804749] (30.46\%) & 31.57s & all2, 95% \\ \hline
-//None & None & None & None & all order-2 (50000) & [-19.6429004320, -5.4200867854] (33.86\%) & 32.45s & all2, 99.7% \\ \hline
-auto (51x51) & None  & None & None & onlyobj (50000) & [-14.6563667752, -12.3085772537] (5.59\%) & 4.44s & sdp+onlyobj, 95% \\ \hline
-auto (51x51) & None  & None & None & onlyobj (50000) & [-14.6629427801, -11.9190596933] (6.53\%) & 5.04s & sdp+onlyobj, 99.7% \\ \hline
-auto (51x51) & None  & None & None & all order-2 (50000) & [-14.4585147024, -5.9884832918] (20.17\%) & 32.58s & sdp+all2, 95% \\ \hline
-auto (51x51) & None  & None & None & all order-2 (50000) & [-14.5201249168, -5.0116360812] (22.64\%) & 32.06s & sdp+all2, 99.7% \\ \hline
-auto (51x51) & None  & None & None & auto (50000) & [-14.3039473344, -8.2105988804] (14.51\%) & 19.24s & sdp+auto200, 95% \\ \hline
-auto (51x51) & None  & None & None & auto (50000) & [-14.3867493864, -7.2949730658] (16.89\%) & 20.07s & sdp+auto200, 99.7% \\ \hline
-//None & None & None & None & all order-2 (100000) & [-18.0240955375, -8.6456550135] (22.33\%) & 31.95s & all2, 95% \\ \hline
-//None & None & None & None & all order-2 (100000) & [-18.6626358557, -7.8176994353] (25.82\%) & 31.59s & all2, 99.7% \\ \hline
-auto (51x51) & None  & None & None & onlyobj (100000) & [-14.5847131816, -12.7232900301] (4.43\%) & 4.40s & sdp+onlyobj, 95% \\ \hline
-auto (51x51) & None  & None & None & onlyobj (100000) & [-14.5978910872, -12.4207966704] (5.18\%) & 4.45s & sdp+onlyobj, 99.7% \\ \hline
-auto (51x51) & None  & None & None & all order-2 (100000) & [-14.3111938350, -8.2512888160] (14.43\%) & 31.94s & sdp+all2, 95% \\ \hline
-auto (51x51) & None  & None & None & all order-2 (100000) & [-14.3748233482, -7.6768543649] (15.95\%) & 31.92s & sdp+all2, 99.7% \\ \hline
-auto (51x51) & None  & None & None & auto (100000) & [-14.2114244918, -9.8560982831] (10.37\%) & 19.36s & sdp+auto200, 95% \\ \hline
-auto (51x51) & None  & None & None & auto (100000) & [-14.2691054401, -9.3001692468] (11.83\%) & 20.22s & sdp+auto200, 99.7% \\ \hline
-//None & None & None & None & all order-2 (500000) & [-16.3170036956, -11.4780574175] (11.52\%) & 31.92s & all2, 95% \\ \hline
-//None & None & None & None & all order-2 (500000) & [-16.5659674292, -11.1499219266] (12.90\%) & 31.67s & all2, 99.7% \\ \hline
-auto (51x51) & None  & None & None & onlyobj (500000) & [-14.2900301710, -13.2927001158] (2.37\%) & 4.35s & sdp+onlyobj, 95% \\ \hline
-auto (51x51) & None  & None & None & onlyobj (500000) & [-14.4225644659, -13.2393612284] (2.82\%) & 4.41s & sdp+onlyobj, 99.7% \\ \hline
-auto (51x51) & None  & None & None & all order-2 (500000) & [-14.1155210715, -11.3713158444] (6.53\%) & 31.96s & sdp+all2, 95% \\ \hline
-auto (51x51) & None  & None & None & all order-2 (500000) & [-14.1592859943, -10.9715511400] (7.59\%) & 33.28s & sdp+all2, 99.7% \\ \hline
-auto (51x51) & None  & None & None & auto (500000) & [-14.0770317705, -12.0632844537] (4.79\%) & 19.87s & sdp+auto200, 95% \\ \hline
-auto (51x51) & None  & None & None & auto (500000) & [-14.0833170103, -11.8335369133] (5.36\%) & 19.82s & sdp+auto200, 99.7% \\ \hline
-//None & None & None & None & all order-2 (1000000) & [-15.5765635608, -12.1377221535] (8.19\%) & 32.64s & all2, 95% \\ \hline
-//None & None & None & None & all order-2 (1000000) & [-15.7552483750, -11.8425052228] (9.32\%) & 31.76s & all2, 99.7% \\ \hline
-auto (51x51) & None  & None & None & onlyobj (1000000) & [-14.1984026463, -13.4920990429] (1.68\%) & 4.37s & sdp+onlyobj, 95% \\ \hline
-auto (51x51) & None  & None & None & onlyobj (1000000) & [-14.2287139257, -13.3876996850] (2.0\%) & 4.37s & sdp+onlyobj, 99.7% \\ \hline
-auto (51x51) & None  & None & None & all order-2 (1000000) & [-14.0706305562, -12.0970061133] (4.70\%) & 31.98s & sdp+all2, 95% \\ \hline
-auto (51x51) & None  & None & None & all order-2 (1000000) & [-14.0898196307, -11.8368892208] (5.36\%) & 31.88s & sdp+all2, 99.7% \\ \hline
-auto (51x51) & None  & None & None & auto (1000000) & [-14.0461763742, -12.5833878149] (3.48\%) & 19.95s & sdp+auto200, 95% \\ \hline
-auto (51x51) & None  & None & None & auto (1000000) & [-14.0649364163, -12.3654927762] (4.05\%) & 19.48s & sdp+auto200, 99.7% \\ \hline
-//None & None & None & None & all order-2 (5000000) & [-14.5707735169, -13.0328768868] (3.66\%) & 32.34s & all2, 95% \\ \hline
-//None & None & None & None & all order-2 (5000000) & [-14.6879731797, -12.9381412464] (4.17\%) & 31.83s & all2, 99.7% \\ \hline
-auto (51x51) & None  & None & None & onlyobj (5000000) & [-13.9732966214, -13.6574292485] (0.75\%) & 4.91s & sdp+onlyobj, 95% \\ \hline
-auto (51x51) & None  & None & None & onlyobj (5000000) & [-14.0088633228, -13.6327503014] (0.90\%) & 4.40s & sdp+onlyobj, 99.7% \\ \hline
-auto (51x51) & None  & None & None & all order-2 (5000000) & [-14.0128251566, -13.0488825028] (2.30\%) & 33.04s & sdp+all2, 95% \\ \hline
-auto (51x51) & None  & None & None & all order-2 (5000000) & [-14.0200830648, -12.9180640263] (2.62\%) & 32.05s & sdp+all2, 99.7% \\ \hline
-auto (51x51) & None  & None & None & auto (5000000) & [-13.9928339863, -13.2856749186] (1.68\%) & 20.06s & sdp+auto200, 95% \\ \hline
-auto (51x51) & None  & None & None & auto (5000000) & [-14.0071779502, -13.1735457425] (1.98\%) & 19.29s & sdp+auto200, 99.7% \\ \hline
-//None & None & None & None & all order-2 (10000000) & [-14.3300395543, -13.2425824183] (2.59\%) & 32.32s & all2, 95% \\ \hline
-//None & None & None & None & all order-2 (10000000) & [-14.4006877950, -13.1633697690] (2.95\%) & 32.50s & all2, 99.7% \\ \hline
-auto (51x51) & None  & None & None & onlyobj (10000000) & [-13.9406522326, -13.7172994239] (0.53\%) & 4.40s & sdp+onlyobj, 95% \\ \hline
-auto (51x51) & None  & None & None & onlyobj (10000000) & [-13.9532998482, -13.6873472750] (0.63\%) & 4.94s & sdp+onlyobj, 99.7% \\ \hline
-auto (51x51) & None  & None & None & all order-2 (10000000) & [-13.9956923686, -13.2680650425] (1.73\%) & 32.13s & sdp+all2, 95% \\ \hline
-auto (51x51) & None  & None & None & all order-2 (10000000) & [-14.0064255395, -13.1944684001] (1.93\%) & 33.11s & sdp+all2, 99.7% \\ \hline
-auto (51x51) & None  & None & None & auto (10000000) & [-13.9787485089, -13.4141108805] (1.34\%) & 19.30s & sdp+auto200, 95% \\ \hline
-auto (51x51) & None  & None & None & auto (10000000) & [-13.9797582281, -13.3924149548] (1.40\%) & 19.61s & sdp+auto200, 99.7% \\ \hline
-//None & None & None & None & all order-2 (50000000) & [-14.0558690206, -13.5695434049] (1.16\%) & 31.72s & all2, 95% \\ \hline
-//None & None & None & None & all order-2 (50000000) & [-14.1097088746, -13.5563634314] (1.32\%) & 32.96s & all2, 99.7% \\ \hline
-auto (51x51) & None  & None & None & onlyobj (50000000) & [-13.8697404768, -13.7698541228] (0.24\%) & 4.37s & sdp+onlyobj, 95% \\ \hline
-auto (51x51) & None  & None & None & onlyobj (50000000) & [-13.8786384736, -13.7597016158] (0.28\%) & 4.98s & sdp+onlyobj, 99.7% \\ \hline
-auto (51x51) & None  & None & None & all order-2 (50000000) & [-13.9692069962, -13.5801155309] (0.93\%) & 32.24s & sdp+all2, 95% \\ \hline
-auto (51x51) & None  & None & None & all order-2 (50000000) & [-13.9723665202, -13.5386168534] (1.03\%) & 32.74s & sdp+all2, 99.7% \\ \hline
-auto (51x51) & None  & None & None & auto (50000000) & [-13.9223171973, -13.6474382035] (0.65\%) & 19.64s & sdp+auto200, 95% \\ \hline
-auto (51x51) & None  & None & None & auto (50000000) & [-13.9290584689, -13.6098351784] (0.76\%) & 19.63s & sdp+auto200, 99.7% \\ \hline
-//None & None & None & None & all order-2 (100000000) & [-13.9850694835, -13.6411853428] (0.82\%) & 32.35s & all2, 95% \\ \hline
-//None & None & None & None & all order-2 (100000000) & [-14.0201580421, -13.6288837269] (0.93\%) & 31.71s & all2, 99.7% \\ \hline
-auto (51x51) & None  & None & None & onlyobj (100000000) & [-13.8545017763, -13.7838714458] (0.17\%) & 5.32s & sdp+onlyobj, 95% \\ \hline
-auto (51x51) & None  & None & None & onlyobj (100000000) & [-13.8625111658, -13.7784097770] (0.20\%) & 5.02s & sdp+onlyobj, 99.7% \\ \hline
-auto (51x51) & None  & None & None & all order-2 (100000000) & [-13.9578399415, -13.6531614747] (0.73\%) & 32.48s & sdp+all2, 95% \\ \hline
-auto (51x51) & None  & None & None & all order-2 (100000000) & [-13.9616055893, -13.6291224071] (0.79\%) & 32.09s & sdp+all2, 99.7% \\ \hline
-auto (51x51) & None  & None & None & auto (100000000) & [-13.9062482199, -13.6996857482] (0.49\%) & 19.71s & sdp+auto200, 95% \\ \hline
-auto (51x51) & None  & None & None & auto (100000000) & [-13.9113181954, -13.6763562834] (0.56\%) & 20.29s & sdp+auto200, 99.7% \\ \hline
-//None & None & None & None & all order-2 (-1) & [-13.8207902581, -13.8207902581] (0.0\%) & 3.34s & all2, 95% \\ \hline
-//None & None & None & None & all order-2 (-1) & [-13.8207902581, -13.8207902581] (0.0\%) & 3.15s & all2, 99.7% \\ \hline
-auto (51x51) & None  & None & None & onlyobj (-1) & [-13.8207902581, -13.8207902581] (0.0\%) & 3.11s & sdp+onlyobj, 95% \\ \hline
-auto (51x51) & None  & None & None & onlyobj (-1) & [-13.8207902581, -13.8207902581] (0.0\%) & 3.16s & sdp+onlyobj, 99.7% \\ \hline
-auto (51x51) & None  & None & None & all order-2 (-1) & [-13.8207902581, -13.8207902581] (0.0\%) & 3.08s & sdp+all2, 95% \\ \hline
-auto (51x51) & None  & None & None & all order-2 (-1) & [-13.8207902581, -13.8207902581] (0.0\%) & 3.05s & sdp+all2, 99.7% \\ \hline
-auto (51x51) & None  & None & None & auto (-1) & [-13.8207902581, -13.8207902581] (0.0\%) & 3.40s & sdp+auto200, 95% \\ \hline
-auto (51x51) & None  & None & None & auto (-1) & [-13.8207902581, -13.8207902581] (0.0\%) & 3.40s & sdp+auto200, 99.7% \\ \hline
+auto (51x51) & None  & None & None & [-10.8166537962, 10.8166537962] (72.11\%) & 0.43s & sdp \\ \hline
+//None & None & None & None & all order-2 (10000) & [-14.8973335157, 2.1385741641] (56.79\%) & 32.52s & all2, 95% \\ \hline
+//None & None & None & None & all order-2 (10000) & [-14.8627179960, 4.6259647415] (64.96\%) & 32.17s & all2, 99.7% \\ \hline
+auto (51x51) & None  & None & None & onlyobj (10000) & [-10.7658485719, -7.5168997096] (10.83\%) & 5.08s & sdp+onlyobj, 95% \\ \hline
+auto (51x51) & None  & None & None & onlyobj (10000) & [-10.7971279997, -6.8949379586] (13.01\%) & 4.32s & sdp+onlyobj, 99.7% \\ \hline
+auto (51x51) & None  & None & None & all order-2 (10000) & [-10.7666714155, 2.7814313069] (45.16\%) & 32.01s & sdp+all2, 95% \\ \hline
+auto (51x51) & None  & None & None & all order-2 (10000) & [-10.7724511524, 3.8815398799] (48.85\%) & 32.06s & sdp+all2, 99.7% \\ \hline
+auto (51x51) & None  & None & None & auto (10000) & [-10.7035720284, -0.7889122733] (33.05\%) & 19.31s & sdp+auto200, 95% \\ \hline
+auto (51x51) & None  & None & None & auto (10000) & [-10.7313881822, 0.3834146282] (37.05\%) & 19.32s & sdp+auto200, 99.7% \\ \hline
+//None & None & None & None & all order-2 (50000) & [-13.1793468261, -4.1255765968] (30.18\%) & 31.67s & all2, 95% \\ \hline
+//None & None & None & None & all order-2 (50000) & [-13.6163937152, -3.5153537401] (33.67\%) & 31.79s & all2, 99.7% \\ \hline
+auto (51x51) & None  & None & None & onlyobj (50000) & [-10.6311292654, -8.7195719880] (6.37\%) & 4.39s & sdp+onlyobj, 95% \\ \hline
+auto (51x51) & None  & None & None & onlyobj (50000) & [-10.6632345560, -8.6283199490] (6.78\%) & 4.38s & sdp+onlyobj, 99.7% \\ \hline
+auto (51x51) & None  & None & None & all order-2 (50000) & [-10.4705648938, -4.0903653298] (21.27\%) & 32.52s & sdp+all2, 95% \\ \hline
+auto (51x51) & None  & None & None & all order-2 (50000) & [-10.5319582754, -3.8322551491] (22.33\%) & 32.08s & sdp+all2, 99.7% \\ \hline
+auto (51x51) & None  & None & None & auto (50000) & [-10.5180397479, -6.1026190160] (14.72\%) & 19.31s & sdp+auto200, 95% \\ \hline
+auto (51x51) & None  & None & None & auto (50000) & [-10.5644031964, -5.3256637661] (17.46\%) & 19.75s & sdp+auto200, 99.7% \\ \hline
+//None & None & None & None & all order-2 (100000) & [-12.6779741504, -5.9304980479] (22.49\%) & 32.17s & all2, 95% \\ \hline
+//None & None & None & None & all order-2 (100000) & [-12.8267337629, -5.2852782687] (25.14\%) & 32.34s & all2, 99.7% \\ \hline
+auto (51x51) & None  & None & None & onlyobj (100000) & [-10.5471551287, -9.1100284801] (4.79\%) & 4.39s & sdp+onlyobj, 95% \\ \hline
+auto (51x51) & None  & None & None & onlyobj (100000) & [-10.5523293103, -8.8870904893] (5.55\%) & 4.96s & sdp+onlyobj, 99.7% \\ \hline
+auto (51x51) & None  & None & None & all order-2 (100000) & [-10.3170616061, -5.8706388961] (14.82\%) & 32.83s & sdp+all2, 95% \\ \hline
+auto (51x51) & None  & None & None & all order-2 (100000) & [-10.3958478120, -5.5669684099] (16.10\%) & 32.74s & sdp+all2, 99.7% \\ \hline
+auto (51x51) & None  & None & None & auto (100000) & [-10.4479367707, -6.9791709482] (11.56\%) & 19.93s & sdp+auto200, 95% \\ \hline
+auto (51x51) & None  & None & None & auto (100000) & [-10.4710630929, -6.5510599916] (13.07\%) & 19.87s & sdp+auto200, 99.7% \\ \hline
+//None & None & None & None & all order-2 (500000) & [-11.5778892820, -8.1595875614] (11.39\%) & 32.43s & all2, 95% \\ \hline
+//None & None & None & None & all order-2 (500000) & [-11.7633969684, -7.9075485671] (12.85\%) & 32.32s & all2, 99.7% \\ \hline
+auto (51x51) & None  & None & None & onlyobj (500000) & [-10.2550987001, -9.5416168869] (2.38\%) & 5.19s & sdp+onlyobj, 95% \\ \hline
+auto (51x51) & None  & None & None & onlyobj (500000) & [-10.3238425996, -9.4771050668] (2.82\%) & 4.36s & sdp+onlyobj, 99.7% \\ \hline
+auto (51x51) & None  & None & None & all order-2 (500000) & [-10.1727370200, -8.0430145275] (7.10\%) & 32.22s & sdp+all2, 95% \\ \hline
+auto (51x51) & None  & None & None & all order-2 (500000) & [-10.1797745842, -7.9166777806] (7.54\%) & 32.87s & sdp+all2, 99.7% \\ \hline
+auto (51x51) & None  & None & None & auto (500000) & [-10.2926073606, -8.6152668752] (5.59\%) & 19.35s & sdp+auto200, 95% \\ \hline
+auto (51x51) & None  & None & None & auto (500000) & [-10.3258031790, -8.4659476587] (6.20\%) & 19.98s & sdp+auto200, 99.7% \\ \hline
+//None & None & None & None & all order-2 (1000000) & [-11.0951285124, -8.6388132215] (8.19\%) & 31.78s & all2, 95% \\ \hline
+//None & None & None & None & all order-2 (1000000) & [-11.3283212834, -8.5429216717] (9.28\%) & 31.77s & all2, 99.7% \\ \hline
+auto (51x51) & None  & None & None & onlyobj (1000000) & [-10.1398591738, -9.6353565975] (1.68\%) & 4.89s & sdp+onlyobj, 95% \\ \hline
+auto (51x51) & None  & None & None & onlyobj (1000000) & [-10.2044551341, -9.6037307718] (2.0\%) & 4.27s & sdp+onlyobj, 99.7% \\ \hline
+auto (51x51) & None  & None & None & all order-2 (1000000) & [-10.1325179722, -8.6405682207] (4.97\%) & 32.27s & sdp+all2, 95% \\ \hline
+auto (51x51) & None  & None & None & all order-2 (1000000) & [-10.1423254733, -8.5776707064] (5.22\%) & 32.68s & sdp+all2, 99.7% \\ \hline
+auto (51x51) & None  & None & None & auto (1000000) & [-10.2390678201, -8.9892997550] (4.17\%) & 19.34s & sdp+auto200, 95% \\ \hline
+auto (51x51) & None  & None & None & auto (1000000) & [-10.2648149571, -8.9151103341] (4.50\%) & 19.60s & sdp+auto200, 99.7% \\ \hline
+//None & None & None & None & all order-2 (5000000) & [-10.4003544476, -9.3018568546] (3.66\%) & 32.33s & all2, 95% \\ \hline
+//None & None & None & None & all order-2 (5000000) & [-10.4987202500, -9.2488402976] (4.17\%) & 32.78s & all2, 99.7% \\ \hline
+auto (51x51) & None  & None & None & onlyobj (5000000) & [-10.0131814757, -9.7875614196] (0.75\%) & 4.34s & sdp+onlyobj, 95% \\ \hline
+auto (51x51) & None  & None & None & onlyobj (5000000) & [-10.0224626729, -9.7538107937] (0.90\%) & 4.36s & sdp+onlyobj, 99.7% \\ \hline
+auto (51x51) & None  & None & None & all order-2 (5000000) & [-10.0744537167, -9.3486803015] (2.42\%) & 33.17s & sdp+all2, 95% \\ \hline
+auto (51x51) & None  & None & None & all order-2 (5000000) & [-10.0824643036, -9.3028943516] (2.60\%) & 32.03s & sdp+all2, 99.7% \\ \hline
+auto (51x51) & None  & None & None & auto (5000000) & [-10.1348913501, -9.4964600520] (2.13\%) & 19.40s & sdp+auto200, 95% \\ \hline
+auto (51x51) & None  & None & None & auto (5000000) & [-10.1476873882, -9.4175390689] (2.43\%) & 20.05s & sdp+auto200, 99.7% \\ \hline
+//None & None & None & None & all order-2 (10000000) & [-10.3047341649, -9.5279790678] (2.59\%) & 31.66s & all2, 95% \\ \hline
+//None & None & None & None & all order-2 (10000000) & [-10.3429171960, -9.4591186060] (2.95\%) & 31.77s & all2, 99.7% \\ \hline
+auto (51x51) & None  & None & None & onlyobj (10000000) & [-9.9759048569, -9.8163671893] (0.53\%) & 4.36s & sdp+onlyobj, 95% \\ \hline
+auto (51x51) & None  & None & None & onlyobj (10000000) & [-9.9912359323, -9.8012710426] (0.63\%) & 4.91s & sdp+onlyobj, 99.7% \\ \hline
+auto (51x51) & None  & None & None & all order-2 (10000000) & [-10.0583447665, -9.5069541465] (1.84\%) & 32.09s & sdp+all2, 95% \\ \hline
+auto (51x51) & None  & None & None & all order-2 (10000000) & [-10.0636078227, -9.4591888061] (2.01\%) & 33.01s & sdp+all2, 99.7% \\ \hline
+auto (51x51) & None  & None & None & auto (10000000) & [-10.0936372795, -9.6113749754] (1.61\%) & 19.50s & sdp+auto200, 95% \\ \hline
+auto (51x51) & None  & None & None & auto (10000000) & [-10.1117074615, -9.5567656634] (1.85\%) & 20.13s & sdp+auto200, 99.7% \\ \hline
+//None & None & None & None & all order-2 (50000000) & [-10.0702619565, -9.7228865167] (1.16\%) & 31.79s & all2, 95% \\ \hline
+//None & None & None & None & all order-2 (50000000) & [-10.0831059980, -9.6878592529] (1.32\%) & 31.70s & all2, 99.7% \\ \hline
+auto (51x51) & None  & None & None & onlyobj (50000000) & [-9.9339173478, -9.8625699397] (0.24\%) & 5.06s & sdp+onlyobj, 95% \\ \hline
+auto (51x51) & None  & None & None & onlyobj (50000000) & [-9.9411429399, -9.8561877077] (0.28\%) & 4.99s & sdp+onlyobj, 99.7% \\ \hline
+auto (51x51) & None  & None & None & all order-2 (50000000) & [-10.0213983271, -9.7186183524] (1.01\%) & 32.65s & sdp+all2, 95% \\ \hline
+auto (51x51) & None  & None & None & all order-2 (50000000) & [-10.0271304759, -9.6945703796] (1.11\%) & 32.72s & sdp+all2, 99.7% \\ \hline
+auto (51x51) & None  & None & None & auto (50000000) & [-9.9977990430, -9.7700590328] (0.76\%) & 19.97s & sdp+auto200, 95% \\ \hline
+auto (51x51) & None  & None & None & auto (50000000) & [-10.0062397476, -9.7465195216] (0.87\%) & 19.86s & sdp+auto200, 99.7% \\ \hline
+//None & None & None & None & all order-2 (100000000) & [-10.0111801029, -9.7655485738] (0.82\%) & 32.32s & all2, 95% \\ \hline
+//None & None & None & None & all order-2 (100000000) & [-10.0331560603, -9.7536744066] (0.93\%) & 32.45s & all2, 99.7% \\ \hline
+auto (51x51) & None  & None & None & onlyobj (100000000) & [-9.9225978909, -9.8721476556] (0.17\%) & 4.95s & sdp+onlyobj, 95% \\ \hline
+auto (51x51) & None  & None & None & onlyobj (100000000) & [-9.9267577841, -9.8666855631] (0.20\%) & 4.33s & sdp+onlyobj, 99.7% \\ \hline
+auto (51x51) & None  & None & None & all order-2 (100000000) & [-10.0021173172, -9.7781776244] (0.75\%) & 32.86s & sdp+all2, 95% \\ \hline
+auto (51x51) & None  & None & None & all order-2 (100000000) & [-10.0074021971, -9.7581286006] (0.83\%) & 32.30s & sdp+all2, 99.7% \\ \hline
+auto (51x51) & None  & None & None & auto (100000000) & [-9.9706831160, -9.8092598282] (0.54\%) & 19.91s & sdp+auto200, 95% \\ \hline
+auto (51x51) & None  & None & None & auto (100000000) & [-9.9788746828, -9.7952539992] (0.61\%) & 19.95s & sdp+auto200, 99.7% \\ \hline
+//None & None & None & None & all order-2 (-1) & [-9.8970681675, -9.8970681675] (0.0\%) & 3.37s & all2, 95% \\ \hline
+//None & None & None & None & all order-2 (-1) & [-9.8970681675, -9.8970681675] (0.0\%) & 2.90s & all2, 99.7% \\ \hline
+auto (51x51) & None  & None & None & onlyobj (-1) & [-9.8970681675, -9.8970681675] (0.0\%) & 2.62s & sdp+onlyobj, 95% \\ \hline
+auto (51x51) & None  & None & None & onlyobj (-1) & [-9.8970681675, -9.8970681675] (0.0\%) & 3.13s & sdp+onlyobj, 99.7% \\ \hline
+auto (51x51) & None  & None & None & all order-2 (-1) & [-9.8970681675, -9.8970681675] (0.0\%) & 3.12s & sdp+all2, 95% \\ \hline
+auto (51x51) & None  & None & None & all order-2 (-1) & [-9.8970681675, -9.8970681675] (0.0\%) & 3.12s & sdp+all2, 99.7% \\ \hline
+auto (51x51) & None  & None & None & auto (-1) & [-9.8970681675, -9.8970681675] (0.0\%) & 2.89s & sdp+auto200, 95% \\ \hline
+auto (51x51) & None  & None & None & auto (-1) & [-9.8970681675, -9.8970681675] (0.0\%) & 3.47s & sdp+auto200, 99.7% \\ \hline
