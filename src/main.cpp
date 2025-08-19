@@ -603,11 +603,21 @@ int main(int argc, char* argv[]) {
         
             // H = J \sum S_j S_{j+1} + (J/2) \sum S_j S_{j+2}
             hamiltonianInter = std::vector<std::vector<Poly>>(numQubits, std::vector<Poly>(numQubits, Poly()));
-            for (int i=0; i<numQubits-1; i++) {
-                hamiltonianInter[i][i+1] = Poly(J, "<X" + std::to_string(i+1) + "X" + std::to_string(i+2) + ">");
+            for (int i=0; i<numQubits; i++) {
+                int ind1 = i;
+                int ind2 = (i+1) % numQubits;
+                hamiltonianInter[ind1][ind2] = Poly(J/4.0, "<X" + std::to_string(ind1+1) + "X" + std::to_string(ind2+1) + ">")
+                                             + Poly(J/4.0, "<Y" + std::to_string(ind1+1) + "Y" + std::to_string(ind2+1) + ">")
+                                             + Poly(J/4.0, "<Z" + std::to_string(ind1+1) + "Z" + std::to_string(ind2+1) + ">");
+                hamiltonianInter[ind2][ind1] = hamiltonianInter[ind1][ind2];
             }
-            for (int i=0; i<numQubits-2; i++) {
-                hamiltonianInter[i][i+2] = Poly(J/2.0, "<X" + std::to_string(i+1) + "X" + std::to_string(i+3) + ">");
+            for (int i=0; i<numQubits; i++) {
+                int ind1 = i;
+                int ind2 = (i+2) % numQubits;
+                hamiltonianInter[ind1][ind2] = Poly(J/8.0, "<X" + std::to_string(ind1+1) + "X" + std::to_string(ind2+1) + ">")
+                                             + Poly(J/8.0, "<Y" + std::to_string(ind1+1) + "Y" + std::to_string(ind2+1) + ">")
+                                             + Poly(J/8.0, "<Z" + std::to_string(ind1+1) + "Z" + std::to_string(ind2+1) + ">");
+                hamiltonianInter[ind2][ind1] = hamiltonianInter[ind1][ind2];
             }
 
             // Full Hamiltonian
@@ -2146,7 +2156,7 @@ int main(int argc, char* argv[]) {
         // The objective is the Hamiltonian
         Poly H = Poly();
         for (int i=0; i<numQubits; i++) {
-            for (int j=0; j<numQubits; j++) {
+            for (int j=i; j<numQubits; j++) {
                 H += hamiltonianInter[i][j];
             }
         }
@@ -2351,23 +2361,25 @@ int main(int argc, char* argv[]) {
             std::set<Mon> monomsInConstraints;
             std::vector<Mon> queue;
             queue.push_back(Mon());
+            monomsUsed.insert(Mon());
             monomsInConstraints.insert(Mon());
             for (auto& term : pseudoObjective) {
-                if (!monomsInConstraints.count(term.first)) {
-                    monomsInConstraints.insert(term.first);
+                if (!monomsUsed.count(term.first)) {
+                    monomsUsed.insert(term.first);
                     queue.push_back(term.first);
                 }
             }
             for (size_t i=0; i<variablesToPut.size(); i++) {
                 Mon monToAdd = variablesToPut[i].getKey();
-                if (!monomsInConstraints.count(monToAdd)) {
-                    monomsInConstraints.insert(monToAdd);
+                if (!monomsUsed.count(monToAdd)) {
+                    monomsUsed.insert(monToAdd);
                     queue.push_back(monToAdd);
                 }
             }
             for (size_t i=0; i<constraintsZero.size(); i++) {
                 for (auto& term : constraintsZero[i]) {
-                    if (!monomsInConstraints.count(term.first)) {
+                    if (!monomsUsed.count(term.first)) {
+                        monomsUsed.insert(term.first);
                         monomsInConstraints.insert(term.first);
                         queue.push_back(term.first);
                     }
@@ -2377,37 +2389,60 @@ int main(int argc, char* argv[]) {
                 for (size_t j=0; j<momentMatrices[i].size(); j++) {
                     for (size_t k=0; k<momentMatrices[i][j].size(); k++) {
                         Mon monToAdd = momentMatrices[i][j][k].getKey();
-                        if (!monomsInConstraints.count(monToAdd)) {
+                        if (!monomsUsed.count(monToAdd)) {
+                            monomsUsed.insert(monToAdd);
                             monomsInConstraints.insert(monToAdd);
                             queue.push_back(monToAdd);
                         }
                     }
                 }
             }
+
+            std::cout << "Initial queue:" << std::endl;
+            for (size_t i=0; i<queue.size(); i++) {
+                std::cout << queue[i] << std::endl;
+            }
+            std::cout << std::endl;
+            std::cout << "Monomials used: " << std::endl;
+            for (auto& mon : monomsUsed) {
+                std::cout << mon << std::endl;
+            }
+            std::cout << std::endl;
+            std::cout << "Monomials in constraints: " << std::endl;
+            for (auto& mon : monomsInConstraints) {
+                std::cout << mon << std::endl;
+            }
+            std::cout << std::endl;
+
+            // Keep putting things back into the Lindbladian
             int nextQueueLoc = 0;
-            while (int(constraintsZero.size()) < findMinimalAmount) {
-                double ratio = double(constraintsZero.size()) / (monomsInConstraints.size()-1);
+            while (int(constraintsZero.size()) < findMinimalAmount || precompute) {
+                double ratio = double(constraintsZero.size()) / (double(monomsInConstraints.size())-1);
                 if (verbosity >= 1) {
-                    std::cout << constraintsZero.size() << " / " << findMinimalAmount << " (" << ratio << ")        \r" << std::flush;
+                    std::cout << monomsInConstraints.size() << " vars, " << constraintsZero.size() << " cons, aim: " << findMinimalAmount << " (" << ratio << ")              \r" << std::flush;
                 }
 
                 // Stop if we're fully constrained
                 if (!precompute && ratio >= 1.0 && constraintsZero.size() > 2) {
                     break;
+                } else if (precompute && monomsInConstraints.size() >= 1+findMinimalAmount && 
+                                         constraintsZero.size() >= findMinimalAmount) {
+                    break;
                 }
 
                 // Find a monomial that hasn't been used
                 Mon monToAdd;
+                bool found = false;
                 if (nextQueueLoc < int(queue.size())) {
                     monToAdd = queue[nextQueueLoc];
+                    found = true;
                     nextQueueLoc++;
 
                 // Otherwise we're looping, need to break out of the cycle
                 } else {
-                    bool found = false;
 
                     // Try removing a term from the start of a monomial
-                    for (auto& mon : monomsInConstraints) {
+                    for (auto& mon : monomsUsed) {
                         if (mon.size() >= 2) {
                             Mon reducedMon = mon;
                             reducedMon.monomial.erase(reducedMon.monomial.begin());
@@ -2421,11 +2456,12 @@ int main(int argc, char* argv[]) {
 
                     // Try combining two terms
                     if (!found) {
-                        for (auto it1 = monomsInConstraints.begin(); it1 != monomsInConstraints.end(); ++it1) {
-                            for (auto it2 = std::next(it1); it2 != monomsInConstraints.end(); ++it2) {
+                        for (auto it1 = monomsUsed.begin(); it1 != monomsUsed.end(); ++it1) {
+                            for (auto it2 = std::next(it1); it2 != monomsUsed.end(); ++it2) {
                                 Mon combinedMon = (*it1) * (*it2);
-                                if (!monomsUsed.count(combinedMon)) {
-                                    monToAdd = combinedMon;
+                                std::pair<std::complex<double>, Mon> reducedMon = combinedMon.reduce();
+                                if (!monomsUsed.count(reducedMon.second)) {
+                                    monToAdd = reducedMon.second;
                                     found = true;
                                     break;
                                 }
@@ -2445,7 +2481,7 @@ int main(int argc, char* argv[]) {
                 }
 
                 // If we can't find anything else, break
-                if (monToAdd.size() == 0 && monomsUsed.count(monToAdd)) {
+                if (!found) {
                     if (verbosity >= 2) {
                         std::cout << std::endl;
                         std::cout << "Couldn't find any more monomials to add" << std::endl;
@@ -2473,8 +2509,8 @@ int main(int argc, char* argv[]) {
                     newTerms.insert(term.first);
                 }
                 for (auto& term : newTerms) {
-                    if (!monomsInConstraints.count(term)) {
-                        monomsInConstraints.insert(term);
+                    monomsInConstraints.insert(term);
+                    if (!monomsUsed.count(term)) {
                         bool allGood = true;
                         if (includeOnly.size() > 0) {
                             for (int j=0; j<term.size(); j++) {
@@ -2486,6 +2522,7 @@ int main(int argc, char* argv[]) {
                         }
                         if (allGood) {
                             queue.push_back(term);
+                            monomsUsed.insert(term);
                         }
                     }
                 }
@@ -2505,20 +2542,44 @@ int main(int argc, char* argv[]) {
             std::set<Mon> monomsInConstraints;
             std::vector<Mon> queue;
             queue.push_back(Mon());
+            monomsUsed.insert(Mon());
             monomsInConstraints.insert(Mon());
             for (auto& term : pseudoObjective) {
-                if (!monomsInConstraints.count(term.first)) {
-                    monomsInConstraints.insert(term.first);
+                if (!monomsUsed.count(term.first)) {
+                    monomsUsed.insert(term.first);
                     queue.push_back(term.first);
                 }
             }
             for (size_t i=0; i<variablesToPut.size(); i++) {
                 Mon monToAdd = variablesToPut[i].getKey();
-                if (!monomsInConstraints.count(monToAdd)) {
-                    monomsInConstraints.insert(monToAdd);
+                if (!monomsUsed.count(monToAdd)) {
+                    monomsUsed.insert(monToAdd);
                     queue.push_back(monToAdd);
                 }
             }
+            for (size_t i=0; i<constraintsZero.size(); i++) {
+                for (auto& term : constraintsZero[i]) {
+                    if (!monomsUsed.count(term.first)) {
+                        monomsUsed.insert(term.first);
+                        monomsInConstraints.insert(term.first);
+                        queue.push_back(term.first);
+                    }
+                }
+            }
+            for (size_t i=0; i<momentMatrices.size(); i++) {
+                for (size_t j=0; j<momentMatrices[i].size(); j++) {
+                    for (size_t k=0; k<momentMatrices[i][j].size(); k++) {
+                        Mon monToAdd = momentMatrices[i][j][k].getKey();
+                        if (!monomsUsed.count(monToAdd)) {
+                            monomsUsed.insert(monToAdd);
+                            monomsInConstraints.insert(monToAdd);
+                            queue.push_back(monToAdd);
+                        }
+                    }
+                }
+            }
+
+            // Keep branching
             constraintsZero.clear();
             int amountToTest = 50;
             int nextQueueLoc = 0;
@@ -3483,7 +3544,7 @@ int main(int argc, char* argv[]) {
                     // Construct the Hamiltonian
                     Poly H = Poly();
                     for (int i=0; i<numQubits; i++) {
-                        for (int j=0; j<numQubits; j++) {
+                        for (int j=i; j<numQubits; j++) {
                             H += hamiltonianInter[i][j];
                         }
                     }
@@ -3692,7 +3753,7 @@ int main(int argc, char* argv[]) {
                 // Construct the Hamiltonian
                 Poly H = Poly();
                 for (int i=0; i<numQubits; i++) {
-                    for (int j=0; j<numQubits; j++) {
+                    for (int j=i; j<numQubits; j++) {
                         H += hamiltonianInter[i][j];
                     }
                 }
@@ -4177,11 +4238,13 @@ int main(int argc, char* argv[]) {
             // Construct the Hamiltonian
             Poly H = Poly();
             for (int i=0; i<numQubits; i++) {
-                for (int j=0; j<numQubits; j++) {
+                for (int j=i; j<numQubits; j++) {
                     H += hamiltonianInter[i][j];
                 }
             }
             H.reduce();
+
+            // TODO ones acting weird
 
             // Form the explicit Hamiltonian
             Eigen::SparseMatrix<std::complex<double>> HMat(fullMatSize, fullMatSize);
