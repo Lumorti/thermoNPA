@@ -74,14 +74,14 @@ std::complex<double> trace(const Eigen::SparseMatrix<std::complex<double>>& mat)
 }
 
 // Generate a Pauli string matrix on demand
-Eigen::SparseMatrix<std::complex<double>> generatePauliMatrix(int numQubits, std::vector<int> pauliInds) {
+Eigen::SparseMatrix<std::complex<double>> generatePauliMatrix(std::vector<int> pauliInds) {
 
     // The matrix starts as 1x1 identity
     Eigen::SparseMatrix<std::complex<double>> mat(1, 1);
     mat.insert(0, 0) = 1;
 
     // For each ind, tensor product with that Pauli
-    for (int i=0; i<numQubits; ++i) {
+    for (size_t i=0; i<pauliInds.size(); ++i) {
         Eigen::SparseMatrix<std::complex<double>> pauliMat;
         if (pauliInds[i] == 0) {
             pauliMat = pauliI;
@@ -149,9 +149,11 @@ int main(int argc, char* argv[]) {
     bool benchmark = false;
     bool checkObj = false;
     bool symSample = false;
+    bool useKnown = false;
     bool allSymmetries = false;
     std::vector<Poly> zeroConsForSampling;
     std::string stateFile = "state.dat";
+    std::string autoType = "first";
     int level = 0;
     int precision = 10;
     int lindbladLevel = 0;
@@ -606,7 +608,7 @@ int main(int argc, char* argv[]) {
             for (int i=0; i<numQubits; i++) {
                 int ind1 = i;
                 int ind2 = (i+1) % numQubits;
-                hamiltonianInter[ind1][ind2] = Poly(J/4.0, "<X" + std::to_string(ind1+1) + "X" + std::to_string(ind2+1) + ">")
+                hamiltonianInter[ind1][ind2] += Poly(J/4.0, "<X" + std::to_string(ind1+1) + "X" + std::to_string(ind2+1) + ">")
                                              + Poly(J/4.0, "<Y" + std::to_string(ind1+1) + "Y" + std::to_string(ind2+1) + ">")
                                              + Poly(J/4.0, "<Z" + std::to_string(ind1+1) + "Z" + std::to_string(ind2+1) + ">");
                 hamiltonianInter[ind2][ind1] = hamiltonianInter[ind1][ind2];
@@ -614,7 +616,7 @@ int main(int argc, char* argv[]) {
             for (int i=0; i<numQubits; i++) {
                 int ind1 = i;
                 int ind2 = (i+2) % numQubits;
-                hamiltonianInter[ind1][ind2] = Poly(J/8.0, "<X" + std::to_string(ind1+1) + "X" + std::to_string(ind2+1) + ">")
+                hamiltonianInter[ind1][ind2] += Poly(J/8.0, "<X" + std::to_string(ind1+1) + "X" + std::to_string(ind2+1) + ">")
                                              + Poly(J/8.0, "<Y" + std::to_string(ind1+1) + "Y" + std::to_string(ind2+1) + ">")
                                              + Poly(J/8.0, "<Z" + std::to_string(ind1+1) + "Z" + std::to_string(ind2+1) + ">");
                 hamiltonianInter[ind2][ind1] = hamiltonianInter[ind1][ind2];
@@ -628,8 +630,15 @@ int main(int argc, char* argv[]) {
                 }
             }
             H.reduce();
+
+            // This is an energy only model
             objective = H;
             useEnergy = true;
+            noLindbladian = true;
+
+            // We know the true ground state energy
+            idealIsKnown = true;
+            knownIdeal = -(3.0/8.0) * J * numQubits;
 
             // No baths
             lindbladianHot = Poly();
@@ -1922,8 +1931,16 @@ int main(int argc, char* argv[]) {
             sampleChoice = "onlyobj";
 
         // If sampling from a subset of Pauli strings
+        } else if (argAsString == "--first") {
+            sampleChoice = "auto";
+            autoType = "first";
+            maxPaulis = std::stoi(argv[i+1]);
+            i++;
+
+        // If sampling from a subset of Pauli strings
         } else if (argAsString == "--auto") {
             sampleChoice = "auto";
+            autoType = "common";
             maxPaulis = std::stoi(argv[i+1]);
             i++;
 
@@ -2021,6 +2038,10 @@ int main(int argc, char* argv[]) {
         } else if (argAsString == "--sym") {
             symSample = true;
 
+        // If sampling using the known ground-state
+        } else if (argAsString == "--known") {
+            useKnown = true;
+
         // Output the help
         } else if (argAsString == "-h" || argAsString == "--help") {
             std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
@@ -2045,15 +2066,17 @@ int main(int argc, char* argv[]) {
             std::cout << "  --samples <int>     Solve exactly, take this many samples per Pauli string" << std::endl;
             std::cout << "  --shots   <int>     Same as above, but limit the total number of measurements" << std::endl;
             std::cout << "  -p <int>            Percentile for the error (e.g. 95)" << std::endl;
-            std::cout << "  --all <int>         Samples from all Pauli strings evenly up to this degree" << std::endl;
+            std::cout << "  --all <int>         Sample from all Pauli strings evenly up to this degree" << std::endl;
             std::cout << "  --onlyobj           Sample only from the objective" << std::endl;
             std::cout << "  --energy            Sample only the energy" << std::endl;
-            std::cout << "  --auto <int>        Samples from a subset Pauli strings" << std::endl;
+            std::cout << "  --auto <int>        Sample from the most common Pauli strings" << std::endl;
+            std::cout << "  --first <int>        Sample from first Pauli strings" << std::endl;
             std::cout << "  --noobj             Exclude the objective from the sampling" << std::endl;
             std::cout << "  --nox               Exclude any X terms from the sampling" << std::endl;
             std::cout << "  --noy               Exclude any Y terms from the sampling" << std::endl;
             std::cout << "  --noz               Exclude any Z terms from the sampling" << std::endl;
             std::cout << "  --sym               Sample from the symmetries" << std::endl;
+            std::cout << "  --known             Sample using the known ground-state" << std::endl;
             std::cout << "Constraint options:" << std::endl;
             std::cout << "  -m <int>            Level of the moment matrix" << std::endl;
             std::cout << "  -l <int>            Level of the moments to put in the Lindbladian" << std::endl;
@@ -2918,57 +2941,6 @@ int main(int argc, char* argv[]) {
 
     }
 
-    // Pauli matrices
-    std::map<std::vector<int>, Eigen::SparseMatrix<std::complex<double>>> pauliMap;
-    for (int i=0; i<4; i++) {
-        std::vector<int> key = {i};
-        if (i == 0) {
-            pauliMap[key] = pauliI;
-        } else if (i == 1) {
-            pauliMap[key] = pauliX;
-        } else if (i == 2) {
-            pauliMap[key] = pauliY;
-        } else if (i == 3) {
-            pauliMap[key] = pauliZ;
-        }
-    }
-    for (int i=0; i<4; i++) {
-        for (int j=0; j<4; j++) {
-            std::vector<int> key = {i,j};
-            pauliMap[key] = kroneckerProduct(pauliMap[{i}], pauliMap[{j}]);
-        }
-    }
-    for (int i=0; i<4; i++) {
-        for (int j=0; j<4; j++) {
-            for (int k=0; k<4; k++) {
-                std::vector<int> key = {i,j,k};
-                pauliMap[key] = kroneckerProduct(pauliMap[{i,j}], pauliMap[{k}]);
-            }
-        }
-    }
-    for (int i=0; i<4; i++) {
-        for (int j=0; j<4; j++) {
-            for (int k=0; k<4; k++) {
-                for (int l=0; l<4; l++) {
-                    std::vector<int> key = {i,j,k,l};
-                    pauliMap[key] = kroneckerProduct(pauliMap[{i,j,k}], pauliMap[{l}]);
-                }
-            }
-        }
-    }
-    for (int i=0; i<4; i++) {
-        for (int j=0; j<4; j++) {
-            for (int k=0; k<4; k++) {
-                for (int l=0; l<4; l++) {
-                    for (int m=0; m<4; m++) {
-                        std::vector<int> key = {i,j,k,l,m};
-                        pauliMap[key] = kroneckerProduct(pauliMap[{i,j,k,l}], pauliMap[{m}]);
-                    }
-                }
-            }
-        }
-    }
-
     // Add constraints that the reconstructed density matrix is positive
     if (reconLevel != 0) {
 
@@ -2986,7 +2958,7 @@ int main(int argc, char* argv[]) {
 
                 // For each Pauli matrix
                 for (int l=0; l<4; l++) {
-                    Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[{l}];
+                    Eigen::SparseMatrix<std::complex<double>> mat = generatePauliMatrix({l});
 
                     // For each element of said matrix
                     for (int k=0; k<mat.outerSize(); ++k) {
@@ -3028,7 +3000,7 @@ int main(int argc, char* argv[]) {
                     // For each Pauli matrix
                     for (int l=0; l<4; l++) {
                         for (int l2=0; l2<4; l2++) {
-                        Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[{l,l2}];
+                        Eigen::SparseMatrix<std::complex<double>> mat = generatePauliMatrix({l,l2});
 
                             // For each element of said matrix
                             for (int k=0; k<mat.outerSize(); ++k) {
@@ -3080,7 +3052,7 @@ int main(int argc, char* argv[]) {
                                 for (int l3=0; l3<4; l3++) {
 
                                     // For each element of said matrix
-                                    Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[{l,l2,l3}];
+                                    Eigen::SparseMatrix<std::complex<double>> mat = generatePauliMatrix({l,l2,l3});
                                     for (int k=0; k<mat.outerSize(); ++k) {
                                         for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(mat,k); it; ++it) {
                                             std::complex<double> val = it.value();
@@ -3137,7 +3109,7 @@ int main(int argc, char* argv[]) {
                                         for (int l4=0; l4<4; l4++) {
 
                                             // For each element of said matrix
-                                            Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[{l,l2,l3,l4}];
+                                            Eigen::SparseMatrix<std::complex<double>> mat = generatePauliMatrix({l,l2,l3,l4});
                                             for (int k=0; k<mat.outerSize(); ++k) {
                                                 for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(mat,k); it; ++it) {
                                                     std::complex<double> val = it.value();
@@ -3200,7 +3172,7 @@ int main(int argc, char* argv[]) {
                                                 for (int l5=0; l5<4; l5++) {
 
                                                     // For each element of said matrix
-                                                    Eigen::SparseMatrix<std::complex<double>> mat = pauliMap[{l,l2,l3,l4,l5}];
+                                                    Eigen::SparseMatrix<std::complex<double>> mat = generatePauliMatrix({l,l2,l3,l4,l5});
                                                     for (int k=0; k<mat.outerSize(); ++k) {
                                                         for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(mat,k); it; ++it) {
                                                             std::complex<double> val = it.value();
@@ -3454,6 +3426,7 @@ int main(int argc, char* argv[]) {
                 }
             }
 
+        // Otherwise need to take samples
         } else {
 
             // Pauli matrices
@@ -3463,7 +3436,6 @@ int main(int argc, char* argv[]) {
             Eigen::SparseMatrix<std::complex<double>> Z(2, 2);
             Eigen::SparseMatrix<std::complex<double>> iden1(1, 1);
             Eigen::SparseMatrix<std::complex<double>> iden2(2, 2);
-            Eigen::SparseMatrix<std::complex<double>> idenFull(matSize, matSize);
             X.insert(0, 1) = 1;
             X.insert(1, 0) = 1;
             Y.insert(0, 1) = std::complex<double>(0, -1);
@@ -3473,42 +3445,45 @@ int main(int argc, char* argv[]) {
             iden1.insert(0, 0) = 1;
             iden2.insert(0, 0) = 1;
             iden2.insert(1, 1) = 1;
-            for (int i = 0; i < matSize; i++) {
-                idenFull.insert(i, i) = 1;
-            }
             X.makeCompressed();
             Y.makeCompressed();
             Z.makeCompressed();
             iden1.makeCompressed();
             iden2.makeCompressed();
-            idenFull.makeCompressed();
 
-            // The state we want to find
-            Eigen::SparseMatrix<std::complex<double>> groundTruth(matSize, matSize);
-
-            // Pauli operators on the state
+            // Declare here, init later only if needed
+            Eigen::SparseMatrix<std::complex<double>> groundTruth;
             std::vector<Eigen::SparseMatrix<std::complex<double>>> Xs(numQubits);
             std::vector<Eigen::SparseMatrix<std::complex<double>>> Ys(numQubits);
             std::vector<Eigen::SparseMatrix<std::complex<double>>> Zs(numQubits);
-            for (int i = 0; i < numQubits; i++) {
-                Xs[i] = iden1;
-                Ys[i] = iden1;
-                Zs[i] = iden1;
-                for (int j = 0; j < numQubits; j++) {
-                    if (j == i) {
-                        Xs[i] = kroneckerProduct(Xs[i], X).eval();
-                        Ys[i] = kroneckerProduct(Ys[i], Y).eval();
-                        Zs[i] = kroneckerProduct(Zs[i], Z).eval();
-                    } else {
-                        Xs[i] = kroneckerProduct(Xs[i], iden2).eval();
-                        Ys[i] = kroneckerProduct(Ys[i], iden2).eval();
-                        Zs[i] = kroneckerProduct(Zs[i], iden2).eval();
-                    }
 
+            // Only create these if we need to
+            if (!useKnown) {
+
+                // The state we want to find
+                groundTruth = Eigen::SparseMatrix<std::complex<double>>(matSize, matSize);
+
+                // Pauli operators on the state
+                for (int i = 0; i < numQubits; i++) {
+                    Xs[i] = iden1;
+                    Ys[i] = iden1;
+                    Zs[i] = iden1;
+                    for (int j = 0; j < numQubits; j++) {
+                        if (j == i) {
+                            Xs[i] = kroneckerProduct(Xs[i], X).eval();
+                            Ys[i] = kroneckerProduct(Ys[i], Y).eval();
+                            Zs[i] = kroneckerProduct(Zs[i], Z).eval();
+                        } else {
+                            Xs[i] = kroneckerProduct(Xs[i], iden2).eval();
+                            Ys[i] = kroneckerProduct(Ys[i], iden2).eval();
+                            Zs[i] = kroneckerProduct(Zs[i], iden2).eval();
+                        }
+
+                    }
+                    Xs[i].makeCompressed();
+                    Ys[i].makeCompressed();
+                    Zs[i].makeCompressed();
                 }
-                Xs[i].makeCompressed();
-                Ys[i].makeCompressed();
-                Zs[i].makeCompressed();
             }
 
             // If precomputed, load the ground truth
@@ -3536,7 +3511,7 @@ int main(int argc, char* argv[]) {
                 inFile.close();
 
             // Otherwise we need to solve for the ground truth
-            } else {
+            } else if (!useKnown) {
 
                 // If it's an energy problem
                 if (noLindbladian) {
@@ -3716,20 +3691,6 @@ int main(int argc, char* argv[]) {
 
             }
 
-            // Check that this is positive and has trace 1
-            //Eigen::SelfAdjointEigenSolver<Eigen::SparseMatrix<std::complex<double>>> es(groundTruth);
-            //Eigen::VectorXcd eigenValues = es.eigenvalues();
-            //Eigen::MatrixXcd eigenVectors = es.eigenvectors();
-            //std::complex<double> smallestEigenvalue = eigenValues(0).real();
-            //std::complex<double> matTrace = 0;
-            //for (int i = 0; i < matSize; i++) {
-                //matTrace += groundTruth.coeff(i, i);
-            //}
-            //if (verbosity >= 2) {
-                //std::cout << "Smallest eigenvalue: " << eigenValues(0).real() << std::endl;
-                //std::cout << "Trace: " << matTrace.real() << std::endl;
-            //}
-
             // The samples we should take
             if (verbosity >= 1) {
                 std::cout << "Generating sample operators" << std::endl;
@@ -3821,17 +3782,21 @@ int main(int argc, char* argv[]) {
                 monCount.erase(Mon());
 
                 // Sort the above map and take the top N monomials
-                //std::vector<std::pair<Mon, int>> monCountVec(monCount.begin(), monCount.end());
-                //std::sort(monCountVec.begin(), monCountVec.end(), [](const std::pair<Mon, int>& a, const std::pair<Mon, int>& b) {
-                    //return a.second > b.second;
-                //});
-                //for (int i = 0; i < std::min(maxPaulis, (int)monCountVec.size()); i++) {
-                    //sampleOperators.insert(monCountVec[i].first);
-                //}
-                
-                // Just take the first N monomials
-                for (int i = 0; i < std::min(maxPaulis, (int)monList.size()); i++) {
-                    sampleOperators.insert(monList[i]);
+                if (autoType == "common") { 
+                    std::vector<std::pair<Mon, int>> monCountVec(monCount.begin(), monCount.end());
+                    std::sort(monCountVec.begin(), monCountVec.end(), [](const std::pair<Mon, int>& a, const std::pair<Mon, int>& b) {
+                        return a.second > b.second;
+                    });
+                    for (int i = 0; i < std::min(maxPaulis, (int)monCountVec.size()); i++) {
+                        sampleOperators.insert(monCountVec[i].first);
+                    }
+
+                // Otherwise just take the first N monomials
+                } else {
+                    for (int i = 0; i < std::min(maxPaulis, (int)monList.size()); i++) {
+                        sampleOperators.insert(monList[i]);
+                    }
+
                 }
 
             // Just samples from the objective
@@ -3936,47 +3901,80 @@ int main(int argc, char* argv[]) {
             samples = {};
             for (auto mon : sampleOperators) {
 
-                // Construct the operator
-                Eigen::SparseMatrix<std::complex<double>> op = Eigen::SparseMatrix<std::complex<double>>(matSize, matSize);
-                for (int i = 0; i < matSize; i++) {
-                    op.insert(i, i) = 1;
-                }
-                for (int i = mon.size()-1; i >= 0; i--) {
-                    char pauli = mon[i].first;
-                    int ind = mon[i].second-1;
-                    if (pauli == 'X') {
-                        op = op * Xs[ind];
-                    } else if (pauli == 'Y') {
-                        op = op * Ys[ind];
-                    } else if (pauli == 'Z') {
-                        op = op * Zs[ind];
+                // The true value and the probability of getting a 1
+                double trueExpectation = 0.0;
+                double prob1 = 0.0;
+
+                // If we know the true solution
+                // TODO some fourth order should be non-zero
+                if (modelName == "--mg" && useKnown) {
+                    bool allNonZero = true;
+                    if (mon.size() % 2 != 0) {
+                        allNonZero = false;
+                    } else {
+                        for (int i = 0; i < mon.size(); i+=2) {
+                            if (mon[i].first != mon[i+1].first || (mon[i].second % 2) == 0 || std::abs(mon[i].second - mon[i+1].second) != 1) {
+                                allNonZero = false;
+                                break;
+                            }
+                            
+                        }
                     }
+                    if (allNonZero) {
+                        trueExpectation = std::pow(-1, mon.size() / 2);
+                    } else {
+                        prob1 = 0.5;
+                    }
+
+                // If we don't
+                } else {
+
+                    // Construct the operator
+                    Eigen::SparseMatrix<std::complex<double>> op = Eigen::SparseMatrix<std::complex<double>>(matSize, matSize);
+                    for (int i = 0; i < matSize; i++) {
+                        op.insert(i, i) = 1;
+                    }
+                    for (int i = mon.size()-1; i >= 0; i--) {
+                        char pauli = mon[i].first;
+                        int ind = mon[i].second-1;
+                        if (pauli == 'X') {
+                            op = op * Xs[ind];
+                        } else if (pauli == 'Y') {
+                            op = op * Ys[ind];
+                        } else if (pauli == 'Z') {
+                            op = op * Zs[ind];
+                        }
+                    }
+                    op.makeCompressed();
+                    
+                    // Get the true expectation value
+                    trueExpectation = Eigen::MatrixXcd(op * groundTruth).trace().real();
+
+                    // Get the positive part of the operator
+                    Eigen::SparseMatrix<std::complex<double>> iden = Eigen::SparseMatrix<std::complex<double>>(matSize, matSize);
+                    for (int i = 0; i < matSize; i++) {
+                        iden.insert(i, i) = 1;
+                    }
+                    iden.makeCompressed();
+                    Eigen::MatrixXcd opPos = (op + iden) / 2.0;
+
+                    // The probability of getting a 1 is trace(opPos * rho)
+                    prob1 = (opPos * groundTruth).trace().real();
+
                 }
-                op.makeCompressed();
-                
-                // Get the true expectation value
-                double trueExpectation = Eigen::MatrixXcd(op * groundTruth).trace().real();
 
                 // If -1 given as the number of samples, use the exact
                 if (numSamples == -1) {
                     constraintsZero.push_back(Poly(1, mon) - Poly(trueExpectation));
                     samples[mon] = trueExpectation;
+                    if (verbosity >= 3) {
+                        std::cout << "True expectation value of " << mon << " = " << trueExpectation << std::endl;
+                    }
                     continue;
                 }
-                
-                // Get the positive part of the operator
-                Eigen::SparseMatrix<std::complex<double>> iden = Eigen::SparseMatrix<std::complex<double>>(matSize, matSize);
-                for (int i = 0; i < matSize; i++) {
-                    iden.insert(i, i) = 1;
-                }
-                iden.makeCompressed();
-                Eigen::MatrixXcd opPos = (op + iden) / 2.0;
-
-                // The probability of getting a 1 is trace(opPos * rho)
-                double prob1 = (opPos * groundTruth).trace().real();
-                double expFromProb = 2 * prob1 - 1;
 
                 // Determine the average from this many samples
+                double expFromProb = 2 * prob1 - 1;
                 std::random_device rd;
                 std::mt19937 gen(rd());
                 std::binomial_distribution<> binom(numSamples, prob1);
@@ -4000,6 +3998,7 @@ int main(int argc, char* argv[]) {
                 // Verbose output
                 if (verbosity >= 3) {
                     std::cout << "True expectation value of " << mon << " = " << trueExpectation << std::endl;
+                    std::cout << "Probability of 1 = " << prob1 << std::endl;
                     std::cout << "Expectation from probability = " << expFromProb << std::endl;
                     std::cout << "Expectation value of " << mon << " from samples = " << avg << std::endl;
                     std::cout << "Bounding " << mon << " to [" << lower << ", " << upper << "]" << std::endl;
@@ -4244,8 +4243,6 @@ int main(int argc, char* argv[]) {
             }
             H.reduce();
 
-            // TODO ones acting weird
-
             // Form the explicit Hamiltonian
             Eigen::SparseMatrix<std::complex<double>> HMat(fullMatSize, fullMatSize);
             for (auto& term : H) {
@@ -4279,7 +4276,7 @@ int main(int argc, char* argv[]) {
                 }
 
                 // The corresponding matrix
-                Eigen::SparseMatrix<std::complex<double>> mat = generatePauliMatrix(numQubits, inds);
+                Eigen::SparseMatrix<std::complex<double>> mat = generatePauliMatrix(inds);
 
                 // Add it, scaled by the value
                 HMat += coeff * mat;
@@ -4321,6 +4318,10 @@ int main(int argc, char* argv[]) {
             error = 0;
             if (verbosity >= 1) {
                 std::cout << "Minimum energy of H: " << lowerBound << std::endl;
+                if (modelName == "--mg") {
+                    knownIdeal = -(3.0/8.0)*numQubits;
+                    std::cout << "Known minimum: " << knownIdeal << std::endl;
+                }
             }
 
             // Form the full matrix
@@ -4374,7 +4375,7 @@ int main(int argc, char* argv[]) {
                     }
 
                     // The corresponding matrix
-                    Eigen::SparseMatrix<std::complex<double>> mat = generatePauliMatrix(numQubits, inds);
+                    Eigen::SparseMatrix<std::complex<double>> mat = generatePauliMatrix(inds);
 
                     // Add it, scaled by the value
                     reconMatrix += value * mat;

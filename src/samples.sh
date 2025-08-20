@@ -92,19 +92,26 @@ do
 
 done
 
-# Ground state energy for large systems using symmetries
-#echo "file & large" | tee -a data/measure.dat
-#systemSize="3 30"
-#./run -B -N "sdp" -s M --2dtfiperiodic ${systemSize} -S 1 -m 3 -H -O "<Z1>+<Z2>+<Z3>+<X1>+<X2>+<X3>" -P --shots ${shots} --sym | tee -a data/measure.dat
-#for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
-#do
+# Ground state energy for large systems
+echo "file & large" | tee -a data/measure.dat
+systemSize="50"
+./run -B -S 1 -N "sdp" -s M --mg ${systemSize} -A 100 -H | tee -a data/measure.dat
+for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
+do
 
-    ## SDP plus symmetry
-    #./run -B -N "sdp+sym, 68%" -p 68 -Y -s M --2dtfiperiodic ${systemSize} -S 1 -m 3 -H -O "<Z1>+<Z2>+<Z3>+<X1>+<X2>+<X3>" -P --shots ${shots} --sym | tee -a data/measure.dat
-    #./run -B -N "sdp+sym, 95%" -p 95 -Y -s M --2dtfiperiodic ${systemSize} -S 1 -m 3 -H -O "<Z1>+<Z2>+<Z3>+<X1>+<X2>+<X3>" -P --shots ${shots} --sym | tee -a data/measure.dat
-    #./run -B -N "sdp+sym, 99.7%" -p 99.7 -Y -s M --2dtfiperiodic ${systemSize} -S 1 -m 3 -H -O "<Z1>+<Z2>+<Z3>+<X1>+<X2>+<X3>" -P --shots ${shots} --sym | tee -a data/measure.dat
+    # SDP plus level 2 shots
+    ./run -B -S 1 -N "sdp+all2, 95%" -p 95 -s M --mg ${systemSize} --known -A 100 -H --shots ${shots} --all 2 | tee -a data/measure.dat
+    ./run -B -S 1 -N "sdp+all2, 99.7%" -p 99.7 -s M --mg ${systemSize} --known -A 100 -H --shots ${shots} --all 2 | tee -a data/measure.dat
 
-#done
+    # SDP plus 200 automatic
+    ./run -B -S 1 -N "sdp+auto200, 95%" -p 95 -s M --mg ${systemSize} --known -A 100 -H --shots ${shots} --auto 200 | tee -a data/measure.dat
+    ./run -B -S 1 -N "sdp+auto200, 99.7%" -p 99.7 -s M --mg ${systemSize} --known -A 100 -H --shots ${shots} --auto 200 | tee -a data/measure.dat
+
+    # SDP plus 200 first
+    ./run -B -S 1 -N "sdp+auto200, 95%" -p 95 -s M --mg ${systemSize} --known -A 100 -H --shots ${shots} --first 200 | tee -a data/measure.dat
+    ./run -B -S 1 -N "sdp+auto200, 99.7%" -p 99.7 -s M --mg ${systemSize} --known -A 100 -H --shots ${shots} --first 200 | tee -a data/measure.dat
+
+done
 
 # Automatically commit once done
 git add .
