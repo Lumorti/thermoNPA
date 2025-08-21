@@ -140,6 +140,8 @@ std::vector<std::vector<Poly>> partialTrace(std::vector<std::vector<Poly>> mat, 
 int main(int argc, char* argv[]) {
 
     // Random seed unless specified
+    std::random_device rd;
+    std::mt19937 gen(rd());
     srand(time(NULL));
 
     // Define the scenario
@@ -592,7 +594,7 @@ int main(int argc, char* argv[]) {
             lindbladianCold += Poly(-0.5*gamma_c_minus, "<P2M2A0>");
             lindbladianCold.convertToPaulis();
 
-        // Majumdar-Ghost model TODO
+        // Majumdar-Ghosh model
         } else if (argAsString == "--mg") {
             modelName = argAsString;
 
@@ -2421,21 +2423,24 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            std::cout << "Initial queue:" << std::endl;
-            for (size_t i=0; i<queue.size(); i++) {
-                std::cout << queue[i] << std::endl;
+            // Verbose output
+            if (verbosity >= 3) {
+                std::cout << "Initial queue:";
+                for (size_t i=0; i<queue.size(); i++) {
+                    std::cout << queue[i] << ", ";
+                }
+                std::cout << std::endl;
+                std::cout << "Monomials used: ";
+                for (auto& mon : monomsUsed) {
+                    std::cout << mon << ", ";
+                }
+                std::cout << std::endl;
+                std::cout << "Monomials in constraints: ";
+                for (auto& mon : monomsInConstraints) {
+                    std::cout << mon << ", ";
+                }
+                std::cout << std::endl;
             }
-            std::cout << std::endl;
-            std::cout << "Monomials used: " << std::endl;
-            for (auto& mon : monomsUsed) {
-                std::cout << mon << std::endl;
-            }
-            std::cout << std::endl;
-            std::cout << "Monomials in constraints: " << std::endl;
-            for (auto& mon : monomsInConstraints) {
-                std::cout << mon << std::endl;
-            }
-            std::cout << std::endl;
 
             // Keep putting things back into the Lindbladian
             int nextQueueLoc = 0;
@@ -3905,8 +3910,7 @@ int main(int argc, char* argv[]) {
                 double trueExpectation = 0.0;
                 double prob1 = 0.0;
 
-                // If we know the true solution
-                // TODO some fourth order should be non-zero
+                // If we know the true solution TODO 
                 if (modelName == "--mg" && useKnown) {
                     bool allNonZero = true;
                     if (mon.size() % 2 != 0) {
@@ -3922,8 +3926,6 @@ int main(int argc, char* argv[]) {
                     }
                     if (allNonZero) {
                         trueExpectation = std::pow(-1, mon.size() / 2);
-                    } else {
-                        prob1 = 0.5;
                     }
 
                 // If we don't
@@ -3950,18 +3952,10 @@ int main(int argc, char* argv[]) {
                     // Get the true expectation value
                     trueExpectation = Eigen::MatrixXcd(op * groundTruth).trace().real();
 
-                    // Get the positive part of the operator
-                    Eigen::SparseMatrix<std::complex<double>> iden = Eigen::SparseMatrix<std::complex<double>>(matSize, matSize);
-                    for (int i = 0; i < matSize; i++) {
-                        iden.insert(i, i) = 1;
-                    }
-                    iden.makeCompressed();
-                    Eigen::MatrixXcd opPos = (op + iden) / 2.0;
-
-                    // The probability of getting a 1 is trace(opPos * rho)
-                    prob1 = (opPos * groundTruth).trace().real();
-
                 }
+
+                // The probability of measuring 1 from the positive part of the operator
+                prob1 = (trueExpectation + 1) / 2.0;
 
                 // If -1 given as the number of samples, use the exact
                 if (numSamples == -1) {
@@ -3975,8 +3969,6 @@ int main(int argc, char* argv[]) {
 
                 // Determine the average from this many samples
                 double expFromProb = 2 * prob1 - 1;
-                std::random_device rd;
-                std::mt19937 gen(rd());
                 std::binomial_distribution<> binom(numSamples, prob1);
                 int success_count = binom(gen);
                 double avg = static_cast<double>(success_count) / numSamples;
@@ -4069,8 +4061,11 @@ int main(int argc, char* argv[]) {
 
         // Add all the Pauli strings in variableSet
         quadCone.push_back(Mon("<T1>"));
+        quadCone.push_back(Mon());
         for (auto mon : variableSet) {
-            quadCone.push_back(mon);
+            if (mon != Mon() && !mon.contains('T')) {
+                quadCone.push_back(mon);
+            }
         }
 
         // Objective is the purity
