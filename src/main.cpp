@@ -156,6 +156,7 @@ int main(int argc, char* argv[]) {
     std::vector<Poly> zeroConsForSampling;
     std::string stateFile = "state.dat";
     std::string autoType = "first";
+    std::string autoMomentType = "first";
     int level = 0;
     int precision = 10;
     int lindbladLevel = 0;
@@ -165,7 +166,7 @@ int main(int argc, char* argv[]) {
     int gridWidth = 1;
     int gridHeight = 1;
     int imagType = 0;
-    int numSamples = 0;
+    int numSamplesPer = 0;
     int numShots = 0;
     double tol = 1e-7;
     bool usePurity = false;
@@ -657,6 +658,7 @@ int main(int argc, char* argv[]) {
             lindbladian.reduce();
 
         // 2D Lindbladian test
+        // 2dtfi 3x3 has min energy -9.897068167
         } else if (argAsString == "--2d" || argAsString == "--2dtfiperiodic" || argAsString == "--2dtfi" || argAsString == "--2dtwo") {
             modelName = argAsString;
 
@@ -1892,13 +1894,13 @@ int main(int argc, char* argv[]) {
 
         // If taking samples
         } else if (argAsString == "--samples") {
-            numSamples = std::stoi(argv[i+1]);
+            numSamplesPer = std::stoi(argv[i+1]);
             i++;
 
         // If taking samples
         } else if (argAsString == "--shots") {
             numShots = std::stoi(argv[i+1]);
-            numSamples = 1;
+            numSamplesPer = 1;
             i++;
 
         // If setting the percentile
@@ -1955,7 +1957,7 @@ int main(int argc, char* argv[]) {
             outputLindbladAsLaTeX = true;
 
         // If outputting the final moments to file
-        } else if (argAsString == "-F") {
+        } else if (argAsString == "-f") {
             outputToFile = true;
 
         // If checking the final results by reconstructing the full state
@@ -2056,7 +2058,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  -v <int>            Verbosity level" << std::endl;
             std::cout << "  -B                  Benchmarking mode" << std::endl;
             std::cout << "  -X                  Output the Lindbladian in LaTeX form" << std::endl;
-            std::cout << "  -F                  Output the final moments to file (monoms.csv)" << std::endl;
+            std::cout << "  -f                  Output the final moments to file (monoms.csv)" << std::endl;
             std::cout << "  -H                  Consider it as a Hamiltonian minimization problem" << std::endl;
             std::cout << "  -o                  Check the final results by reconstructing the full state" << std::endl;
             std::cout << "  --prec <int>        Set the output precision (default 10)" << std::endl;
@@ -2085,7 +2087,8 @@ int main(int argc, char* argv[]) {
             std::cout << "  -e <mon>            Add an extra monomial to the top row of the moment matrix" << std::endl;
             std::cout << "  -E <mon>            Add an extra monomial to the list of Lindbladian replacements" << std::endl;
             std::cout << "  -M <int>            Try to generate the minimal set of linear constraints" << std::endl;
-            std::cout << "  -A <int>            Try to generate the minimal moment matrix" << std::endl;
+            std::cout << "  -A <int>            Generate a moment matrix from the most common moments" << std::endl;
+            std::cout << "  -F <int>            Generate a moment matrix from the first occuring moments" << std::endl;
             std::cout << "  -r <int>            Insist that the reconstructed density matrix be positive" << std::endl;
             std::cout << "  -R                  Try removing random constraints" << std::endl;
             std::cout << "  -y <ints>           Add a symetry between two groups e.g. -y 1,2 3,4" << std::endl;
@@ -2153,6 +2156,13 @@ int main(int argc, char* argv[]) {
         // If auto generating the moment matrix
         } else if (argAsString == "-A") {
             autoMomentAmount = std::stoi(argv[i+1]);
+            autoMomentType = "common";
+            i++;
+
+        // If auto generating the moment matrix
+        } else if (argAsString == "-F") {
+            autoMomentAmount = std::stoi(argv[i+1]);
+            autoMomentType = "first";
             i++;
 
         // Otherwise we don't know what this is
@@ -2447,7 +2457,7 @@ int main(int argc, char* argv[]) {
             while (int(constraintsZero.size()) < findMinimalAmount || precompute) {
                 double ratio = double(constraintsZero.size()) / (double(monomsInConstraints.size())-1);
                 if (verbosity >= 1) {
-                    std::cout << monomsInConstraints.size() << " vars, " << constraintsZero.size() << " cons, aim: " << findMinimalAmount << " (" << ratio << ")              \r" << std::flush;
+                    std::cout << monomsInConstraints.size() << " vars, " << constraintsZero.size() << " cons, aim: " << findMinimalAmount << " (" << ratio << ")                         \r" << std::flush;
                 }
 
                 // Stop if we're fully constrained
@@ -2717,23 +2727,94 @@ int main(int argc, char* argv[]) {
     // Generate the moment matrix from the monomsUsed
     if (autoMomentAmount > 0) {
 
-        // Add the first used monoms to the top row
-        std::set<Mon> toPut = monomsUsed;
-        for (auto& term : pseudoObjective) {
-            toPut.insert(term.first);
-        }
+        // Begin forming the top row of the moment matrix
         std::vector<Poly> topRow = {Poly(1)};
-        int added = 0;
-        for (auto& mon : toPut) {
-            if (mon.size() == 0) {
-                continue;
+        std::set<Mon> monomsInMat;
+
+        // Add the most common monoms to the top row
+        if (autoMomentType == "common") { 
+
+            // Determine the most-used monomial
+            std::map<Mon, int> monCounts;
+            for (auto& term : pseudoObjective) {
+                monCounts[term.first]++;
             }
-            topRow.push_back(Poly(mon));
-            added++;
-            if (added >= autoMomentAmount) {
+            for (size_t i=0; i<constraintsZero.size(); i++) {
+                for (auto& term : constraintsZero[i]) {
+                    monCounts[term.first]++;
+                }
+            }
+            std::vector<Mon> sortedMonoms;
+            for (auto& monCount : monCounts) {
+                sortedMonoms.push_back(monCount.first);
+            }
+            std::sort(sortedMonoms.begin(), sortedMonoms.end(), 
+                      [](const Mon& a, const Mon& b) { return a.size() < b.size(); });
+
+            // Add them to the top row
+            int added = 1;
+            for (auto& mon : sortedMonoms) {
+                if (mon.size() == 0) {
+                    continue;
+                }
+                topRow.push_back(Poly(mon));
+                monomsInMat.insert(mon);
+                added++;
+                if (added >= autoMomentAmount) {
+                    break;
+                }
+            }
+
+        // Otherwise just add the used monoms to the top row
+        } else {
+            std::set<Mon> toPut = monomsUsed;
+            for (auto& term : pseudoObjective) {
+                toPut.insert(term.first);
+            }
+            int added = 1;
+            for (auto& mon : toPut) {
+                if (mon.size() == 0) {
+                    continue;
+                }
+                topRow.push_back(Poly(mon));
+                monomsInMat.insert(mon);
+                added++;
+                if (added >= autoMomentAmount) {
+                    break;
+                }
+            }
+        }
+
+        // If the top row isn't big enough, add products of things in it
+        while (int(topRow.size()) < autoMomentAmount) {
+
+            // Find the next monomial to add
+            Mon nextMon;
+            for (size_t i=0; i<topRow.size(); i++) {
+                for (size_t j=i; j<topRow.size(); j++) {
+                    Mon product = topRow[i].getKey() * topRow[j].getKey();
+                    std::pair<std::complex<double>, Mon> reducedMon = product.reduce();
+                    if (!monomsInMat.count(reducedMon.second) && reducedMon.second.size() > 0) {
+                        nextMon = reducedMon.second;
+                        break;
+                    }
+                }
+                if (nextMon.size() > 0) {
+                    break;
+                }
+            }
+
+            // If we found a new monomial, add it
+            if (nextMon.size() > 0) {
+                topRow.push_back(Poly(nextMon));
+                monomsInMat.insert(nextMon);
+            } else {
                 break;
             }
+
         }
+
+        // Generate the moment matrix from the top row
         momentMatrices.push_back(generateFromTopRow(topRow, verbosity));
 
     }
@@ -2742,7 +2823,7 @@ int main(int argc, char* argv[]) {
     int newReductConsAdded = 0;
     while (newReductConsAdded < reductiveCons) {
         if (verbosity >= 1) {
-            std::cout << newReductConsAdded << " / " << reductiveCons << "        \r" << std::flush;
+            std::cout << newReductConsAdded << " / " << reductiveCons << "                      \r" << std::flush;
         }
 
         // Add constraints based on the monomials we already have
@@ -3370,7 +3451,7 @@ int main(int argc, char* argv[]) {
     }
 
     // If we take fake samples
-    if (numSamples != 0 && !precompute) {
+    if (numSamplesPer != 0 && !precompute) {
 
         // If simulating samples from symmetries
         if (symSample) {
@@ -3385,18 +3466,18 @@ int main(int argc, char* argv[]) {
 
             // If we're taking samples to a total number of shots
             if (numShots == -1) {
-                numSamples = -1;
+                numSamplesPer = -1;
             } else if (numShots != 0) {
-                numSamples = numShots / sampleOperators.size();
+                numSamplesPer = numShots / sampleOperators.size();
             } else {
-                numShots = numSamples * sampleOperators.size();
+                numShots = numSamplesPer * sampleOperators.size();
             }
 
             // Verbose output
-            int totalSamples = sampleOperators.size() * numSamples;
+            int totalSamples = sampleOperators.size() * numSamplesPer;
             totalSamples = std::abs(totalSamples);
             if (verbosity >= 1) {
-                std::cout << "Taking " << numSamples << " samples of " << sampleOperators.size() << " operators" << std::endl;
+                std::cout << "Taking " << numSamplesPer << " samples of " << sampleOperators.size() << " operators" << std::endl;
                 std::cout << "Total measurements: " << totalSamples << std::endl;
             }
             if (verbosity >= 3) {
@@ -3409,7 +3490,7 @@ int main(int argc, char* argv[]) {
             // Errors
             double K = sampleOperators.size();
             double delta = 1.0 - percentile / 100.0;
-            double epsilon = std::sqrt(2 * std::log((2.0 * K) / delta) / numSamples);
+            double epsilon = std::sqrt(2 * std::log((2.0 * K) / delta) / numSamplesPer);
             if (verbosity >= 2) {
                 std::cout << "K = " << K << std::endl;
                 std::cout << "delta = " << delta << std::endl;
@@ -3417,7 +3498,7 @@ int main(int argc, char* argv[]) {
             }
 
             // Add the constraint that each symmetry should be between -epsilon and epsilon
-            if (numSamples == -1) {
+            if (numSamplesPer == -1) {
                 for (auto& con : zeroConsForSampling) {
                     Poly newCon1 = con - Poly(epsilon);
                     constraintsZero.push_back(newCon1);
@@ -3871,18 +3952,18 @@ int main(int argc, char* argv[]) {
 
             // If we're taking samples to a total number of shots
             if (numShots == -1) {
-                numSamples = -1;
+                numSamplesPer = -1;
             } else if (numShots != 0) {
-                numSamples = numShots / sampleOperators.size();
+                numSamplesPer = numShots / sampleOperators.size();
             } else {
-                numShots = numSamples * sampleOperators.size();
+                numShots = numSamplesPer * sampleOperators.size();
             }
 
             // Verbose output
-            int totalSamples = sampleOperators.size() * numSamples;
+            int totalSamples = sampleOperators.size() * numSamplesPer;
             totalSamples = std::abs(totalSamples);
             if (verbosity >= 1) {
-                std::cout << "Taking " << numSamples << " samples of " << sampleOperators.size() << " operators" << std::endl;
+                std::cout << "Taking " << numSamplesPer << " samples of " << sampleOperators.size() << " operators" << std::endl;
                 std::cout << "Total measurements: " << totalSamples << std::endl;
             }
             if (verbosity >= 3) {
@@ -3895,7 +3976,7 @@ int main(int argc, char* argv[]) {
             // Errors
             double K = sampleOperators.size();
             double delta = 1.0 - percentile / 100.0;
-            double epsilon = std::sqrt(2 * std::log((2.0 * K) / delta) / numSamples);
+            double epsilon = std::sqrt(2 * std::log((2.0 * K) / delta) / numSamplesPer);
             if (verbosity >= 2) {
                 std::cout << "K = " << K << std::endl;
                 std::cout << "delta = " << delta << std::endl;
@@ -3910,7 +3991,7 @@ int main(int argc, char* argv[]) {
                 double trueExpectation = 0.0;
                 double prob1 = 0.0;
 
-                // If we know the true solution TODO 
+                // If we know the true solution
                 if (modelName == "--mg" && useKnown) {
                     bool allNonZero = true;
                     if (mon.size() % 2 != 0) {
@@ -3958,7 +4039,7 @@ int main(int argc, char* argv[]) {
                 prob1 = (trueExpectation + 1) / 2.0;
 
                 // If -1 given as the number of samples, use the exact
-                if (numSamples == -1) {
+                if (numSamplesPer == -1) {
                     constraintsZero.push_back(Poly(1, mon) - Poly(trueExpectation));
                     samples[mon] = trueExpectation;
                     if (verbosity >= 3) {
@@ -3969,9 +4050,9 @@ int main(int argc, char* argv[]) {
 
                 // Determine the average from this many samples
                 double expFromProb = 2 * prob1 - 1;
-                std::binomial_distribution<> binom(numSamples, prob1);
+                std::binomial_distribution<> binom(numSamplesPer, prob1);
                 int success_count = binom(gen);
-                double avg = static_cast<double>(success_count) / numSamples;
+                double avg = static_cast<double>(success_count) / numSamplesPer;
 
                 // Scale and save this value
                 avg = 2 * avg - 1;
@@ -4468,7 +4549,7 @@ int main(int argc, char* argv[]) {
             int width = constraintsZero.size() - numSyms;
             outputLin = "auto (" + std::to_string(width) + ")";
         }
-        if (numSamples != 0) {
+        if (numSamplesPer != 0) {
             outputShots = "";
             outputShots += sampleChoice;
             if (sampleChoice == "all") {
@@ -4500,7 +4581,7 @@ int main(int argc, char* argv[]) {
         if (note.size() > 0) {
             outputNote = " & " + note;
         }
-        if (numSamples != 0) {
+        if (numSamplesPer != 0) {
             std::cout << outputMat << " & " << outputLin << " & " << outputRecon << " & " << outputSym << " & " << outputShots << " & " << outputDiff << " & " << outputTime << outputNote << " \\\\ \\hline" << std::endl;
         } else {
             std::cout << outputMat << " & " << outputLin << " & " << outputRecon << " & " << outputSym << " & " << outputDiff << " & " << outputTime << outputNote << " \\\\ \\hline" << std::endl;
