@@ -24,20 +24,32 @@ for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 1000000
 do
 
     # SDP plus level 2 shots
-    ./run -B -N "sdp+all2-z, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --noz --shots ${shots} --all 2 | tee -a data/measure.dat
-    ./run -B -N "sdp+all2-z, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --noz --shots ${shots} --all 2 | tee -a data/measure.dat
+    ./run -B -N "sdp+all2-x, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --all 2 | tee -a data/measure.dat
+    ./run -B -N "sdp+all2-x, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --all 2 | tee -a data/measure.dat
 
     # SDP plus level 3 shots
-    ./run -B -N "sdp+all3-z, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --noz --shots ${shots} --all 3 | tee -a data/measure.dat
-    ./run -B -N "sdp+all3-z, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --noz --shots ${shots} --all 3 | tee -a data/measure.dat
+    ./run -B -N "sdp+all3-x, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --all 3 | tee -a data/measure.dat
+    ./run -B -N "sdp+all3-x, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --all 3 | tee -a data/measure.dat
 
     # SDP plus 50 automatic
-    ./run -B -N "sdp+auto50-z, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --noz --shots ${shots} --auto 50 | tee -a data/measure.dat
-    ./run -B -N "sdp+auto50-z, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --noz --shots ${shots} --auto 50 | tee -a data/measure.dat
+    ./run -B -N "sdp+auto50-x, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --auto 50 | tee -a data/measure.dat
+    ./run -B -N "sdp+auto50-x, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --auto 50 | tee -a data/measure.dat
+
+    # SDP plus 100 automatic
+    ./run -B -N "sdp+auto100-x, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --auto 100 | tee -a data/measure.dat
+    ./run -B -N "sdp+auto100-x, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --auto 100 | tee -a data/measure.dat
+
+    # SDP plus 200 automatic
+    ./run -B -N "sdp+auto200-x, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --auto 200 | tee -a data/measure.dat
+    ./run -B -N "sdp+auto200-x, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --auto 200 | tee -a data/measure.dat
+
+    # SDP plus 300 automatic
+    ./run -B -N "sdp+auto300-x, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --auto 300 | tee -a data/measure.dat
+    ./run -B -N "sdp+auto300-x, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --auto 300 | tee -a data/measure.dat
 
     # SDP plus only objective
-    ./run -B -N "sdp+onlyobj-z, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --noz --shots ${shots} --onlyobj | tee -a data/measure.dat
-    ./run -B -N "sdp+onlyobj-z, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --noz --shots ${shots} --onlyobj | tee -a data/measure.dat
+    ./run -B -N "sdp+onlyobj-x, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --onlyobj | tee -a data/measure.dat
+    ./run -B -N "sdp+onlyobj-x, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --onlyobj | tee -a data/measure.dat
 
 done
 
@@ -66,14 +78,13 @@ done
 
 # Ground state energy vs number of measurements
 echo "file & energy" | tee -a data/measure.dat
-A=50
 ./run -B -N "sdp" -s M --2dtfi ${systemSize} -A ${A} -H | tee -a data/measure.dat
 for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
 do
 
     # Only automatic
-    ./run -B -N "auto200, 95%"   -p 95   -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -H --shots ${shots} --auto 200 | tee -a data/measure.dat
-    ./run -B -N "auto200, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -H --shots ${shots} --auto 200 | tee -a data/measure.dat
+    #./run -B -N "auto200, 95%"   -p 95   -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -H --shots ${shots} --auto 200 | tee -a data/measure.dat
+    #./run -B -N "auto200, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -H --shots ${shots} --auto 200 | tee -a data/measure.dat
 
     # Only measure the objective
     ./run -B -N "onlyobj, 95%"   -p 95   -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -H --shots ${shots} --onlyobj | tee -a data/measure.dat
@@ -96,7 +107,7 @@ done
 # Ground state energy for large systems
 echo "file & large" | tee -a data/measure.dat
 systemSize="100"
-A=70
+A=100
 ./run -B -S 1 -N "sdp" -s M --mg ${systemSize} -A 70 -H | tee -a data/measure.dat
 for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
 do
@@ -110,16 +121,20 @@ do
     ./run -B -S 1 -N "sdp+onlyobj, 99.7%" -p 99.7 -s M --mg ${systemSize} --known -A ${A} -H --shots ${shots} --onlyobj | tee -a data/measure.dat
 
     # SDP plus level 2 shots
-    #./run -B -S 1 -N "sdp+all2, 95%" -p 95 -s M --mg ${systemSize} --known -A ${A} -H --shots ${shots} --all 2 | tee -a data/measure.dat
-    #./run -B -S 1 -N "sdp+all2, 99.7%" -p 99.7 -s M --mg ${systemSize} --known -A ${A} -H --shots ${shots} --all 2 | tee -a data/measure.dat
+    ./run -B -S 1 -N "sdp+all2, 95%" -p 95 -s M --mg ${systemSize} --known -A ${A} -H --shots ${shots} --all 2 | tee -a data/measure.dat
+    ./run -B -S 1 -N "sdp+all2, 99.7%" -p 99.7 -s M --mg ${systemSize} --known -A ${A} -H --shots ${shots} --all 2 | tee -a data/measure.dat
 
-    # SDP plus 200 automatic
-    ./run -B -S 1 -N "sdp+auto200, 95%" -p 95 -s M --mg ${systemSize} --known -A ${A} -H --shots ${shots} --auto 200 | tee -a data/measure.dat
-    ./run -B -S 1 -N "sdp+auto200, 99.7%" -p 99.7 -s M --mg ${systemSize} --known -A ${A} -H --shots ${shots} --auto 200 | tee -a data/measure.dat
+    # SDP plus 100 automatic
+    ./run -B -S 1 -N "sdp+auto100, 95%" -p 95 -s M --mg ${systemSize} --known -A ${A} -H --shots ${shots} --auto 100 | tee -a data/measure.dat
+    ./run -B -S 1 -N "sdp+auto100, 99.7%" -p 99.7 -s M --mg ${systemSize} --known -A ${A} -H --shots ${shots} --auto 100 | tee -a data/measure.dat
 
-    # SDP plus 200 first
-    #./run -B -S 1 -N "sdp+auto200, 95%" -p 95 -s M --mg ${systemSize} --known -A ${A} -H --shots ${shots} --first 200 | tee -a data/measure.dat
-    #./run -B -S 1 -N "sdp+auto200, 99.7%" -p 99.7 -s M --mg ${systemSize} --known -A ${A} -H --shots ${shots} --first 200 | tee -a data/measure.dat
+    # SDP plus 300 automatic
+    ./run -B -S 1 -N "sdp+auto300, 95%" -p 95 -s M --mg ${systemSize} --known -A ${A} -H --shots ${shots} --auto 300 | tee -a data/measure.dat
+    ./run -B -S 1 -N "sdp+auto300, 99.7%" -p 99.7 -s M --mg ${systemSize} --known -A ${A} -H --shots ${shots} --auto 300 | tee -a data/measure.dat
+
+    # SDP plus 500 automatic
+    ./run -B -S 1 -N "sdp+auto500, 95%" -p 95 -s M --mg ${systemSize} --known -A ${A} -H --shots ${shots} --auto 500 | tee -a data/measure.dat
+    ./run -B -S 1 -N "sdp+auto500, 99.7%" -p 99.7 -s M --mg ${systemSize} --known -A ${A} -H --shots ${shots} --auto 500 | tee -a data/measure.dat
 
 done
 

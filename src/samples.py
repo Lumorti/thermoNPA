@@ -130,7 +130,7 @@ for filename in filenames:
         plt.ylabel("Purity Lower Bound")
     elif "mag" in filename:
         plt.ylabel("Magnetization Bounds")
-    elif "energy" in filename:
+    elif "energy" in filename or "large" in filename:
         plt.ylabel("Ground-state Energy Lower Bound")
     elif "heat" in filename:
         plt.ylabel("Heat Current Bounds")
@@ -194,7 +194,7 @@ for filename in filenames:
             plt.axhline(y=yLineLower, linestyle='--', color=color)
 
         # If we need an upper bound too
-        if filename != "purity" and filename != "energy":
+        if filename != "purity" and filename != "energy" and filename != "large":
             line = plt.plot(x, yUpper, color=color)
             if yLineUpper is not None:
                 plt.axhline(y=yLineUpper, linestyle='--', color=color)
@@ -204,7 +204,6 @@ for filename in filenames:
     ax = plt.gca()
     handles, labels = ax.get_legend_handles_labels()
     labels, handles = zip(*sorted(zip(labels, handles), key=lambda t: t[0]))
-    # ax.legend(handles, labels, loc='center right')
     ax.legend(handles, labels)
     plt.tight_layout()
     plt.savefig('data/estimation_' + filename + '.pdf', bbox_inches='tight')

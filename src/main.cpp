@@ -166,8 +166,8 @@ int main(int argc, char* argv[]) {
     int gridWidth = 1;
     int gridHeight = 1;
     int imagType = 0;
-    int numSamplesPer = 0;
-    int numShots = 0;
+    long int numSamplesPer = 0;
+    long int numShots = 0;
     double tol = 1e-7;
     bool usePurity = false;
     bool useEnergy = false;
@@ -1380,7 +1380,7 @@ int main(int argc, char* argv[]) {
 
             // Make sure it's odd
             if (numQubits % 2 == 0) {
-                std::cout << "Error - Number of qubits must be odd" << std::endl;
+                std::cerr << "Error - Number of qubits must be odd" << std::endl;
                 return 1;
             }
 
@@ -1690,6 +1690,8 @@ int main(int argc, char* argv[]) {
         } else if (argAsString == "-S") {
             seed = std::string(argv[i+1]);
             srand(std::hash<std::string>{}(seed));
+            std::seed_seq seedSeq (seed.begin(), seed.end());
+            gen.seed(seedSeq);
             i++;
 
         // If setting verbosity
@@ -1796,13 +1798,13 @@ int main(int argc, char* argv[]) {
                 } else if (argv[i+1][0] == 'H') {
                     spinsToUse.push_back(-1);
                     if (lindbladianHot.size() == 0) {
-                        std::cout << "Error - list of spins connected to the hot bath not defined" << std::endl;
+                        std::cerr << "Error - list of spins connected to the hot bath not defined" << std::endl;
                         return 1;
                     }
                 } else if (argv[i+1][0] == 'C') {
                     spinsToUse.push_back(-2);
                     if (lindbladianCold.size() == 0) {
-                        std::cout << "Error - list of spins connected to the hot bath not defined" << std::endl;
+                        std::cerr << "Error - list of spins connected to the hot bath not defined" << std::endl;
                         return 1;
                     }
                 } else {
@@ -1813,13 +1815,13 @@ int main(int argc, char* argv[]) {
 
             // Make sure we know the Hamiltonian
             if (hamiltonianInter.size() == 0) {
-                std::cout << "Error - hamiltonian not explicitly defined" << std::endl;
+                std::cerr << "Error - hamiltonian not explicitly defined" << std::endl;
                 return 1;
             }
 
             // Make sure at least one spin was specified
             if (spinsToUse.size() == 0) {
-                std::cout << "Error - no spins specified" << std::endl;
+                std::cerr << "Error - no spins specified" << std::endl;
                 return 1;
             }
 
@@ -1875,7 +1877,7 @@ int main(int argc, char* argv[]) {
             } else if (type == "negative") {
                 constraintsPositive.push_back(-tempObj);
             } else {
-                std::cout << "Error - unknown type of heat current constraint" << std::endl;
+                std::cerr << "Error - unknown type of heat current constraint" << std::endl;
                 return 1;
             }
 
@@ -2019,7 +2021,7 @@ int main(int argc, char* argv[]) {
             }
             for (int q : qubitsToUse) {
                 if (q < 1 || q > numQubits) {
-                    std::cout << "Error - invalid qubit index " << q << " specified" << std::endl;
+                    std::cerr << "Error - invalid qubit index " << q << " specified" << std::endl;
                     return 1;
                 }
             }
@@ -3590,6 +3592,19 @@ int main(int argc, char* argv[]) {
                     if (!(iss >> row >> col >> real >> imag)) {break;}
                     groundTruth.insert(row, col) = std::complex<double>(real, imag);
                 }
+                if (usePurity) {
+                    double purity = 0;
+                    for (int k=0; k<matSize; k++) {
+                        for (int l=0; l<matSize; l++) {
+                            purity += std::norm(groundTruth.coeff(k,l));
+                        }
+                    }
+                    knownIdeal = purity;
+                    idealIsKnown = true;
+                    if (verbosity >= 1) {
+                        std::cout << "Loaded state has purity " << purity << std::endl;
+                    }
+                }
                 if (verbosity >= 3) {
                     std::cout << "Ground truth matrix:" << std::endl;
                     std::cout << Eigen::MatrixXcd(groundTruth) << std::endl;
@@ -4133,10 +4148,9 @@ int main(int argc, char* argv[]) {
     for (size_t i=0; i<constraintsPositive.size(); i++) {
         addVariables(variableSet, constraintsPositive[i]);
     }
-    addVariables(variableSet, objective);
-    int numVars = variableSet.size()-1;
 
-    // If using purity as the objective
+    // If using purity as the objective TODO
+    // ./run -S 1 --2dtfi 3 3 --precomputed data/2d_3x3.dat --objPurity --shots 1000000 --auto 200
     std::vector<Mon> quadCone;
     if (usePurity) {
 
@@ -4153,6 +4167,10 @@ int main(int argc, char* argv[]) {
         objective = Poly(1, Mon("<T1>"));
 
     }
+
+    // Also add the variables from the objective
+    addVariables(variableSet, objective);
+    int numVars = variableSet.size()-1;
 
     // Output the problem
     if (verbosity >= 2) {
@@ -4261,15 +4279,31 @@ int main(int argc, char* argv[]) {
     double lowerBound = bounds.first;
     double upperBound = bounds.second;
     if (usePurity) {
-        lowerBound = std::pow(lowerBound, 2) / std::pow(2, numQubits);
-        upperBound = 1.0;
+        lowerBound = lowerBound / std::pow(2, numQubits);
+        upperBound = 0.0;
+        double absSum = 0.0;
+        for (const auto& val : results) {
+            if (!val.first.contains('T')) {
+                upperBound += std::norm(val.second);
+                absSum += std::abs(val.second);
+            }
+        }
+        if (verbosity >= 1) {
+            std::cout << "sum of pauli squares = " << upperBound << std::endl;
+        }
+        upperBound /= std::pow(2, numQubits);
+        if (verbosity >= 1) {
+            std::cout << "T = " << results[Mon("<T1>")] << std::endl;
+        }
     }
     double diff = std::abs(upperBound - lowerBound);
+    double error = (diff / std::abs(trivialMax - trivialMin)) * 100;
+
+    // Output the results
     if (idealIsKnown && verbosity >= 1) {
         std::cout << "Known True Optimum: " << knownIdeal << std::endl;
         std::cout << "Relative Error: " << diff / std::abs(knownIdeal) * 100 << "%" << std::endl;
     }
-    double error = (diff / std::abs(trivialMax - trivialMin)) * 100;
     if (verbosity >= 1) {
         std::cout << "Bounds: " << lowerBound << "  <  " << upperBound << std::endl;
         std::cout << "Difference: " << upperBound - lowerBound << std::endl;
@@ -4396,6 +4430,7 @@ int main(int argc, char* argv[]) {
                 std::cout << "Minimum energy of H: " << lowerBound << std::endl;
                 if (modelName == "--mg") {
                     knownIdeal = -(3.0/8.0)*numQubits;
+                    idealIsKnown = true;
                     std::cout << "Known minimum: " << knownIdeal << std::endl;
                 }
             }
