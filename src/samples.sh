@@ -6,50 +6,51 @@
 
 # System settings
 systemSize="3 3"
-A=50
-M=1000
+A=75
+M=2000
 
 # Pre-compute the steady state
 filename="data/2d_3x3.dat"
 ./run --2dtfi ${systemSize} --precompute ${filename} | tee -a data/precomputes.log
 
 # Pre-compute the ground state
-filename="data/2d_3x3_H.dat"
-./run --2dtfi ${systemSize} --precompute ${filename} -H | tee -a data/precomputes.log
+filenameEnergy="data/2d_3x3_H.dat"
+./run --2dtfi ${systemSize} --precompute ${filenameEnergy} -H | tee -a data/precomputes.log
 
-# Heat current without Z vs number of measurements
+# Heat current without something vs number of measurements
 echo "file & heat" | tee -a data/measure.dat
 ./run -B -N "sdp" -s M --2dtfi ${systemSize} -M ${M} -A ${A} --objHC H | tee -a data/measure.dat
+letter=y
 for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
 do
 
     # SDP plus level 2 shots
-    ./run -B -N "sdp+all2-x, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --all 2 | tee -a data/measure.dat
-    ./run -B -N "sdp+all2-x, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --all 2 | tee -a data/measure.dat
+    ./run -B -N "sdp+all2-${letter}, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --no${letter} --shots ${shots} --all 2 | tee -a data/measure.dat
+    ./run -B -N "sdp+all2-${letter}, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --no${letter} --shots ${shots} --all 2 | tee -a data/measure.dat
 
     # SDP plus level 3 shots
-    ./run -B -N "sdp+all3-x, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --all 3 | tee -a data/measure.dat
-    ./run -B -N "sdp+all3-x, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --all 3 | tee -a data/measure.dat
-
-    # SDP plus 50 automatic
-    ./run -B -N "sdp+auto50-x, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --auto 50 | tee -a data/measure.dat
-    ./run -B -N "sdp+auto50-x, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --auto 50 | tee -a data/measure.dat
-
-    # SDP plus 100 automatic
-    ./run -B -N "sdp+auto100-x, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --auto 100 | tee -a data/measure.dat
-    ./run -B -N "sdp+auto100-x, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --auto 100 | tee -a data/measure.dat
+    ./run -B -N "sdp+all3-${letter}, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --no${letter} --shots ${shots} --all 3 | tee -a data/measure.dat
+    ./run -B -N "sdp+all3-${letter}, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --no${letter} --shots ${shots} --all 3 | tee -a data/measure.dat
 
     # SDP plus 200 automatic
-    ./run -B -N "sdp+auto200-x, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --auto 200 | tee -a data/measure.dat
-    ./run -B -N "sdp+auto200-x, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --auto 200 | tee -a data/measure.dat
+    ./run -B -N "sdp+auto200-${letter}, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --no${letter} --shots ${shots} --auto 200 | tee -a data/measure.dat
+    ./run -B -N "sdp+auto200-${letter}, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --no${letter} --shots ${shots} --auto 200 | tee -a data/measure.dat
 
     # SDP plus 300 automatic
-    ./run -B -N "sdp+auto300-x, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --auto 300 | tee -a data/measure.dat
-    ./run -B -N "sdp+auto300-x, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --auto 300 | tee -a data/measure.dat
+    ./run -B -N "sdp+auto300-${letter}, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --no${letter} --shots ${shots} --auto 300 | tee -a data/measure.dat
+    ./run -B -N "sdp+auto300-${letter}, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --no${letter} --shots ${shots} --auto 300 | tee -a data/measure.dat
+
+    # SDP plus 400 automatic
+    ./run -B -N "sdp+auto400-${letter}, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --no${letter} --shots ${shots} --auto 400 | tee -a data/measure.dat
+    ./run -B -N "sdp+auto400-${letter}, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --no${letter} --shots ${shots} --auto 400 | tee -a data/measure.dat
+
+    # SDP plus 500 automatic
+    ./run -B -N "sdp+auto500-${letter}, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --no${letter} --shots ${shots} --auto 500 | tee -a data/measure.dat
+    ./run -B -N "sdp+auto500-${letter}, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --no${letter} --shots ${shots} --auto 500 | tee -a data/measure.dat
 
     # SDP plus only objective
-    ./run -B -N "sdp+onlyobj-x, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --onlyobj | tee -a data/measure.dat
-    ./run -B -N "sdp+onlyobj-x, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --nox --shots ${shots} --onlyobj | tee -a data/measure.dat
+    ./run -B -N "sdp+onlyobj-${letter}, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --no${letter} --shots ${shots} --onlyobj | tee -a data/measure.dat
+    ./run -B -N "sdp+onlyobj-${letter}, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -M ${M} -A ${A} --objHC H --no${letter} --shots ${shots} --onlyobj | tee -a data/measure.dat
 
 done
 
@@ -57,6 +58,10 @@ done
 echo "file & purity" | tee -a data/measure.dat
 for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
 do
+
+    # Only level 2 shots
+    ./run -B -N "all2, 95%" -s M -p 95 --2dtfi ${systemSize} --precomputed ${filename} --millis -S 1 --objPurity --shots ${shots} --all 2 | tee -a data/measure.dat
+    ./run -B -N "all2, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filename} --millis -S 1 --objPurity --shots ${shots} --all 2 | tee -a data/measure.dat
 
     # Only level 3 shots
     ./run -B -N "all3, 95%" -s M -p 95 --2dtfi ${systemSize} --precomputed ${filename} --millis -S 1 --objPurity --shots ${shots} --all 3 | tee -a data/measure.dat
@@ -74,6 +79,10 @@ do
     ./run -B -N "sdp+auto300, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --auto 300 | tee -a data/measure.dat
     ./run -B -N "sdp+auto300, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --auto 300 | tee -a data/measure.dat
 
+    # SDP plus auto 500
+    ./run -B -N "sdp+auto500, 95%" -p 95 -s M --2dtfi ${systemSize} --precomputed ${filename} --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --auto 500 | tee -a data/measure.dat
+    ./run -B -N "sdp+auto500, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} --millis -S 1 -M ${M} -A ${A} --objPurity --shots ${shots} --auto 500 | tee -a data/measure.dat
+
 done
 
 # Ground state energy vs number of measurements
@@ -82,31 +91,44 @@ echo "file & energy" | tee -a data/measure.dat
 for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
 do
 
-    # Only automatic
-    #./run -B -N "auto200, 95%"   -p 95   -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -H --shots ${shots} --auto 200 | tee -a data/measure.dat
-    #./run -B -N "auto200, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -H --shots ${shots} --auto 200 | tee -a data/measure.dat
+    # Only automatic 200
+    ./run -B -N "auto200, 95%"   -p 95   -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S 1 -H --shots ${shots} --auto 200 | tee -a data/measure.dat
+    ./run -B -N "auto200, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S 1 -H --shots ${shots} --auto 200 | tee -a data/measure.dat
+
+    # Only automatic 300
+    ./run -B -N "auto300, 95%"   -p 95   -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S 1 -H --shots ${shots} --auto 300 | tee -a data/measure.dat
+    ./run -B -N "auto300, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S 1 -H --shots ${shots} --auto 300 | tee -a data/measure.dat
 
     # Only measure the objective
-    ./run -B -N "onlyobj, 95%"   -p 95   -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -H --shots ${shots} --onlyobj | tee -a data/measure.dat
-    ./run -B -N "onlyobj, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -H --shots ${shots} --onlyobj | tee -a data/measure.dat
+    ./run -B -N "onlyobj, 95%"   -p 95   -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S 1 -H --shots ${shots} --onlyobj | tee -a data/measure.dat
+    ./run -B -N "onlyobj, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S 1 -H --shots ${shots} --onlyobj | tee -a data/measure.dat
 
     # SDP plus measure the objective
-    ./run -B -N "sdp+onlyobj, 95%"   -p 95   -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -A ${A} -H --shots ${shots} --onlyobj | tee -a data/measure.dat
-    ./run -B -N "sdp+onlyobj, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -A ${A} -H --shots ${shots} --onlyobj | tee -a data/measure.dat
+    ./run -B -N "sdp+onlyobj, 95%"   -p 95   -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S 1 -A ${A} -H --shots ${shots} --onlyobj | tee -a data/measure.dat
+    ./run -B -N "sdp+onlyobj, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S 1 -A ${A} -H --shots ${shots} --onlyobj | tee -a data/measure.dat
 
     # SDP plus level 2 shots
-    ./run -B -N "sdp+all2, 95%"   -p 95   -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -A ${A} -H --shots ${shots} --all 2 | tee -a data/measure.dat
-    ./run -B -N "sdp+all2, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S 1 -A ${A} -H --shots ${shots} --all 2 | tee -a data/measure.dat
+    ./run -B -N "sdp+all2, 95%"   -p 95   -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S 1 -A ${A} -H --shots ${shots} --all 2 | tee -a data/measure.dat
+    ./run -B -N "sdp+all2, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S 1 -A ${A} -H --shots ${shots} --all 2 | tee -a data/measure.dat
 
-    # SDP plus automatic
-    ./run -B -N "sdp+auto200, 95%"   -s M -p 95   --2dtfi ${systemSize} --precomputed ${filename} -S 1 -A ${A} -H --shots ${shots} --auto 200 | tee -a data/measure.dat
-    ./run -B -N "sdp+auto200, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filename} -S 1 -A ${A} -H --shots ${shots} --auto 200 | tee -a data/measure.dat
+    # SDP plus level 3 shots
+    ./run -B -N "sdp+all3, 95%"   -p 95   -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S 1 -A ${A} -H --shots ${shots} --all 3 | tee -a data/measure.dat
+    ./run -B -N "sdp+all3, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S 1 -A ${A} -H --shots ${shots} --all 3 | tee -a data/measure.dat
+
+    # SDP plus automatic 200
+    ./run -B -N "sdp+auto200, 95%"   -s M -p 95   --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S 1 -A ${A} -H --shots ${shots} --auto 200 | tee -a data/measure.dat
+    ./run -B -N "sdp+auto200, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S 1 -A ${A} -H --shots ${shots} --auto 200 | tee -a data/measure.dat
+
+    # SDP plus automatic 300
+    ./run -B -N "sdp+auto300, 95%"   -s M -p 95   --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S 1 -A ${A} -H --shots ${shots} --auto 300 | tee -a data/measure.dat
+    ./run -B -N "sdp+auto300, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S 1 -A ${A} -H --shots ${shots} --auto 300 | tee -a data/measure.dat
+
 
 done
 
 # Ground state energy for large systems
 echo "file & large" | tee -a data/measure.dat
-systemSize="100"
+systemSize="50"
 A=100
 ./run -B -S 1 -N "sdp" -s M --mg ${systemSize} -A 70 -H | tee -a data/measure.dat
 for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
@@ -119,6 +141,10 @@ do
     # SDP plus only the objective
     ./run -B -S 1 -N "sdp+onlyobj, 95%"   -p 95   -s M --mg ${systemSize} --known -A ${A} -H --shots ${shots} --onlyobj | tee -a data/measure.dat
     ./run -B -S 1 -N "sdp+onlyobj, 99.7%" -p 99.7 -s M --mg ${systemSize} --known -A ${A} -H --shots ${shots} --onlyobj | tee -a data/measure.dat
+
+    # SDP plus level 1 shots
+    ./run -B -S 1 -N "sdp+all1, 95%" -p 95 -s M --mg ${systemSize} --known -A ${A} -H --shots ${shots} --all 1 | tee -a data/measure.dat
+    ./run -B -S 1 -N "sdp+all1, 99.7%" -p 99.7 -s M --mg ${systemSize} --known -A ${A} -H --shots ${shots} --all 1 | tee -a data/measure.dat
 
     # SDP plus level 2 shots
     ./run -B -S 1 -N "sdp+all2, 95%" -p 95 -s M --mg ${systemSize} --known -A ${A} -H --shots ${shots} --all 2 | tee -a data/measure.dat

@@ -130,7 +130,9 @@ for filename in filenames:
         plt.ylabel("Purity Lower Bound")
     elif "mag" in filename:
         plt.ylabel("Magnetization Bounds")
-    elif "energy" in filename or "large" in filename:
+    elif "large" in filename:
+        plt.ylabel("Ground-state Energy Lower Bound (Large System)")
+    elif "energy" in filename:
         plt.ylabel("Ground-state Energy Lower Bound")
     elif "heat" in filename:
         plt.ylabel("Heat Current Bounds")

@@ -4222,16 +4222,22 @@ int main(int argc, char* argv[]) {
 
     // Output what we're doing
     if (verbosity >= 1) {
+        std::string optType = "LP";
+        if (maxMatSize > 1) {
+            optType = "SDP";
+        } else if (quadCone.size() > 0) {
+            optType = "QP";
+        }
         if (solver == "scs") {
-            std::cout << "Solving SDP using SCS with " << numCons << " constraints, " << numMats << " moment mats with a max size of " << maxMatSize << " and " << numVars << " variables..." << std::endl;
+            std::cout << "Solving " << optType << " using SCS with " << numCons << " constraints, " << numMats << " moment mats with a max size of " << maxMatSize << " and " << numVars << " variables..." << std::endl;
         } else if (maxMatSize > 1 && solver == "mosek") {
-            std::cout << "Solving SDP using MOSEK with " << numCons << " constraints, " << numMats << " moment mats with a max size of " << maxMatSize << " and " << numVars << " variables..." << std::endl;
+            std::cout << "Solving " << optType << " using MOSEK with " << numCons << " constraints, " << numMats << " moment mats with a max size of " << maxMatSize << " and " << numVars << " variables..." << std::endl;
         } else if (solver == "eigen") {
-            std::cout << "Solving linear system using Eigen with " << numCons << " constraints and " << numVars << " variables..." << std::endl;
+            std::cout << "Solving " << optType << " using Eigen with " << numCons << " constraints and " << numVars << " variables..." << std::endl;
         } else if (solver == "mosek") {
-            std::cout << "Solving LP using MOSEK with " << numCons << " constraints and " << numVars << " variables (ratio: " << double(numCons)/numVars << ")..." << std::endl;
+            std::cout << "Solving " << optType << " using MOSEK with " << numCons << " constraints and " << numVars << " variables (ratio: " << double(numCons)/numVars << ")..." << std::endl;
         } else if (solver == "gurobi") {
-            std::cout << "Solving LP using Gurobi with " << numCons << " constraints and " << numVars << " variables (ratio: " << double(numCons)/numVars << ")..." << std::endl;
+            std::cout << "Solving " << optType << " using Gurobi with " << numCons << " constraints and " << numVars << " variables (ratio: " << double(numCons)/numVars << ")..." << std::endl;
         }
     }
 
@@ -4295,6 +4301,7 @@ int main(int argc, char* argv[]) {
         if (verbosity >= 1) {
             std::cout << "T = " << results[Mon("<T1>")] << std::endl;
         }
+        std::swap(lowerBound, upperBound);
     }
     double diff = std::abs(upperBound - lowerBound);
     double error = (diff / std::abs(trivialMax - trivialMin)) * 100;
