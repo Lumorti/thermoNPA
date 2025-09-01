@@ -171,7 +171,7 @@ int main(int argc, char* argv[]) {
     double tol = 1e-7;
     bool usePurity = false;
     bool useEnergy = false;
-    bool noLindbladian = false;
+    bool groundStateProblem = false;
     bool outputToFile = false;
     std::string sampleChoice = "all";
     int maxSampleDegree = 2;
@@ -282,12 +282,6 @@ int main(int argc, char* argv[]) {
         } else if (argAsString == "--objPurity" || argAsString == "--objpurity") {
             usePurity = true;
             solver = "mosek";
-            objective = Poly();
-            for (int i=1; i<=numQubits; i++) {
-                objective += Poly(1.0/numQubits, "<X" + std::to_string(i) + ">");
-                objective += Poly(1.0/numQubits, "<Y" + std::to_string(i) + ">");
-                objective += Poly(1.0/numQubits, "<Z" + std::to_string(i) + ">");
-            }
 
         // Energy objective
         } else if (argAsString == "--objEnergy" || argAsString == "--objenergy") {
@@ -637,7 +631,7 @@ int main(int argc, char* argv[]) {
             // This is an energy only model
             objective = H;
             useEnergy = true;
-            noLindbladian = true;
+            groundStateProblem = true;
 
             // We know the true ground state energy
             idealIsKnown = true;
@@ -2038,7 +2032,7 @@ int main(int argc, char* argv[]) {
 
         // If considering as a H min problem
         } else if (argAsString == "-H") {
-            noLindbladian = true;
+            groundStateProblem = true;
 
         // If sampling from the symmetries
         } else if (argAsString == "--sym") {
@@ -2175,13 +2169,37 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    // If it's a purity problem, use a generic objective for now
+    if (usePurity) {
+        objective = Poly();
+        for (int i=1; i<=numQubits; i++) {
+            objective += Poly(1.0/numQubits, "<X" + std::to_string(i) + ">");
+            objective += Poly(1.0/numQubits, "<Y" + std::to_string(i) + ">");
+            objective += Poly(1.0/numQubits, "<Z" + std::to_string(i) + ">");
+        }
+    }
+
     // If it's a Hamiltonian problem, don't do any Lindblad stuff
-    if (noLindbladian) {
-        lindbladLevel = 0;
-        findMinimal = false;
-        usingHeatCurrent = false;
-        traceCons = false;
+    if (groundStateProblem) {
         useEnergy = true;
+
+        // Get the Hamiltonian
+        Poly H = Poly();
+        for (int i=0; i<numQubits; i++) {
+            for (int j=i; j<numQubits; j++) {
+                H += hamiltonianInter[i][j];
+            }
+        }
+        H.reduce();
+
+        // Lindbladian = -i[H, rho]
+        Poly rho("<R1>");
+        lindbladian = -imag*H.commutator(rho);
+        lindbladian = Poly("<A0>") * lindbladian;
+        lindbladian.cycleToAndRemove('R', 1);
+        lindbladian.convertToPaulis();
+        lindbladian.reduce();
+
     }
 
     // Start a timer
@@ -3615,7 +3633,7 @@ int main(int argc, char* argv[]) {
             } else if (!useKnown) {
 
                 // If it's an energy problem
-                if (noLindbladian) {
+                if (groundStateProblem) {
 
                     // Construct the Hamiltonian
                     Poly H = Poly();
@@ -3896,6 +3914,36 @@ int main(int argc, char* argv[]) {
                 } else {
                     for (int i = 0; i < std::min(maxPaulis, (int)monList.size()); i++) {
                         sampleOperators.insert(monList[i]);
+                    }
+
+                }
+
+                // While we haven't reached the full size, keeping adding products TODO
+                while (int(sampleOperators.size()) < maxPaulis) {
+
+                    // Find the next monomial to add
+                    Mon nextMon;
+                    //for (size_t i=0; i<topRow.size(); i++) {
+                        //for (size_t j=i; j<topRow.size(); j++) {
+                    for (auto it1 = sampleOperators.begin(); it1 != sampleOperators.end(); ++it1) {
+                        for (auto it2 = it1; it2 != sampleOperators.end(); ++it2) {
+                            Mon product = (*it1) * (*it2);
+                            std::pair<std::complex<double>, Mon> reducedMon = product.reduce();
+                            if (!sampleOperators.count(reducedMon.second) && reducedMon.second.size() > 0) {
+                                nextMon = reducedMon.second;
+                                break;
+                            }
+                        }
+                        if (nextMon.size() > 0) {
+                            break;
+                        }
+                    }
+
+                    // If we found a new monomial, add it
+                    if (nextMon.size() > 0) {
+                        sampleOperators.insert(nextMon);
+                    } else {
+                        break;
                     }
 
                 }
@@ -4270,7 +4318,7 @@ int main(int argc, char* argv[]) {
     // Solve the relaxation
     std::pair<double,double> bounds = {-1000000, 1000000};
     std::map<Mon, std::complex<double>> results;
-    if (!(precompute && noLindbladian)) {
+    if (!(precompute && groundStateProblem)) {
         if (solver == "scs") {
             bounds = boundSCS(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity, {-1,1}, &results);
         } else if (solver == "mosek" || maxMatSize > 1) {
@@ -4349,7 +4397,7 @@ int main(int argc, char* argv[]) {
         Eigen::MatrixXcd reconMatrix = Eigen::MatrixXcd::Zero(fullMatSize, fullMatSize);
 
         // If precomputing a Hamiltonian we should diagonalize it here
-        if (precompute && noLindbladian) {
+        if (precompute && groundStateProblem) {
 
             // Construct the Hamiltonian
             Poly H = Poly();
