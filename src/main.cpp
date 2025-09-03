@@ -1895,7 +1895,7 @@ int main(int argc, char* argv[]) {
 
         // If taking samples
         } else if (argAsString == "--shots") {
-            numShots = std::stoi(argv[i+1]);
+            numShots = std::stol(argv[i+1]);
             numSamplesPer = 1;
             i++;
 

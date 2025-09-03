@@ -179,7 +179,7 @@ for filename in filenames:
             noteNoPercent = note
         firstTime = noteNoPercent not in noteToColor.keys()
         if firstTime:
-            color = colors[nextCol]
+            color = colors[nextCol % len(colors)]
             noteToColor[noteNoPercent] = color
             nextCol += 1
         else:
