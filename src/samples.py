@@ -121,7 +121,7 @@ plt.rcParams.update({'font.family': 'serif'})
 
 # Plot the data
 for filename in filenames:
-
+    
     # Set up the figure
     plt.figure(figsize=(7, 5))
     plt.clf()
@@ -152,6 +152,7 @@ for filename in filenames:
         for point in points:
             if point["note"] == note and point["filename"] == filename:
                 if point["shotsVal"] == -1:
+                    print(point)
                     if yLineLower is None:
                         yLineLower = point["diffLowerVal"]
                     if yLineUpper is None:

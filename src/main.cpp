@@ -652,7 +652,6 @@ int main(int argc, char* argv[]) {
             lindbladian.reduce();
 
         // 2D Lindbladian test
-        // 2dtfi 3x3 has min energy -9.897068167
         } else if (argAsString == "--2d" || argAsString == "--2dtfiperiodic" || argAsString == "--2dtfi" || argAsString == "--2dtwo") {
             modelName = argAsString;
 
@@ -674,6 +673,10 @@ int main(int argc, char* argv[]) {
             // Calculated quantities
             double epsilon_c = epsilon_h + delta;
             double epsilon_other = (epsilon_h + epsilon_c) / 2.0;
+            if (argAsString == "--2dtfi" || argAsString == "--2dtfiperiodic") {
+                epsilon_other = epsilon_h;
+                epsilon_c = epsilon_h;
+            }
             std::vector<double> epsilons(numQubits, epsilon_other);
             double n_c = 1.0 / (std::exp(epsilon_c / T_c) - 1.0);
             double n_h = 1.0 / (std::exp(epsilon_h / T_h) - 1.0);
@@ -682,7 +685,7 @@ int main(int argc, char* argv[]) {
             double gamma_c_plus = gamma_c * n_c;
             double gamma_c_minus = gamma_c * (n_c + 1.0);
 
-            // For the tfi, higher g
+            // For the tfi, higher g TODO
             if (argAsString == "--2dtfi" || argAsString == "--2dtfiperiodic") {
                 g = 0.5;
             }
@@ -753,13 +756,6 @@ int main(int argc, char* argv[]) {
                 
             }
 
-            // For the tfi, make all epsilon the same
-            if (argAsString == "--2dtfi" || argAsString == "--2dtfiperiodic") {
-                for (int i=0; i<numQubits; i++) {
-                    epsilons[i] = epsilon_h;
-                }
-            }
-
             // The Hamiltonian
             hamiltonianInter = std::vector<std::vector<Poly>>(numQubits, std::vector<Poly>(numQubits, Poly()));
             if (argAsString == "--2dtwo") {
@@ -777,11 +773,11 @@ int main(int argc, char* argv[]) {
                 }
             } else if (argAsString == "--2dtfi" || argAsString == "--2dtfiperiodic") {
                 for (int i=1; i<=numQubits; i++) {
-                    hamiltonianInter[i-1][i-1] = Poly(epsilons[i-1], "<X" + std::to_string(i) + ">");
+                    hamiltonianInter[i-1][i-1] = Poly(epsilons[i-1], "<Z" + std::to_string(i) + ">");
                 }
                 for (int i=1; i<=numQubits; i++) {
                     for (int j=i+1; j<=numQubits; j++) {
-                        hamiltonianInter[i-1][j-1] = Poly(gs[i-1][j-1], "<Z" + std::to_string(i) + "Z" + std::to_string(j) + ">");
+                        hamiltonianInter[i-1][j-1] = Poly(gs[i-1][j-1], "<X" + std::to_string(i) + "X" + std::to_string(j) + ">");
                         hamiltonianInter[j-1][i-1] = hamiltonianInter[i-1][j-1];
                     }
                 }
@@ -4013,6 +4009,11 @@ int main(int argc, char* argv[]) {
                 sampleOperators.erase(Mon());
             }
 
+            // Make sure sample operators doesn't go above the number of total shots
+            while (numShots != 0 && sampleOperators.size() > size_t(numShots)) {
+                sampleOperators.erase(sampleOperators.begin());
+            }
+
             // If we're taking samples to a total number of shots
             if (numShots == -1) {
                 numSamplesPer = -1;
@@ -4197,8 +4198,7 @@ int main(int argc, char* argv[]) {
         addVariables(variableSet, constraintsPositive[i]);
     }
 
-    // If using purity as the objective TODO
-    // ./run -S 1 --2dtfi 3 3 --precomputed data/2d_3x3.dat --objPurity --shots 1000000 --auto 200
+    // If using purity as the objective
     std::vector<Mon> quadCone;
     if (usePurity) {
 
@@ -4587,6 +4587,7 @@ int main(int argc, char* argv[]) {
         }
         if (verbosity >= 1) {
             std::cout << "Purity: " << purity << std::endl;
+            std::cout << "Minimum possible purity: " << 1.0 / fullMatSize << std::endl;
         }
 
         // If precomputing, save it to a file
