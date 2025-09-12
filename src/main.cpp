@@ -2212,7 +2212,7 @@ int main(int argc, char* argv[]) {
             }
         }
         H.reduce();
-        objective = H;
+        objective = H / numQubits;
 
     }
 

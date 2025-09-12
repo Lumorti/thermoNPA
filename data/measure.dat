@@ -691,77 +691,57 @@ auto (101x101) & None  & None & None & onlyobj (10000) & [-36.9957672247, 17.521
 auto (101x101) & None  & None & None & onlyobj (10000) & [-39.3491900303, 22.0555839807] (54.58\%) & 2m43s & sdp+onlyobj, 99.7% \\ \hline
 auto (101x101) & None  & None & None & all order-2 (10000) & [-43.7804496039, 43.5738993592] (77.65\%) & 3m16s & sdp+all2, 95% \\ \hline
 auto (101x101) & None  & None & None & all order-2 (10000) & [-43.7804496039, 43.5738993592] (77.65\%) & 3m14s & sdp+all2, 99.7% \\ \hline
-auto (101x101) & None  & None & None & auto (10000) & [-43.7804491288, 43.2898517843] (77.40\%) & 2m59s & sdp+auto1000, 95% \\ \hline
-auto (101x101) & None  & None & None & auto (10000) & [-43.7804501055, 43.4323423908] (77.52\%) & 3m8s & sdp+auto1000, 99.7% \\ \hline
 None & None  & None & None & onlyobj (50000) & [-31.1917872500, 0.3456628027] (28.03\%) & 0.05s & onlyobj, 95% \\ \hline
 None & None  & None & None & onlyobj (50000) & [-32.9575128678, 2.9942512294] (31.96\%) & 0.05s & onlyobj, 99.7% \\ \hline
 auto (101x101) & None  & None & None & onlyobj (50000) & [-26.9500605496, -2.3502085775] (21.87\%) & 3m6s & sdp+onlyobj, 95% \\ \hline
 auto (101x101) & None  & None & None & onlyobj (50000) & [-28.1282313055, -0.1034376701] (24.91\%) & 2m57s & sdp+onlyobj, 99.7% \\ \hline
 auto (101x101) & None  & None & None & all order-2 (50000) & [-43.7804496039, 43.5738993592] (77.65\%) & 3m16s & sdp+all2, 95% \\ \hline
 auto (101x101) & None  & None & None & all order-2 (50000) & [-43.7804496039, 43.5738993592] (77.65\%) & 3m15s & sdp+all2, 99.7% \\ \hline
-auto (101x101) & None  & None & None & auto (50000) & [-43.7802578742, 35.7752787496] (70.72\%) & 2m51s & sdp+auto1000, 95% \\ \hline
-auto (101x101) & None  & None & None & auto (50000) & [-43.7803680919, 36.6991302166] (71.54\%) & 2m56s & sdp+auto1000, 99.7% \\ \hline
 None & None  & None & None & onlyobj (100000) & [-27.8128904027, -5.5460547863] (19.79\%) & 0.05s & onlyobj, 95% \\ \hline
 None & None  & None & None & onlyobj (100000) & [-29.0595708417, -3.6760341279] (22.56\%) & 0.06s & onlyobj, 99.7% \\ \hline
 auto (101x101) & None  & None & None & onlyobj (100000) & [-24.8609677246, -7.4587749893] (15.47\%) & 2m55s & sdp+onlyobj, 95% \\ \hline
 auto (101x101) & None  & None & None & onlyobj (100000) & [-25.6950622029, -5.8686093866] (17.62\%) & 3m10s & sdp+onlyobj, 99.7% \\ \hline
 auto (101x101) & None  & None & None & all order-2 (100000) & [-43.7804497035, 41.3284278284] (75.65\%) & 3m9s & sdp+all2, 95% \\ \hline
 auto (101x101) & None  & None & None & all order-2 (100000) & [-43.7804490873, 43.4504701786] (77.54\%) & 3m7s & sdp+all2, 99.7% \\ \hline
-auto (101x101) & None  & None & None & auto (100000) & [-43.7780830323, 33.6376086258] (68.81\%) & 3m3s & sdp+auto1000, 95% \\ \hline
-auto (101x101) & None  & None & None & auto (100000) & [-43.7798828166, 34.2991717133] (69.40\%) & 3m14s & sdp+auto1000, 99.7% \\ \hline
 None & None  & None & None & onlyobj (500000) & [-22.7678813709, -12.8128388080] (8.85\%) & 0.05s & onlyobj, 95% \\ \hline
 None & None  & None & None & onlyobj (500000) & [-23.3252464607, -11.9767911733] (10.09\%) & 0.05s & onlyobj, 99.7% \\ \hline
 auto (101x101) & None  & None & None & onlyobj (500000) & [-21.4971067221, -13.7014289851] (6.93\%) & 3m17s & sdp+onlyobj, 95% \\ \hline
 auto (101x101) & None  & None & None & onlyobj (500000) & [-21.8741326517, -12.9899477509] (7.90\%) & 3m37s & sdp+onlyobj, 99.7% \\ \hline
 auto (101x101) & None  & None & None & all order-2 (500000) & [-37.5705448452, 18.0724029488] (49.46\%) & 2m44s & sdp+all2, 95% \\ \hline
 auto (101x101) & None  & None & None & all order-2 (500000) & [-39.4287604132, 21.5176985725] (54.17\%) & 2m50s & sdp+all2, 99.7% \\ \hline
-auto (101x101) & None  & None & None & auto (500000) & [-43.7390984729, 30.6097859363] (66.09\%) & 2m58s & sdp+auto1000, 95% \\ \hline
-auto (101x101) & None  & None & None & auto (500000) & [-43.7473519048, 30.9166932551] (66.37\%) & 3m4s & sdp+auto1000, 99.7% \\ \hline
 None & None  & None & None & onlyobj (1000000) & [-21.6079680786, -14.5697460519] (6.26\%) & 0.05s & onlyobj, 95% \\ \hline
 None & None  & None & None & onlyobj (1000000) & [-22.0020255853, -13.9786597918] (7.13\%) & 0.05s & onlyobj, 99.7% \\ \hline
 auto (101x101) & None  & None & None & onlyobj (1000000) & [-20.6905455848, -15.1722599254] (4.91\%) & 3m28s & sdp+onlyobj, 95% \\ \hline
 auto (101x101) & None  & None & None & onlyobj (1000000) & [-20.9585270245, -14.6690181082] (5.59\%) & 3m49s & sdp+onlyobj, 99.7% \\ \hline
 auto (101x101) & None  & None & None & all order-2 (1000000) & [-32.3013670991, 7.1015152990] (35.02\%) & 3m2s & sdp+all2, 95% \\ \hline
 auto (101x101) & None  & None & None & all order-2 (1000000) & [-33.6863469320, 9.7338900497] (38.60\%) & 2m54s & sdp+all2, 99.7% \\ \hline
-auto (101x101) & None  & None & None & auto (1000000) & [-43.7022153470, 29.8923080879] (65.42\%) & 2m56s & sdp+auto1000, 95% \\ \hline
-auto (101x101) & None  & None & None & auto (1000000) & [-43.7118163086, 30.1097705623] (65.62\%) & 2m59s & sdp+auto1000, 99.7% \\ \hline
 None & None  & None & None & onlyobj (5000000) & [-20.0257983303, -16.8783041846] (2.80\%) & 0.05s & onlyobj, 95% \\ \hline
 None & None  & None & None & onlyobj (5000000) & [-20.2020209176, -16.6139703037] (3.19\%) & 0.05s & onlyobj, 99.7% \\ \hline
 auto (101x101) & None  & None & None & onlyobj (5000000) & [-19.6247835566, -17.1558128402] (2.19\%) & 3m30s & sdp+onlyobj, 95% \\ \hline
 auto (101x101) & None  & None & None & onlyobj (5000000) & [-19.7454178098, -16.9306658848] (2.50\%) & 3m37s & sdp+onlyobj, 99.7% \\ \hline
 auto (101x101) & None  & None & None & all order-2 (5000000) & [-24.8789343833, -7.2160956199] (15.70\%) & 3m16s & sdp+all2, 95% \\ \hline
 auto (101x101) & None  & None & None & all order-2 (5000000) & [-25.5049452280, -6.0308432847] (17.31\%) & 3m1s & sdp+all2, 99.7% \\ \hline
-auto (101x101) & None  & None & None & auto (5000000) & [-43.6785670079, 28.9033507449] (64.52\%) & 2m52s & sdp+auto1000, 95% \\ \hline
-auto (101x101) & None  & None & None & auto (5000000) & [-43.6838833878, 29.0011624463] (64.61\%) & 3m30s & sdp+auto1000, 99.7% \\ \hline
 None & None  & None & None & onlyobj (10000000) & [-19.6634451599, -17.4378640905] (1.98\%) & 0.05s & onlyobj, 95% \\ \hline
 None & None  & None & None & onlyobj (10000000) & [-19.7880514772, -17.2509546146] (2.26\%) & 0.05s & onlyobj, 99.7% \\ \hline
 auto (101x101) & None  & None & None & onlyobj (10000000) & [-19.3698495381, -17.6227367719] (1.55\%) & 3m7s & sdp+onlyobj, 95% \\ \hline
 auto (101x101) & None  & None & None & onlyobj (10000000) & [-19.4551812613, -17.4633625517] (1.77\%) & 3m13s & sdp+onlyobj, 99.7% \\ \hline
 auto (101x101) & None  & None & None & all order-2 (10000000) & [-23.1203555057, -10.6062372259] (11.12\%) & 3m21s & sdp+all2, 95% \\ \hline
 auto (101x101) & None  & None & None & all order-2 (10000000) & [-23.5637804528, -9.7675745687] (12.26\%) & 3m18s & sdp+all2, 99.7% \\ \hline
-auto (101x101) & None  & None & None & auto (10000000) & [-43.6637841066, 28.6744824179] (64.30\%) & 3m6s & sdp+auto1000, 95% \\ \hline
-auto (101x101) & None  & None & None & auto (10000000) & [-43.6679740815, 28.7436865481] (64.37\%) & 2m56s & sdp+auto1000, 99.7% \\ \hline
 None & None  & None & None & onlyobj (50000000) & [-19.1463093432, -18.1510022171] (0.88\%) & 0.05s & onlyobj, 95% \\ \hline
 None & None  & None & None & onlyobj (50000000) & [-19.2020348152, -18.0674140090] (1.01\%) & 0.05s & onlyobj, 99.7% \\ \hline
 auto (101x101) & None  & None & None & onlyobj (50000000) & [-19.0214727279, -18.2399415256] (0.69\%) & 2m43s & sdp+onlyobj, 95% \\ \hline
 auto (101x101) & None  & None & None & onlyobj (50000000) & [-19.0596965049, -18.1686994203] (0.79\%) & 3m2s & sdp+onlyobj, 99.7% \\ \hline
 auto (101x101) & None  & None & None & all order-2 (50000000) & [-20.6852280389, -15.0860385497] (4.98\%) & 3m13s & sdp+all2, 95% \\ \hline
 auto (101x101) & None  & None & None & all order-2 (50000000) & [-20.8850988959, -14.7105575524] (5.49\%) & 3m15s & sdp+all2, 99.7% \\ \hline
-auto (101x101) & None  & None & None & auto (50000000) & [-43.6434945036, 28.3712003332] (64.01\%) & 3m2s & sdp+auto1000, 95% \\ \hline
-auto (101x101) & None  & None & None & auto (50000000) & [-43.6455756612, 28.4022958552] (64.04\%) & 3m25s & sdp+auto1000, 99.7% \\ \hline
 None & None  & None & None & onlyobj (100000000) & [-19.0402299537, -18.3364425912] (0.63\%) & 0.05s & onlyobj, 95% \\ \hline
 None & None  & None & None & onlyobj (100000000) & [-19.0796337538, -18.2773368911] (0.71\%) & 0.05s & onlyobj, 99.7% \\ \hline
 auto (101x101) & None  & None & None & onlyobj (100000000) & [-18.9484560132, -18.3957806267] (0.49\%) & 3m15s & sdp+onlyobj, 95% \\ \hline
 auto (101x101) & None  & None & None & onlyobj (100000000) & [-18.9754920322, -18.3453791997] (0.56\%) & 3m4s & sdp+onlyobj, 99.7% \\ \hline
 auto (101x101) & None  & None & None & all order-2 (100000000) & [-20.1513678601, -16.1841757173] (3.53\%) & 3m24s & sdp+all2, 95% \\ \hline
 auto (101x101) & None  & None & None & all order-2 (100000000) & [-20.2932387773, -15.9185705847] (3.89\%) & 3m14s & sdp+all2, 99.7% \\ \hline
-auto (101x101) & None  & None & None & auto (100000000) & [-43.6388230975, 28.2979647208] (63.94\%) & 2m55s & sdp+auto1000, 95% \\ \hline
-auto (101x101) & None  & None & None & auto (100000000) & [-43.6403211394, 28.3199544098] (63.96\%) & 3m25s & sdp+auto1000, 99.7% \\ \hline
 None & None  & None & None & onlyobj (-1) & [-18.7500000000, -18.7500000000] (0.0\%) & 0.05s & onlyobj, 95% \\ \hline
 None & None  & None & None & onlyobj (-1) & [-18.7500000000, -18.7500000000] (0.0\%) & 0.05s & onlyobj, 99.7% \\ \hline
 auto (101x101) & None  & None & None & onlyobj (-1) & [-18.7500000000, -18.7500000000] (0.0\%) & 1m48s & sdp+onlyobj, 95% \\ \hline
 auto (101x101) & None  & None & None & onlyobj (-1) & [-18.7500000000, -18.7500000000] (0.0\%) & 1m49s & sdp+onlyobj, 99.7% \\ \hline
 auto (101x101) & None  & None & None & all order-2 (-1) & [-18.7500000000, -18.7500000000] (0.0\%) & 1m39s & sdp+all2, 95% \\ \hline
 auto (101x101) & None  & None & None & all order-2 (-1) & [-18.7500000000, -18.7500000000] (0.0\%) & 1m36s & sdp+all2, 99.7% \\ \hline
-auto (101x101) & None  & None & None & auto (-1) & [-43.6250000000, 28.1250000000] (63.78\%) & 1m48s & sdp+auto1000, 95% \\ \hline
-auto (101x101) & None  & None & None & auto (-1) & [-43.6250000000, 28.1250000000] (63.78\%) & 1m48s & sdp+auto1000, 99.7% \\ \hline

@@ -186,6 +186,31 @@ for filename in filenames:
         else:
             color = noteToColor[noteNoPercent]
 
+        # Make the note less comp-sciy
+        plt.rcParams['text.usetex'] = True
+        newNote = ""
+        if "sdp" in noteNoPercent:
+            newNote += "\\textnormal{SDPR}"
+        if "all1" in noteNoPercent:
+            newNote += "\cup P_1"
+        if "all2" in noteNoPercent:
+            newNote += "\cup P_2"
+        if "onlyobj" in noteNoPercent:
+            newNote += "\cup P_O"
+        if "all3" in noteNoPercent:
+            newNote += "\cup P_3"
+        if "auto" in noteNoPercent:
+            newNote += "\cup P_A"
+        if "-x" in noteNoPercent:
+            newNote += "\setminus P_x"
+        if "-y" in noteNoPercent:
+            newNote += "\setminus P_y"
+        if "-z" in noteNoPercent:
+            newNote += "\setminus P_z"
+        if newNote.startswith("\cup"):
+            newNote = newNote[5:]
+        noteNoPercent = "$" + newNote + "$"
+
         # Plot the line
         if firstTime:
             line = plt.plot(x, yLower, label=noteNoPercent, color=color)
