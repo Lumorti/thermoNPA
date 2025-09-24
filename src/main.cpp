@@ -165,7 +165,7 @@ int main(int argc, char* argv[]) {
     int numQubits = 1;
     int gridWidth = 1;
     int gridHeight = 1;
-    int imagType = 0;
+    int imagType = 1;
     long int numSamplesPer = 0;
     long int numShots = 0;
     double tol = 1e-7;
@@ -629,13 +629,13 @@ int main(int argc, char* argv[]) {
             H.reduce();
 
             // This is an energy only model
-            objective = H;
+            objective = H / double(numQubits);
             useEnergy = true;
             groundStateProblem = true;
 
             // We know the true ground state energy
             idealIsKnown = true;
-            knownIdeal = -(3.0/8.0) * J * numQubits;
+            knownIdeal = -(3.0/8.0) * J;
 
             // No baths
             lindbladianHot = Poly();
@@ -3896,6 +3896,56 @@ int main(int argc, char* argv[]) {
                 // Delete the trivial monomial
                 monCount.erase(Mon());
 
+                // If exluding the objective
+                if (excludeObjective) {
+                    for (auto term : objective) {
+                        Mon mon = term.first;
+                        monCount.erase(mon);
+                    }
+                }
+
+                // If exluding X terms
+                if (excludeX) {
+                    std::map<Mon, int> monCountNew;
+                    for (auto [mon, count] : monCount) {
+                        if (!mon.contains('X')) {
+                            monCountNew[mon] = count;
+                        }
+                    }
+                    monCount = monCountNew;
+                }
+
+                // If exluding Y terms
+                if (excludeY) {
+                    std::map<Mon, int> monCountNew;
+                    for (auto [mon, count] : monCount) {
+                        if (!mon.contains('Y')) {
+                            monCountNew[mon] = count;
+                        }
+                    }
+                    monCount = monCountNew;
+                }
+
+                // If exluding Z terms
+                if (excludeZ) {
+                    std::map<Mon, int> monCountNew;
+                    for (auto [mon, count] : monCount) {
+                        if (!mon.contains('Z')) {
+                            monCountNew[mon] = count;
+                        }
+                    }
+                    monCount = monCountNew;
+                }
+
+                // Remove anything from monList that isn't in monCount
+                std::vector<Mon> monListNew;
+                for (auto mon : monList) {
+                    if (monCount.count(mon)) {
+                        monListNew.push_back(mon);
+                    }
+                }
+                monList = monListNew;
+
                 // Sort the above map and take the top N monomials
                 if (autoType == "common") { 
                     std::vector<std::pair<Mon, int>> monCountVec(monCount.begin(), monCount.end());
@@ -3914,13 +3964,11 @@ int main(int argc, char* argv[]) {
 
                 }
 
-                // While we haven't reached the full size, keeping adding products TODO
+                // While we haven't reached the full size, keeping adding products
                 while (int(sampleOperators.size()) < maxPaulis) {
 
                     // Find the next monomial to add
                     Mon nextMon;
-                    //for (size_t i=0; i<topRow.size(); i++) {
-                        //for (size_t j=i; j<topRow.size(); j++) {
                     for (auto it1 = sampleOperators.begin(); it1 != sampleOperators.end(); ++it1) {
                         for (auto it2 = it1; it2 != sampleOperators.end(); ++it2) {
                             Mon product = (*it1) * (*it2);

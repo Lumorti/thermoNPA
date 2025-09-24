@@ -119,8 +119,100 @@ colors = prop_cycle.by_key()['color']
 plt.rcParams.update({'font.size': 15})
 plt.rcParams.update({'font.family': 'serif'})
 
+allowed = {
+    # "purity": {
+        # "all2, 95%", 
+        # "all2, 99.7%", 
+        # "sdp+all2, 95%", 
+        # "sdp+all2, 99.7%", 
+        # "all3, 95%", 
+        # "all3, 99.7%", 
+        # "sdp+all3, 95%", 
+        # "sdp+all3, 99.7%", 
+        # "auto100, 95%", 
+        # "auto100, 99.7%", 
+        # "sdp+auto100, 95%", 
+        # "sdp+auto100, 99.7%", 
+        # "auto200, 95%", 
+        # "auto200, 99.7%", 
+        # "sdp+auto200, 95%", 
+        # "sdp+auto200, 99.7%", 
+        # "auto300, 95%", 
+        # "auto300, 99.7%", 
+        # "sdp+auto300, 95%", 
+        # "sdp+auto300, 99.7%", 
+    # }, 
+    # "energy": {
+        # "sdp",
+        # "all2, 95%",
+        # "all2, 99.7%",
+        # "sdp+all2, 95%",
+        # "sdp+all2, 99.7%",
+        # "all3, 95%",
+        # "all3, 99.7%",
+        # "sdp+all3, 95%",
+        # "sdp+all3, 99.7%",
+        # "onlyobj, 95%",
+        # "onlyobj, 99.7%",
+        # "sdp+onlyobj, 95%",
+        # "sdp+onlyobj, 99.7%",
+        # "auto100, 95%",
+        # "auto100, 99.7%",
+        # "sdp+auto100, 95%",
+        # "sdp+auto100, 99.7%",
+        # "auto200, 95%",
+        # "auto200, 99.7%",
+        # "sdp+auto200, 95%",
+        # "sdp+auto200, 99.7%",
+        # "auto300, 95%",
+        # "auto300, 99.7%",
+        # "sdp+auto300, 95%",
+        # "sdp+auto300, 99.7%",
+    # },
+    # "large": {
+        # "sdp",
+        # "all2, 95%",
+        # "all2, 99.7%",
+        # "sdp+all2, 95%",
+        # "sdp+all2, 99.7%",
+        # "onlyobj, 95%",
+        # "onlyobj, 99.7%",
+        # "sdp+onlyobj, 95%",
+        # "sdp+onlyobj, 99.7%",
+    # }.
+    "heat": {
+        "sdp",
+        # "all2-z, 95%",
+        "all2-z, 99.7%",
+        # "sdp+all2-z, 95%",
+        "sdp+all2-z, 99.7%",
+        # "all3-z, 95%",
+        # "all3-z, 99.7%",
+        # "sdp+all3-z, 95%",
+        # "sdp+all3-z, 99.7%",
+        # "onlyobj-z, 95%",
+        "onlyobj-z, 99.7%",
+        # "sdp+onlyobj-z, 95%",
+        "sdp+onlyobj-z, 99.7%",
+        # "auto100-z, 95%",
+        "auto100-z, 99.7%",
+        # "sdp+auto100-z, 95%",
+        "sdp+auto100-z, 99.7%",
+        # "auto200-z, 95%",
+        "auto200-z, 99.7%",
+        # "sdp+auto200-z, 95%",
+        "sdp+auto200-z, 99.7%",
+        # "auto300-z, 95%",
+        "auto300-z, 99.7%",
+        # "sdp+auto300-z, 95%",
+        "sdp+auto300-z, 99.7%",
+    },
+}
+
 # Plot the data
 for filename in filenames:
+    if filename not in allowed.keys():
+        continue
     
     # Set up the figure
     plt.figure(figsize=(7, 5))
@@ -142,6 +234,8 @@ for filename in filenames:
 
     # For each constraint set
     for note in notes:
+        if note not in allowed[filename]:
+            continue
 
         # Get the dataset
         x = []
@@ -190,7 +284,7 @@ for filename in filenames:
         plt.rcParams['text.usetex'] = True
         newNote = ""
         if "sdp" in noteNoPercent:
-            newNote += "\\textnormal{SDPR}"
+            newNote += "S"
         if "all1" in noteNoPercent:
             newNote += "\cup P_1"
         if "all2" in noteNoPercent:
@@ -200,6 +294,8 @@ for filename in filenames:
         if "all3" in noteNoPercent:
             newNote += "\cup P_3"
         if "auto" in noteNoPercent:
+            newNote += "\cup P_A"
+        if "first" in noteNoPercent:
             newNote += "\cup P_A"
         if "-x" in noteNoPercent:
             newNote += "\setminus P_x"
