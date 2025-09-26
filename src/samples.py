@@ -1,5 +1,7 @@
 #!/usr/env/python3
 import matplotlib.pyplot as plt
+from matplotlib._cm import cubehelix
+import numpy as np
 import math
 
 # Extract only the first number from a string
@@ -105,107 +107,88 @@ with open('data/measure.dat', 'r') as file:
         elif parts[0] == 'file':
             filename = parts[1]
 
+# Check for points with the same name, number of shots, and filename TODO
+pointsDict = {}
+for point in points:
+    identifier = (point["filename"], point["note"], point["shotsVal"])
+    if identifier in pointsDict:
+        pointsDict[identifier]["diffLowerValSum"] += point["diffLowerVal"]
+        pointsDict[identifier]["diffUpperValSum"] += point["diffUpperVal"]
+        pointsDict[identifier]["diffLowerValSumSquared"] += point["diffLowerVal"] ** 2
+        pointsDict[identifier]["diffUpperValSumSquared"] += point["diffUpperVal"] ** 2
+        pointsDict[identifier]["count"] += 1
+    else:
+        pointsDict[identifier] = point
+        pointsDict[identifier]["count"] = 1
+        pointsDict[identifier]["diffLowerValSum"] = pointsDict[identifier]["diffLowerVal"]
+        pointsDict[identifier]["diffLowerValSumSquared"] = pointsDict[identifier]["diffLowerVal"] ** 2
+        pointsDict[identifier]["diffUpperValSum"] = pointsDict[identifier]["diffUpperVal"]
+        pointsDict[identifier]["diffUpperValSumSquared"] = pointsDict[identifier]["diffUpperVal"] ** 2
+
+points = []
+for identifier in pointsDict:
+    point = pointsDict[identifier]
+    count = point["count"]
+    point["diffLowerVal"] = point["diffLowerValSum"] / count
+    point["diffUpperVal"] = point["diffUpperValSum"] / count
+    point["sdLowerVal"] = math.sqrt((point["diffLowerValSumSquared"] / count) - (point["diffLowerVal"] ** 2)) if count > 1 else 0
+    point["sdUpperVal"] = math.sqrt((point["diffUpperValSumSquared"] / count) - (point["diffUpperVal"] ** 2)) if count > 1 else 0
+    print(identifier, count, point["diffLowerVal"], point["sdLowerVal"], point["diffUpperVal"], point["sdUpperVal"])
+    points.append(point)
+
 # The different datasets
 filenames = set(point["filename"] for point in points)
 filenames = sorted(filenames)
 notes = set(point["note"] for point in points)
 notes = sorted(notes)
 
-# Colors for the plots
-prop_cycle = plt.rcParams['axes.prop_cycle']
-colors = prop_cycle.by_key()['color']
-
 # Set the font size
-plt.rcParams.update({'font.size': 15})
+plt.rcParams.update({'font.size': 18})
 plt.rcParams.update({'font.family': 'serif'})
+linewidth = 2
 
+# Output the full list of things
+print("allowed = {")
+for filename in filenames:
+    print('    "' + filename + '": {')
+    for note in notes:
+        hasData = False
+        for point in points:
+            if point["note"] == note and point["filename"] == filename:
+                hasData = True
+                break
+        if hasData:
+            print('        "' + note + '",')
+    print('    }, ')
+print("}")
+
+# Which things to plot
 allowed = {
-    # "purity": {
-        # "all2, 95%", 
-        # "all2, 99.7%", 
-        # "sdp+all2, 95%", 
-        # "sdp+all2, 99.7%", 
-        # "all3, 95%", 
-        # "all3, 99.7%", 
-        # "sdp+all3, 95%", 
-        # "sdp+all3, 99.7%", 
-        # "auto100, 95%", 
-        # "auto100, 99.7%", 
-        # "sdp+auto100, 95%", 
-        # "sdp+auto100, 99.7%", 
-        # "auto200, 95%", 
-        # "auto200, 99.7%", 
-        # "sdp+auto200, 95%", 
-        # "sdp+auto200, 99.7%", 
-        # "auto300, 95%", 
-        # "auto300, 99.7%", 
-        # "sdp+auto300, 95%", 
-        # "sdp+auto300, 99.7%", 
-    # }, 
-    # "energy": {
-        # "sdp",
-        # "all2, 95%",
-        # "all2, 99.7%",
-        # "sdp+all2, 95%",
-        # "sdp+all2, 99.7%",
-        # "all3, 95%",
-        # "all3, 99.7%",
-        # "sdp+all3, 95%",
-        # "sdp+all3, 99.7%",
-        # "onlyobj, 95%",
-        # "onlyobj, 99.7%",
-        # "sdp+onlyobj, 95%",
-        # "sdp+onlyobj, 99.7%",
-        # "auto100, 95%",
-        # "auto100, 99.7%",
-        # "sdp+auto100, 95%",
-        # "sdp+auto100, 99.7%",
-        # "auto200, 95%",
-        # "auto200, 99.7%",
-        # "sdp+auto200, 95%",
-        # "sdp+auto200, 99.7%",
-        # "auto300, 95%",
-        # "auto300, 99.7%",
-        # "sdp+auto300, 95%",
-        # "sdp+auto300, 99.7%",
-    # },
-    # "large": {
-        # "sdp",
-        # "all2, 95%",
-        # "all2, 99.7%",
-        # "sdp+all2, 95%",
-        # "sdp+all2, 99.7%",
-        # "onlyobj, 95%",
-        # "onlyobj, 99.7%",
-        # "sdp+onlyobj, 95%",
-        # "sdp+onlyobj, 99.7%",
-    # }.
+    "energy": {
+        "sdp",
+        "sdp+all2, 99.7%",
+        "sdp+auto100, 99.7%",
+        "sdp+onlyobj, 99.7%",
+    }, 
     "heat": {
         "sdp",
-        # "all2-z, 95%",
-        "all2-z, 99.7%",
-        # "sdp+all2-z, 95%",
-        "sdp+all2-z, 99.7%",
-        # "all3-z, 95%",
-        # "all3-z, 99.7%",
-        # "sdp+all3-z, 95%",
-        # "sdp+all3-z, 99.7%",
-        # "onlyobj-z, 95%",
-        "onlyobj-z, 99.7%",
-        # "sdp+onlyobj-z, 95%",
-        "sdp+onlyobj-z, 99.7%",
-        # "auto100-z, 95%",
-        "auto100-z, 99.7%",
-        # "sdp+auto100-z, 95%",
-        "sdp+auto100-z, 99.7%",
-        # "auto200-z, 95%",
-        "auto200-z, 99.7%",
-        # "sdp+auto200-z, 95%",
-        "sdp+auto200-z, 99.7%",
-        # "auto300-z, 95%",
-        "auto300-z, 99.7%",
-        # "sdp+auto300-z, 95%",
-        "sdp+auto300-z, 99.7%",
+        "first100-z, 99.7%",
+        "sdp+first100-z, 99.7%",
+    }, 
+    "large": {
+        "sdp",
+        "onlyobj, 99.7%",
+        "sdp+onlyobj, 99.7%",
+    }, 
+    "purity": {
+        "sdp",
+        "all2, 99.7%",
+        "sdp+all2, 99.7%",
+    }, 
+    "confidence": {
+        "sdp+all2, 68%",
+        "sdp+all2, 95%",
+        "sdp+all2, 99.7%",
     },
 }
 
@@ -214,16 +197,22 @@ for filename in filenames:
     if filename not in allowed.keys():
         continue
     
+    # Colors for the plots
+    cmap = plt.get_cmap('cubehelix')
+    numUniqueNotes = len(allowed[filename])
+    indices = np.linspace(0, cmap.N, numUniqueNotes+1)
+    colors = [cmap(int(i)) for i in indices]
+
     # Set up the figure
     plt.figure(figsize=(7, 5))
     plt.clf()
     plt.xlabel("Number of Shots")
-    if filename == "purity":
+    if filename == "purity" or filename == "confidence":
         plt.ylabel("Purity Lower Bound")
     elif "mag" in filename:
         plt.ylabel("Magnetization Bounds")
     elif "large" in filename:
-        plt.ylabel("Ground-state Energy Lower Bound (Large System)")
+        plt.ylabel("Ground-state Energy Lower Bound")
     elif "energy" in filename:
         plt.ylabel("Ground-state Energy Lower Bound")
     elif "heat" in filename:
@@ -273,6 +262,10 @@ for filename in filenames:
         else:
             noteNoPercent = note
         firstTime = noteNoPercent not in noteToColor.keys()
+        if filename == "confidence":
+            firstTime = True
+            noteNoPercent = note
+            noteNoPercent = noteNoPercent.replace('sdp+all2, ', '').strip()
         if firstTime:
             color = colors[nextCol % len(colors)]
             noteToColor[noteNoPercent] = color
@@ -280,38 +273,35 @@ for filename in filenames:
         else:
             color = noteToColor[noteNoPercent]
 
-        # Make the note less comp-sciy
-        plt.rcParams['text.usetex'] = True
-        newNote = ""
-        if "sdp" in noteNoPercent:
-            newNote += "S"
-        if "all1" in noteNoPercent:
-            newNote += "\cup P_1"
-        if "all2" in noteNoPercent:
-            newNote += "\cup P_2"
-        if "onlyobj" in noteNoPercent:
-            newNote += "\cup P_O"
-        if "all3" in noteNoPercent:
-            newNote += "\cup P_3"
-        if "auto" in noteNoPercent:
-            newNote += "\cup P_A"
-        if "first" in noteNoPercent:
-            newNote += "\cup P_A"
-        if "-x" in noteNoPercent:
-            newNote += "\setminus P_x"
-        if "-y" in noteNoPercent:
-            newNote += "\setminus P_y"
-        if "-z" in noteNoPercent:
-            newNote += "\setminus P_z"
-        if newNote.startswith("\cup"):
-            newNote = newNote[5:]
-        noteNoPercent = "$" + newNote + "$"
+        # Get the error if it exists
+        yErrorLower = None
+        yErrorUpper = None
+        if "sdLowerVal" in points[0] and "sdUpperVal" in points[0]:
+            yErrorLower = [[], []]
+            yErrorUpper = [[], []]
+            for point in points:
+                if point["note"] == note and point["filename"] == filename and point["shotsVal"] != -1:
+                    yErrorLower[0].append(point["sdLowerVal"])
+                    yErrorLower[1].append(point["sdLowerVal"])
+                    yErrorUpper[0].append(point["sdUpperVal"])
+                    yErrorUpper[1].append(point["sdUpperVal"])
+            yErrorLower = [yErrorLower[0], yErrorLower[1]]
+            yErrorUpper = [yErrorUpper[0], yErrorUpper[1]]
+            if all(err == 0 for err in yErrorLower[0]):
+                yErrorLower = None
+                yErrorUpper = None
 
         # Plot the line
         if firstTime:
-            line = plt.plot(x, yLower, label=noteNoPercent, color=color)
+            if yErrorLower is not None:
+                line = plt.errorbar(x, yLower, yerr=yErrorLower, label=noteNoPercent, color=color, capsize=3, linewidth=linewidth)
+            else:
+                line = plt.plot(x, yLower, label=noteNoPercent, color=color, linewidth=linewidth)
         else:
-            line = plt.plot(x, yLower, color=color)
+            if yErrorLower is not None:
+                line = plt.errorbar(x, yLower, yerr=yErrorLower, color=color, capsize=3, linewidth=linewidth)
+            else:
+                line = plt.plot(x, yLower, color=color, linewidth=linewidth)
 
         # If we need a true bound
         if yLineLower is not None:
@@ -319,9 +309,12 @@ for filename in filenames:
 
         # If we need an upper bound too
         if filename != "purity" and filename != "energy" and filename != "large":
-            line = plt.plot(x, yUpper, color=color)
+            if yErrorUpper is not None:
+                line = plt.errorbar(x, yUpper, yerr=yErrorUpper, color=color, capsize=3, linewidth=linewidth)
+            else:
+                line = plt.plot(x, yUpper, color=color, linewidth=linewidth)
             if yLineUpper is not None:
-                plt.axhline(y=yLineUpper, linestyle='--', color=color)
+                plt.axhline(y=yLineUpper, linestyle='--', color=color, linewidth=linewidth)
 
     # Finish the plot
     plt.xscale('log')
