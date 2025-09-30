@@ -129,10 +129,16 @@ points = []
 for identifier in pointsDict:
     point = pointsDict[identifier]
     count = point["count"]
+    if count < 1:
+        continue
     point["diffLowerVal"] = point["diffLowerValSum"] / count
     point["diffUpperVal"] = point["diffUpperValSum"] / count
-    point["sdLowerVal"] = math.sqrt((point["diffLowerValSumSquared"] / count) - (point["diffLowerVal"] ** 2)) if count > 1 else 0
-    point["sdUpperVal"] = math.sqrt((point["diffUpperValSumSquared"] / count) - (point["diffUpperVal"] ** 2)) if count > 1 else 0
+    if point["shotsVal"] == -1:
+        point["sdLowerVal"] = 0
+        point["sdUpperVal"] = 0
+    else:
+        point["sdLowerVal"] = math.sqrt((point["diffLowerValSumSquared"] / count) - (point["diffLowerVal"] ** 2))
+        point["sdUpperVal"] = math.sqrt((point["diffUpperValSumSquared"] / count) - (point["diffUpperVal"] ** 2))
     print(identifier, count, point["diffLowerVal"], point["sdLowerVal"], point["diffUpperVal"], point["sdUpperVal"])
     points.append(point)
 

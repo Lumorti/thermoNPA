@@ -1,25 +1,3 @@
-file & heat
-auto (151x151) & auto (2000) & None & None & [-0.0100487409, 0.0040492157] (68.58\%) & 56.05s & sdp \\ \hline
-Unknown argument: H
-Unknown argument: 2000
-Unknown argument: H
-Unknown argument: 2000
-Unknown argument: H
-Unknown argument: 2000
-Unknown argument: H
-Unknown argument: 2000
-Unknown argument: H
-Unknown argument: 2000
-Unknown argument: H
-Unknown argument: 2000
-Unknown argument: H
-Unknown argument: 2000
-Unknown argument: H
-Unknown argument: 2000
-Unknown argument: H
-Unknown argument: 2000
-Unknown argument: H
-Unknown argument: 2000
 file & purity
 auto (151x151) & None  & None & None & [0.0019531250, 0.0019531250] (0.0\%) & 16.36s & sdp \\ \hline
 None & None  & None & None & all order-2 (10000) & [0.0019673358, 0.0019704038] (0.0\%) & 2981ms & all2, 99.7% \\ \hline
