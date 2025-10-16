@@ -149,7 +149,7 @@ notes = set(point["note"] for point in points)
 notes = sorted(notes)
 
 # Set the font size
-plt.rcParams.update({'font.size': 18})
+plt.rcParams.update({'font.size': 16})
 plt.rcParams.update({'font.family': 'serif'})
 linewidth = 2
 
@@ -296,6 +296,21 @@ for filename in filenames:
             if all(err == 0 for err in yErrorLower[0]):
                 yErrorLower = None
                 yErrorUpper = None
+
+        # Adjust the label
+        if filename != "confidence" and filename != "energy":
+            if "+" in noteNoPercent:
+                noteNoPercent = "SDP & Measure"
+            elif "sdp" in noteNoPercent.lower():
+                noteNoPercent = "SDP"
+            else:
+                noteNoPercent = "Measure"
+        elif filename == "energy":
+            noteNoPercent = noteNoPercent.replace('sdp+', 'SDP & ')
+            noteNoPercent = noteNoPercent.replace('sdp', 'SDP')
+            noteNoPercent = noteNoPercent.replace('auto100', 'Measure (a)')
+            noteNoPercent = noteNoPercent.replace('all2', 'Measure (b)')
+            noteNoPercent = noteNoPercent.replace('onlyobj', 'Measure (c)')
 
         # Plot the line
         if firstTime:
