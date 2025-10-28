@@ -107,7 +107,7 @@ with open('data/measure.dat', 'r') as file:
         elif parts[0] == 'file':
             filename = parts[1]
 
-# Check for points with the same name, number of shots, and filename TODO
+# Check for points with the same name, number of shots, and filename
 pointsDict = {}
 for point in points:
     identifier = (point["filename"], point["note"], point["shotsVal"])
@@ -149,9 +149,9 @@ notes = set(point["note"] for point in points)
 notes = sorted(notes)
 
 # Set the font size
-plt.rcParams.update({'font.size': 16})
+plt.rcParams.update({'font.size': 14})
 plt.rcParams.update({'font.family': 'serif'})
-linewidth = 2
+linewidth = 2.5
 
 # Output the full list of things
 print("allowed = {")
@@ -170,32 +170,32 @@ print("}")
 
 # Which things to plot
 allowed = {
-    "energy": {
+    "energy": [
         "sdp",
         "sdp+all2, 99.7%",
         "sdp+auto100, 99.7%",
         "sdp+onlyobj, 99.7%",
-    }, 
-    "heat": {
+    ], 
+    "heat": [
         "sdp",
         "first100-z, 99.7%",
         "sdp+first100-z, 99.7%",
-    }, 
-    "large": {
+    ], 
+    "large": [
         "sdp",
         "onlyobj, 99.7%",
         "sdp+onlyobj, 99.7%",
-    }, 
-    "purity": {
+    ], 
+    "purity": [
         "sdp",
         "all2, 99.7%",
         "sdp+all2, 99.7%",
-    }, 
-    "confidence": {
+    ], 
+    "confidence": [
         "sdp+all2, 68%",
         "sdp+all2, 95%",
         "sdp+all2, 99.7%",
-    },
+    ],
 }
 
 # Plot the data
@@ -204,10 +204,13 @@ for filename in filenames:
         continue
     
     # Colors for the plots
-    cmap = plt.get_cmap('cubehelix')
-    numUniqueNotes = len(allowed[filename])
-    indices = np.linspace(0, cmap.N, numUniqueNotes+1)
-    colors = [cmap(int(i)) for i in indices]
+    # cmap = plt.get_cmap('cubehelix')
+    # cmap = plt.get_cmap('viridis')
+    # numUniqueNotes = len(allowed[filename])
+    # indices = np.linspace(0, cmap.N, numUniqueNotes+1)
+    # indices = np.linspace(0, cmap.N, numUniqueNotes)
+    # colors = [cmap(int(i)) for i in indices]
+    colors = ["black", "royalblue", "lightcoral", "mediumseagreen"]
 
     # Set up the figure
     plt.figure(figsize=(7, 5))
@@ -228,9 +231,10 @@ for filename in filenames:
     nextCol = 0
 
     # For each constraint set
-    for note in notes:
-        if note not in allowed[filename]:
-            continue
+    for note in allowed[filename]:
+        if note not in notes:
+            print("Error: note " + note + " not found for file " + filename)
+            exit(1)
 
         # Get the dataset
         x = []
@@ -326,7 +330,10 @@ for filename in filenames:
 
         # If we need a true bound
         if yLineLower is not None:
-            plt.axhline(y=yLineLower, linestyle='--', color=color)
+            if noteNoPercent == "SDP":
+                plt.axhline(y=yLineLower, color=color, linewidth=linewidth)
+            else:
+                plt.axhline(y=yLineLower, linestyle=':', color=color, linewidth=linewidth, zorder=1000)
 
         # If we need an upper bound too
         if filename != "purity" and filename != "energy" and filename != "large":
@@ -335,14 +342,24 @@ for filename in filenames:
             else:
                 line = plt.plot(x, yUpper, color=color, linewidth=linewidth)
             if yLineUpper is not None:
-                plt.axhline(y=yLineUpper, linestyle='--', color=color, linewidth=linewidth)
+                if noteNoPercent == "SDP":
+                    plt.axhline(y=yLineUpper, color=color, linewidth=linewidth)
+                else:
+                    plt.axhline(y=yLineUpper, linestyle=':', color=color, linewidth=linewidth, zorder=1000)
 
     # Finish the plot
     plt.xscale('log')
     ax = plt.gca()
     handles, labels = ax.get_legend_handles_labels()
     labels, handles = zip(*sorted(zip(labels, handles), key=lambda t: t[0]))
-    ax.legend(handles, labels)
+    legLoc = 'best'
+    if filename == "energy":
+        legLoc = (0.025, 0.66)
+    elif filename == "heat":
+        legLoc = (0.025, 0.52)
+    elif filename == "purity":
+        legLoc = (0.025, 0.67)
+    ax.legend(handles, labels, loc=legLoc)
     plt.tight_layout()
     plt.savefig('data/estimation_' + filename + '.pdf', bbox_inches='tight')
     plt.show()
