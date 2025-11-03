@@ -1934,6 +1934,13 @@ int main(int argc, char* argv[]) {
             i++;
 
         // If sampling from a subset of Pauli strings
+        } else if (argAsString == "--largest") {
+            sampleChoice = "auto";
+            autoType = "largest";
+            maxPaulis = std::stoi(argv[i+1]);
+            i++;
+
+        // If sampling from a subset of Pauli strings
         } else if (argAsString == "--auto") {
             sampleChoice = "auto";
             autoType = "common";
@@ -2066,7 +2073,8 @@ int main(int argc, char* argv[]) {
             std::cout << "  --onlyobj           Sample only from the objective" << std::endl;
             std::cout << "  --energy            Sample only the energy" << std::endl;
             std::cout << "  --auto <int>        Sample from the most common Pauli strings" << std::endl;
-            std::cout << "  --first <int>        Sample from first Pauli strings" << std::endl;
+            std::cout << "  --first <int>       Sample from first Pauli strings" << std::endl;
+            std::cout << "  --largest <int>     Sample from largest Pauli strings" << std::endl;
             std::cout << "  --noobj             Exclude the objective from the sampling" << std::endl;
             std::cout << "  --nox               Exclude any X terms from the sampling" << std::endl;
             std::cout << "  --noy               Exclude any Y terms from the sampling" << std::endl;
@@ -3954,6 +3962,19 @@ int main(int argc, char* argv[]) {
                     });
                     for (int i = 0; i < std::min(maxPaulis, (int)monCountVec.size()); i++) {
                         sampleOperators.insert(monCountVec[i].first);
+                    }
+
+                // Find the largest monomials
+                } else if (autoType == "largest") { 
+                    std::vector<std::pair<Mon, int>> monSizeVec(monCount.begin(), monCount.end());
+                    for (int i = 0; i < monSizeVec.size(); i++) {
+                        monSizeVec[i].second = monSizeVec[i].first.size();
+                    }
+                    std::sort(monSizeVec.begin(), monSizeVec.end(), [](const std::pair<Mon, int>& a, const std::pair<Mon, int>& b) {
+                        return a.second > b.second;
+                    });
+                    for (int i = 0; i < std::min(maxPaulis, (int)monSizeVec.size()); i++) {
+                        sampleOperators.insert(monSizeVec[i].first);
                     }
 
                 // Otherwise just take the first N monomials
