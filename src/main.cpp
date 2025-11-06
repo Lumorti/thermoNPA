@@ -153,6 +153,7 @@ int main(int argc, char* argv[]) {
     bool symSample = false;
     bool useKnown = false;
     bool allSymmetries = false;
+    bool variableSampling = false;
     std::vector<Poly> zeroConsForSampling;
     std::string stateFile = "state.dat";
     std::string autoType = "first";
@@ -1941,6 +1942,13 @@ int main(int argc, char* argv[]) {
             i++;
 
         // If sampling from a subset of Pauli strings
+        } else if (argAsString == "--smallest") {
+            sampleChoice = "auto";
+            autoType = "smallest";
+            maxPaulis = std::stoi(argv[i+1]);
+            i++;
+
+        // If sampling from a subset of Pauli strings
         } else if (argAsString == "--auto") {
             sampleChoice = "auto";
             autoType = "common";
@@ -2075,6 +2083,9 @@ int main(int argc, char* argv[]) {
             std::cout << "  --auto <int>        Sample from the most common Pauli strings" << std::endl;
             std::cout << "  --first <int>       Sample from first Pauli strings" << std::endl;
             std::cout << "  --largest <int>     Sample from largest Pauli strings" << std::endl;
+            std::cout << "  --smallest <int>    Sample from smallest Pauli strings" << std::endl;
+            std::cout << "  --variable          Use a variable sampling rate (i.e. different per Pauli)" << std::endl;
+            std::cout << "  --noobj             Exclude the objective from the sampling" << std::endl;
             std::cout << "  --noobj             Exclude the objective from the sampling" << std::endl;
             std::cout << "  --nox               Exclude any X terms from the sampling" << std::endl;
             std::cout << "  --noy               Exclude any Y terms from the sampling" << std::endl;
@@ -2143,6 +2154,10 @@ int main(int argc, char* argv[]) {
         } else if (argAsString == "-B") {
             verbosity = 0;
             benchmark = true;
+
+        // Variable measurement counts
+        } else if (argAsString == "--variable") {
+            variableSampling = true;
 
         // Ignore the imaginary components of the moment matrix
         } else if (argAsString == "-i") {
@@ -3977,6 +3992,19 @@ int main(int argc, char* argv[]) {
                         sampleOperators.insert(monSizeVec[i].first);
                     }
 
+                // Find the smallest monomials
+                } else if (autoType == "smallest") { 
+                    std::vector<std::pair<Mon, int>> monSizeVec(monCount.begin(), monCount.end());
+                    for (int i = 0; i < monSizeVec.size(); i++) {
+                        monSizeVec[i].second = monSizeVec[i].first.size();
+                    }
+                    std::sort(monSizeVec.begin(), monSizeVec.end(), [](const std::pair<Mon, int>& a, const std::pair<Mon, int>& b) {
+                        return a.second < b.second;
+                    });
+                    for (int i = 0; i < std::min(maxPaulis, (int)monSizeVec.size()); i++) {
+                        sampleOperators.insert(monSizeVec[i].first);
+                    }
+
                 // Otherwise just take the first N monomials
                 } else {
                     for (int i = 0; i < std::min(maxPaulis, (int)monList.size()); i++) {
@@ -4106,10 +4134,42 @@ int main(int argc, char* argv[]) {
                 }
             }
 
+            // If using a variable sampling rate TODO
+            std::map<Mon, int> samplesPerOperator;
+            for (auto mon : sampleOperators) {
+                samplesPerOperator[mon] = numSamplesPer;
+            }
+            if (variableSampling) { 
+                std::cout << "Ideal total samples: " << totalSamples << std::endl;
+                int maxPauliLength = 0;
+                for (auto mon : sampleOperators) {
+                    std::max(maxPauliLength, int(mon.size()));
+                }
+                long long int newTotal = 0;
+                for (auto mon : sampleOperators) {
+                    samplesPerOperator[mon] = std::pow(2, 1 + maxPauliLength - mon.size());
+                    newTotal += samplesPerOperator[mon];
+                }
+                std::cout << "New total samples before scaling: " << newTotal << std::endl;
+                float scale = float(totalSamples) / float(newTotal);
+                int newTotalScaled = 0;
+                for (auto mon : sampleOperators) {
+                    samplesPerOperator[mon] = std::floor(scale * samplesPerOperator[mon]);
+                    newTotalScaled += samplesPerOperator[mon];
+                }
+                std::cout << "After scaling: " << newTotalScaled << std::endl;
+            }
+
             // Errors
             double K = sampleOperators.size();
             double delta = 1.0 - percentile / 100.0;
             double epsilon = std::sqrt(2 * std::log((2.0 * K) / delta) / numSamplesPer);
+            std::map<Mon, double> epsilons;
+            for (auto mon : sampleOperators) {
+                int samplesForThis = samplesPerOperator[mon];
+                double eps = std::sqrt(2 * std::log((2.0 * K) / delta) / samplesForThis);
+                epsilons[mon] = eps;
+            }
             if (verbosity >= 2) {
                 std::cout << "K = " << K << std::endl;
                 std::cout << "delta = " << delta << std::endl;
@@ -4183,17 +4243,17 @@ int main(int argc, char* argv[]) {
 
                 // Determine the average from this many samples
                 double expFromProb = 2 * prob1 - 1;
-                std::binomial_distribution<> binom(numSamplesPer, prob1);
+                std::binomial_distribution<> binom(samplesPerOperator[mon], prob1);
                 int success_count = binom(gen);
-                double avg = static_cast<double>(success_count) / numSamplesPer;
+                double avg = static_cast<double>(success_count) / samplesPerOperator[mon];
 
                 // Scale and save this value
                 avg = 2 * avg - 1;
                 samples[mon] = avg;
 
                 // Bound each quantity
-                double lower = avg - epsilon;
-                double upper = avg + epsilon;
+                double lower = avg - epsilons[mon];
+                double upper = avg + epsilons[mon];
                 if (std::abs(lower) < 1) {
                     constraintsPositive.push_back(Poly(1, mon) - Poly(lower));
                 }
