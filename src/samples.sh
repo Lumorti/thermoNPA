@@ -15,22 +15,22 @@ filenameEnergy="data/2d_3x3_H.dat"
 #./run --2dtfi ${systemSize} --precompute ${filenameEnergy} -H | tee -a data/precomputes.log
 
 # Heat current without something vs number of measurements
-echo "file & heat" | tee -a data/measure.dat
-./run -B -N "sdp" -s M --2dtfi ${systemSize} -M ${M} -A ${A} --objHC H | tee -a data/measure.dat
-letter=z
-for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
-do
-    for ind in $(seq 1 $numRepeats)
-    do
+#echo "file & heat" | tee -a data/measure.dat
+#./run -B -N "sdp" -s M --2dtfi ${systemSize} -M ${M} -A ${A} --objHC H | tee -a data/measure.dat
+#letter=z
+#for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
+#do
+    #for ind in $(seq 1 $numRepeats)
+    #do
 
-        # Only 100 first
-        ./run -B -N "first100-${letter}, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S ${ind} --objHC H --no${letter} --shots ${shots} --first 100 | tee -a data/measure.dat
+        ## Only 100 first
+        #./run -B -N "first100-${letter}, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S ${ind} --objHC H --no${letter} --shots ${shots} --first 100 | tee -a data/measure.dat
 
-        # SDP plus 100 first
-        ./run -B -N "sdp+first100-${letter}, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S ${ind} -M ${M} -A ${A} --objHC H --no${letter} --shots ${shots} --first 100 | tee -a data/measure.dat
+        ## SDP plus 100 first
+        #./run -B -N "sdp+first100-${letter}, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filename} -S ${ind} -M ${M} -A ${A} --objHC H --no${letter} --shots ${shots} --first 100 | tee -a data/measure.dat
 
-    done
-done
+    #done
+#done
 
 # Purity versus number of measurements
 #echo "file & purity" | tee -a data/measure.dat
@@ -41,10 +41,10 @@ done
     #do
 
         ## Only level 2 shots
-        #./run -B -N "all2, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} --millis -S ${ind} --objPurity --shots ${shots} --all 2 | tee -a data/measure.dat
+        #./run -B -N "first100, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} --millis -S ${ind} --objPurity --shots ${shots} --all 2 | tee -a data/measure.dat
 
         ## SDP plus level 2 shots
-        #./run -B -N "sdp+all2, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} --millis -S ${ind} -A ${A} --objPurity --shots ${shots} --all 2 | tee -a data/measure.dat
+        #./run -B -N "sdp+first100, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} --millis -S ${ind} -A ${A} --objPurity --shots ${shots} --all 2 | tee -a data/measure.dat
 
     #done
 #done
@@ -57,8 +57,8 @@ done
     #for ind in $(seq 1 $numRepeats)
     #do
 
-        ## SDP plus automatic 100
-        #./run -B -N "sdp+auto100, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S ${ind} -A ${A} -H --shots ${shots} --auto 100 | tee -a data/measure.dat
+        ## SDP plus first 100
+        #./run -B -N "sdp+first100, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S ${ind} -A ${A} -H --shots ${shots} --first 100 | tee -a data/measure.dat
 
         ## SDP plus measure the objective
         #./run -B -N "sdp+onlyobj, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S ${ind} -A ${A} -H --shots ${shots} --onlyobj | tee -a data/measure.dat
@@ -68,6 +68,23 @@ done
 
     #done
 #done
+
+# Renyi-1 entropy vs number of measurements
+echo "file & renyi1" | tee -a data/measure.dat
+./run -B -N "sdp" -s M --2dtfi ${systemSize} -A ${A} -H | tee -a data/measure.dat
+for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
+do
+    for ind in $(seq 1 $numRepeats)
+    do
+
+        # Just measure the objective
+        ./run -B -N "onlyobj, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S ${ind} -H --objRenyi1 1 2 3 --shots ${shots} --onlyobj | tee -a data/measure.dat
+
+        # SDP plus measure the objective
+        ./run -B -N "sdp+onlyobj, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S ${ind} -A ${A} -H --objRenyi1 1 2 3 --shots ${shots} --onlyobj | tee -a data/measure.dat
+
+    done
+done
 
 # File showing the different confidence levels
 #echo "file & confidence" | tee -a data/measure.dat

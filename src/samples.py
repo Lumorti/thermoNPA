@@ -173,7 +173,7 @@ allowed = {
     "energy": [
         "sdp",
         "sdp+all2, 99.7%",
-        "sdp+auto100, 99.7%",
+        "sdp+first100, 99.7%",
         "sdp+onlyobj, 99.7%",
     ], 
     "heat": [

@@ -153,7 +153,7 @@ int main(int argc, char* argv[]) {
     bool symSample = false;
     bool useKnown = false;
     bool allSymmetries = false;
-    bool variableSampling = false;
+    bool variableSampling = true;
     std::vector<Poly> zeroConsForSampling;
     std::string stateFile = "state.dat";
     std::string autoType = "first";
@@ -170,8 +170,8 @@ int main(int argc, char* argv[]) {
     long int numSamplesPer = 0;
     long int numShots = 0;
     double tol = 1e-7;
-    bool usePurity = false;
-    bool useEnergy = false;
+    std::string specialObjective = "";
+    std::set<int> subsystemInds;
     bool groundStateProblem = false;
     bool outputToFile = false;
     std::string sampleChoice = "all";
@@ -183,7 +183,7 @@ int main(int argc, char* argv[]) {
     bool excludeY = false;
     bool excludeZ = false;
     bool outputLindbladAsLaTeX = false;
-    double percentile = 95;
+    double percentile = 99.7;
     Poly objective("<Z1>");
     std::map<Mon, double> samples;
     Poly pseudoObjective;
@@ -281,12 +281,31 @@ int main(int argc, char* argv[]) {
 
         // Purity objective
         } else if (argAsString == "--objPurity" || argAsString == "--objpurity") {
-            usePurity = true;
+            specialObjective = "purity";
+            solver = "mosek";
+            
+        // Renyi entropy 1 TODO
+        } else if (argAsString == "--objRenyi1") {
+            specialObjective = "renyi1";
+            solver = "mosek";
+            subsystemInds.clear();
+            for (int j = i + 1; j < argc; j++) {
+                std::string nextArg = std::string(argv[j]);
+                if (nextArg.rfind("-", 0) == 0) {
+                    break;
+                }
+                subsystemInds.insert(std::stoi(nextArg));
+                i++;
+            }
+
+        // Renyi entropy 2 TODO
+        } else if (argAsString == "--objRenyi2") {
+            specialObjective = "renyi2";
             solver = "mosek";
 
         // Energy objective
         } else if (argAsString == "--objEnergy" || argAsString == "--objenergy") {
-            useEnergy = true;
+            specialObjective = "energy";
 
         // Objective is made of random Paulis of some order
         } else if (argAsString == "--objRand" || argAsString == "--objrand") {
@@ -631,7 +650,7 @@ int main(int argc, char* argv[]) {
 
             // This is an energy only model
             objective = H / double(numQubits);
-            useEnergy = true;
+            specialObjective = "energy";
             groundStateProblem = true;
 
             // We know the true ground state energy
@@ -686,7 +705,7 @@ int main(int argc, char* argv[]) {
             double gamma_c_plus = gamma_c * n_c;
             double gamma_c_minus = gamma_c * (n_c + 1.0);
 
-            // For the tfi, higher g TODO
+            // For the tfi, higher g
             if (argAsString == "--2dtfi" || argAsString == "--2dtfiperiodic") {
                 g = 0.5;
             }
@@ -924,7 +943,6 @@ int main(int argc, char* argv[]) {
             lindbladian.convertToPaulis();
             lindbladian.reduce();
 
-        // TODO
         // Jin "Cluster Mean-Field Approach to the Steady-State Phase Diagram of Dissipative Spin Systems"
         // Lee "Unconventional magnetism via optical pumping of interacting spin systems"
         } else if (argAsString == "--phase2") {
@@ -1002,7 +1020,7 @@ int main(int argc, char* argv[]) {
             lindbladian.convertToPaulis();
             lindbladian.reduce();
 
-        // TODO https://journals.aps.org/pra/pdf/10.1103/PhysRevA.98.042118?casa_token=CFcuEJLHI8IAAAAA%3AQA26OCFU-TCiLQGncKG3TRRu9FW-Bf5mfgdspWRoCLiLa-1UJN9qLSBlSy9qqyfGQPAvs4e54FXAwcwp
+        // https://journals.aps.org/pra/pdf/10.1103/PhysRevA.98.042118?casa_token=CFcuEJLHI8IAAAAA%3AQA26OCFU-TCiLQGncKG3TRRu9FW-Bf5mfgdspWRoCLiLa-1UJN9qLSBlSy9qqyfGQPAvs4e54FXAwcwp
         } else if (argAsString == "--phase3") {
             modelName = argAsString;
 
@@ -1986,7 +2004,6 @@ int main(int argc, char* argv[]) {
             }
             precompute = true;
             checkObj = true;
-            //lindbladLevel = numQubits;
             findMinimal = true;
             findMinimalAmount = 0;
 
@@ -2085,6 +2102,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  --largest <int>     Sample from largest Pauli strings" << std::endl;
             std::cout << "  --smallest <int>    Sample from smallest Pauli strings" << std::endl;
             std::cout << "  --variable          Use a variable sampling rate (i.e. different per Pauli)" << std::endl;
+            std::cout << "  --uniform           Use a uniform sampling rate (i.e. same per Pauli)" << std::endl;
             std::cout << "  --noobj             Exclude the objective from the sampling" << std::endl;
             std::cout << "  --noobj             Exclude the objective from the sampling" << std::endl;
             std::cout << "  --nox               Exclude any X terms from the sampling" << std::endl;
@@ -2124,6 +2142,8 @@ int main(int argc, char* argv[]) {
             std::cout << "  --objRand <int>     Random objective up to a certain order" << std::endl;
             std::cout << "  --objPurity         Try to minimize the purity of the state" << std::endl;
             std::cout << "  --objEnergy         Try to minimize the energy of the state" << std::endl;
+            std::cout << "  --objRenyi1 <int>   Try to maximize local Renyi entropy with alpha=1" << std::endl;
+            std::cout << "  --objRenyi2         Try to maximize Renyi entropy with alpha=2" << std::endl;
             std::cout << "Limbliadian choices:" << std::endl;
             std::cout << "  -L <str>            Manually set the Lindbladian" << std::endl;
             std::cout << "  --file <str>        Read the Lindbladian from a file" << std::endl;
@@ -2159,6 +2179,10 @@ int main(int argc, char* argv[]) {
         } else if (argAsString == "--variable") {
             variableSampling = true;
 
+        // Uniform measurement counts
+        } else if (argAsString == "--uniform") {
+            variableSampling = false;
+
         // Ignore the imaginary components of the moment matrix
         } else if (argAsString == "-i") {
             imagType = std::stoi(argv[i+1]);
@@ -2188,8 +2212,16 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // If it's a purity problem, use a generic objective for now
-    if (usePurity) {
+    // If it's a special problem, use a generic objective for now
+    if (specialObjective == "renyi1") {
+        objective = Poly();
+        int subsystemSize = subsystemInds.size();
+        for (int ind : subsystemInds) {
+            objective += Poly(1.0/subsystemSize, "<X" + std::to_string(ind) + ">");
+            objective += Poly(1.0/subsystemSize, "<Y" + std::to_string(ind) + ">");
+            objective += Poly(1.0/subsystemSize, "<Z" + std::to_string(ind) + ">");
+        }
+    } else if (specialObjective != "") {
         objective = Poly();
         for (int i=1; i<=numQubits; i++) {
             objective += Poly(1.0/numQubits, "<X" + std::to_string(i) + ">");
@@ -2200,7 +2232,10 @@ int main(int argc, char* argv[]) {
 
     // If it's a Hamiltonian problem, don't do any Lindblad stuff
     if (groundStateProblem) {
-        useEnergy = true;
+        if (specialObjective == "") {
+            specialObjective = "energy";
+        }
+        findMinimal = false;
 
         // Get the Hamiltonian
         Poly H = Poly();
@@ -2225,7 +2260,7 @@ int main(int argc, char* argv[]) {
     std::chrono::steady_clock::time_point timeFinishedArgs = std::chrono::steady_clock::now();
 
     // If using energy as the objective
-    if (useEnergy) {
+    if (specialObjective == "energy") {
 
         // The objective is the Hamiltonian
         Poly H = Poly();
@@ -3629,7 +3664,7 @@ int main(int argc, char* argv[]) {
                     if (!(iss >> row >> col >> real >> imag)) {break;}
                     groundTruth.insert(row, col) = std::complex<double>(real, imag);
                 }
-                if (usePurity) {
+                if (specialObjective == "purity" || specialObjective == "renyi1" || specialObjective == "renyi2") {
                     double purity = 0;
                     for (int k=0; k<matSize; k++) {
                         for (int l=0; l<matSize; l++) {
@@ -3743,7 +3778,7 @@ int main(int argc, char* argv[]) {
                     }
                     addSingleMonomials(variables, objective);
                     int fullLevel = numQubits;
-                    std::vector<Poly> variablesToPut = generateMonomials(variables, fullLevel, verbosity);
+                    std::vector<Poly> variablesToPut = generateReducedMonomials(variables, fullLevel, verbosity);
                     for (size_t i=0; i<extraMonomialsLim.size(); i++) {
                         variablesToPut.push_back(Poly(extraMonomialsLim[i]));
                     }
@@ -3841,7 +3876,7 @@ int main(int argc, char* argv[]) {
                     variables.push_back(Mon("<Y" + std::to_string(i+1) + ">"));
                     variables.push_back(Mon("<Z" + std::to_string(i+1) + ">"));
                 }
-                std::vector<Poly> variablesToPut = generateMonomials(variables, maxSampleDegree, verbosity);
+                std::vector<Poly> variablesToPut = generateReducedMonomials(variables, maxSampleDegree, verbosity);
                 for (size_t i=0; i<variablesToPut.size(); i++) {
                     sampleOperators.insert(variablesToPut[i].getKey());
                 }
@@ -4041,13 +4076,26 @@ int main(int argc, char* argv[]) {
 
                 }
 
-            // Just samples from the objective
+            // Just sample from the objective TODO
             } else if (sampleChoice == "onlyobj") {
-                for (auto term : objective) {
-                    Mon mon = term.first;
-                    sampleOperators.insert(mon);
+                if (specialObjective == "renyi1") {
+                    int subsystemSize = subsystemInds.size();
+                    std::vector<Mon> subsystemVars = {};
+                    for (int ind : subsystemInds) {
+                        subsystemVars.push_back(Mon("<X" + std::to_string(ind) + ">"));
+                        subsystemVars.push_back(Mon("<Y" + std::to_string(ind) + ">"));
+                        subsystemVars.push_back(Mon("<Z" + std::to_string(ind) + ">"));
+                    }
+                    std::vector<Poly> variablesToCalc = generateReducedMonomials(subsystemVars, subsystemSize, verbosity);
+                    for (auto var : variablesToCalc) {
+                        sampleOperators.insert(var.getKey());
+                    }
+                } else {
+                    for (auto term : objective) {
+                        Mon mon = term.first;
+                        sampleOperators.insert(mon);
+                    }
                 }
-
             }
 
             // Simplfy all, also remove any T monomials
@@ -4134,30 +4182,31 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            // If using a variable sampling rate TODO
-            std::map<Mon, int> samplesPerOperator;
+            // If using a variable sampling rate
+            std::map<Mon, long int> samplesPerOperator;
             for (auto mon : sampleOperators) {
                 samplesPerOperator[mon] = numSamplesPer;
             }
             if (variableSampling) { 
-                std::cout << "Ideal total samples: " << totalSamples << std::endl;
                 int maxPauliLength = 0;
                 for (auto mon : sampleOperators) {
-                    std::max(maxPauliLength, int(mon.size()));
+                    maxPauliLength = std::max(maxPauliLength, int(mon.size()));
                 }
-                long long int newTotal = 0;
+                long int newTotal = 0;
                 for (auto mon : sampleOperators) {
-                    samplesPerOperator[mon] = std::pow(2, 1 + maxPauliLength - mon.size());
+                    long int samples = std::pow(2, 1 + maxPauliLength - int(mon.size()));
+                    samplesPerOperator[mon] = samples;
                     newTotal += samplesPerOperator[mon];
                 }
-                std::cout << "New total samples before scaling: " << newTotal << std::endl;
                 float scale = float(totalSamples) / float(newTotal);
                 int newTotalScaled = 0;
                 for (auto mon : sampleOperators) {
                     samplesPerOperator[mon] = std::floor(scale * samplesPerOperator[mon]);
                     newTotalScaled += samplesPerOperator[mon];
                 }
-                std::cout << "After scaling: " << newTotalScaled << std::endl;
+                if (verbosity >= 1) {
+                    std::cout << "Total measurements after scaling: " << newTotalScaled << std::endl;
+                }
             }
 
             // Errors
@@ -4284,11 +4333,11 @@ int main(int argc, char* argv[]) {
                 } else if (samples.find(mon) != samples.end()) {
                     double sample = samples[mon];
                     if (coeff > 0) {
-                        maxVal += coeff * std::min(sample + epsilon, 1.0);
-                        minVal += coeff * std::max(sample - epsilon, -1.0);
+                        maxVal += coeff * std::min(sample + epsilons[mon], 1.0);
+                        minVal += coeff * std::max(sample - epsilons[mon], -1.0);
                     } else {
-                        maxVal += coeff * std::max(sample - epsilon, -1.0);
-                        minVal += coeff * std::min(sample + epsilon, 1.0);
+                        maxVal += coeff * std::max(sample - epsilons[mon], -1.0);
+                        minVal += coeff * std::min(sample + epsilons[mon], 1.0);
                     }
                 } else {
                     minVal -= std::abs(coeff);
@@ -4328,10 +4377,11 @@ int main(int argc, char* argv[]) {
     }
 
     // If using purity as the objective
-    std::vector<Mon> quadCone;
-    if (usePurity) {
+    std::vector<std::vector<Mon>> quadCones;
+    if (specialObjective == "purity") {
 
         // Add all the Pauli strings in variableSet
+        std::vector<Mon> quadCone;
         quadCone.push_back(Mon("<T1>"));
         quadCone.push_back(Mon());
         for (auto mon : variableSet) {
@@ -4339,6 +4389,61 @@ int main(int argc, char* argv[]) {
                 quadCone.push_back(mon);
             }
         }
+        quadCones.push_back(quadCone);
+
+        // Objective is the purity
+        objective = Poly(1, Mon("<T1>"));
+
+    }
+
+    // If using Renyi-1 as the objective TODO
+    if (specialObjective == "renyi1") {
+
+        // Add all the Pauli strings in variableSet
+        std::vector<Mon> quadCone;
+        quadCone.push_back(Mon("<T1>"));
+        quadCone.push_back(Mon());
+        for (auto mon : variableSet) {
+            if (mon != Mon() && !mon.contains('T')) {
+                bool containsOnlySubsystem = true;
+                for (auto [letter, index] : mon) {
+                    if (subsystemInds.count(index) == 0) {
+                        containsOnlySubsystem = false;
+                        break;
+                    }
+                }
+                if (containsOnlySubsystem) {
+                    quadCone.push_back(mon);
+                }
+            }
+        }
+        quadCones.push_back(quadCone);
+
+        // Objective is the purity
+        objective = Poly(1, Mon("<T1>"));
+
+    }
+
+    // If using Renyi-2 as the objective TODO
+    if (specialObjective == "renyi2") {
+
+        // Add all the Pauli strings in variableSet
+        std::vector<Mon> quadCone;
+        quadCone.push_back(Mon("<T1>"));
+        quadCone.push_back(Mon());
+        int extraT = 2;
+        for (auto mon : variableSet) {
+            if (mon != Mon() && !mon.contains('T')) {
+                std::vector<Mon> quadConeExtra;
+                Mon extraTMon = Mon("<T" + std::to_string(extraT) + ">");
+                quadConeExtra.push_back(extraTMon);
+                quadConeExtra.push_back(mon);
+                quadCone.push_back(extraTMon);
+                extraT++;
+                quadCones.push_back(quadConeExtra);
+            }
+        }
+        quadCones.push_back(quadCone);
 
         // Objective is the purity
         objective = Poly(1, Mon("<T1>"));
@@ -4379,10 +4484,14 @@ int main(int argc, char* argv[]) {
             std::cout << "Positive constraints (" << constraintsPositive.size() << "): " << std::endl;
             std::cout << constraintsPositive << std::endl;
         }
-        if (quadCone.size() > 0) {
-            std::cout << "Quadratic cone constraints (" << quadCone.size() << "): " << std::endl;
-            for (const auto& mon : quadCone) {
-                std::cout << mon << std::endl;
+        if (quadCones.size() > 0) {
+            std::cout << "Quadratic cone constraints (" << quadCones.size() << "): " << std::endl;
+            for (int i=0; i<quadCones.size(); i++) {
+                std::cout << " Cone " << i << ":" << std::endl;
+                for (const auto& mon : quadCones[i]) {
+                    std::cout << mon << ", ";
+                }
+                std::cout << std::endl << std::endl;
             }
         }
         std::cout << "----------------------------------------" << std::endl;
@@ -4402,7 +4511,7 @@ int main(int argc, char* argv[]) {
         std::string optType = "LP";
         if (maxMatSize > 1) {
             optType = "SDP";
-        } else if (quadCone.size() > 0) {
+        } else if (quadCones.size() > 0) {
             optType = "QP";
         }
         if (solver == "scs") {
@@ -4436,7 +4545,7 @@ int main(int argc, char* argv[]) {
             }
         }
     }
-    if (usePurity) {
+    if (specialObjective == "purity" || specialObjective == "renyi1" || specialObjective == "renyi2") {
         trivialMin = 0.0;
         trivialMax = 1.0;
     }
@@ -4451,7 +4560,7 @@ int main(int argc, char* argv[]) {
         if (solver == "scs") {
             bounds = boundSCS(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity, {-1,1}, &results);
         } else if (solver == "mosek" || maxMatSize > 1) {
-            bounds = boundMOSEK(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity, {-1,1}, imagType, &results, quadCone);
+            bounds = boundMOSEK(objective, momentMatrices, constraintsZero, constraintsPositive, verbosity, {-1,1}, imagType, &results, quadCones);
         } else if (solver == "gurobi") {
             bounds = boundGurobi(objective, constraintsZero, verbosity, &results);
         } else if (solver == "eigen") {
@@ -4461,7 +4570,7 @@ int main(int argc, char* argv[]) {
     }
     double lowerBound = bounds.first;
     double upperBound = bounds.second;
-    if (usePurity) {
+    if (specialObjective == "purity") {
         lowerBound = lowerBound / std::pow(2, numQubits);
         upperBound = 0.0;
         double absSum = 0.0;
@@ -4479,6 +4588,10 @@ int main(int argc, char* argv[]) {
             std::cout << "T = " << results[Mon("<T1>")] << std::endl;
         }
         std::swap(lowerBound, upperBound);
+    } else if (specialObjective == "renyi1") {
+        lowerBound = 1 - lowerBound / std::pow(2, subsystemInds.size());
+    } else if (specialObjective == "renyi2") {
+        lowerBound = 1 - lowerBound / std::pow(2, numQubits);
     }
     double diff = std::abs(upperBound - lowerBound);
     double error = (diff / std::abs(trivialMax - trivialMin)) * 100;
@@ -4631,7 +4744,7 @@ int main(int argc, char* argv[]) {
             // Make sure we have enough vars to reconstruct the matrix
             int numNeeded = std::pow(4, numQubits) - 1;
             if (results.size() < numNeeded) {
-                std::cout << "Warning: not enough variables to reconstruct the full matrix (" << results.size() << " < " << numNeeded << ")" << std::endl;
+                std::cout << "ERROR: not enough variables to reconstruct the full matrix (" << results.size() << " < " << numNeeded << ")" << std::endl;
             }
             if (results.find(Mon()) == results.end()) {
                 results[Mon()] = std::complex<double>(1.0, 0.0);
@@ -4717,6 +4830,80 @@ int main(int argc, char* argv[]) {
         if (verbosity >= 1) {
             std::cout << "Purity: " << purity << std::endl;
             std::cout << "Minimum possible purity: " << 1.0 / fullMatSize << std::endl;
+        }
+
+        // Check the Renyi-1 entropy TODO
+        if (numQubits >= 4) {
+            if (subsystemInds.size() == 0) {
+                subsystemInds = {1, 2, 3};
+            }
+            int subsystemSize = subsystemInds.size();
+
+            // Calculate expectation values for all Pauli strings on the subsystem
+            std::vector<Mon> subsystemVars = {};
+            for (int ind : subsystemInds) {
+                subsystemVars.push_back(Mon("<X" + std::to_string(ind) + ">"));
+                subsystemVars.push_back(Mon("<Y" + std::to_string(ind) + ">"));
+                subsystemVars.push_back(Mon("<Z" + std::to_string(ind) + ">"));
+            }
+            std::vector<Poly> variablesToCalc = generateReducedMonomials(subsystemVars, subsystemSize, verbosity);
+            std::map<Mon, std::complex<double>> subsystemResults = {};
+            for (auto& var : variablesToCalc) {
+                Mon monom = var.getKey();
+
+                // Turn X1Y2I3 -> {1, 2, 0}
+                std::vector<int> inds(numQubits, 0);
+                for (int i = 0; i < monom.size(); i++) {
+                    char letter = monom[i].first;
+                    int index = monom[i].second - 1;
+                    if (letter == 'X') {
+                        inds[index] = 1;
+                    } else if (letter == 'Y') {
+                        inds[index] = 2;
+                    } else if (letter == 'Z') {
+                        inds[index] = 3;
+                    }
+                }
+
+                // The corresponding matrix
+                Eigen::SparseMatrix<std::complex<double>> mat = generatePauliMatrix(inds);
+
+                // Calculate the expectation value
+                subsystemResults[monom] = (reconMatrix * mat).trace();
+                std::cout << "Added subsystem monomial " << monom << " with value " << subsystemResults[monom] << std::endl;
+
+            }
+
+            // Calculate the Renyi-1 entropy from these
+            double renyi1 = 1;
+            for (auto& [monom, value] : subsystemResults) {
+                renyi1 += std::norm(value);
+                std::cout << "Adding " << monom << " with value " << value << " to Renyi-1 calculation" << std::endl;
+            }
+            std::cout << "Sum of squares for Renyi-1: " << renyi1 << std::endl;
+            renyi1 = 1 - renyi1 / std::pow(2, subsystemInds.size());
+            if (verbosity >= 1) {
+                std::string subsysStr = "{";
+                for (auto ind : subsystemInds) {
+                    subsysStr += std::to_string(ind) + ",";
+                }
+                subsysStr.pop_back();
+                subsysStr += "}";
+                std::cout << "Renyi-1 entropy (subsystem " << subsysStr << "): " << renyi1 << std::endl;
+            }
+
+        }
+
+        // Check the Renyi-2 entropy TODO
+        double renyi2 = 0;
+        for (int i = 0; i < fullMatSize; i++) {
+            for (int j = 0; j < fullMatSize; j++) {
+                renyi2 += std::pow(std::norm(reconMatrix(i, j)), 2);
+            }
+        }
+        renyi2 = 1.0 - renyi2 / fullMatSize;
+        if (verbosity >= 1) {
+            std::cout << "Renyi-2 entropy: " << renyi2 << std::endl;
         }
 
         // If precomputing, save it to a file
