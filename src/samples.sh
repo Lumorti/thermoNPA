@@ -70,21 +70,21 @@ filenameEnergy="data/2d_3x3_H.dat"
 #done
 
 # Renyi-1 entropy vs number of measurements
-echo "file & renyi1" | tee -a data/measure.dat
-./run -B -N "sdp" -s M --2dtfi ${systemSize} -A ${A} -H | tee -a data/measure.dat
-for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
-do
-    for ind in $(seq 1 $numRepeats)
-    do
+#echo "file & renyi1" | tee -a data/measure.dat
+./run -B -N "sdp" -s M --2dtfi ${systemSize} -A ${A} -H --objRenyi1 1 2 3 | tee -a data/measure.dat
+#for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
+#do
+    #for ind in $(seq 1 $numRepeats)
+    #do
 
-        # Just measure the objective
-        ./run -B -N "onlyobj, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S ${ind} -H --objRenyi1 1 2 3 --shots ${shots} --onlyobj | tee -a data/measure.dat
+        ## Just measure the objective
+        #./run -B -N "onlyobj, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S ${ind} -H --objRenyi1 1 2 3 --shots ${shots} --onlyobj | tee -a data/measure.dat
 
-        # SDP plus measure the objective
-        ./run -B -N "sdp+onlyobj, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S ${ind} -A ${A} -H --objRenyi1 1 2 3 --shots ${shots} --onlyobj | tee -a data/measure.dat
+        ## SDP plus measure the objective
+        #./run -B -N "sdp+onlyobj, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S ${ind} -A ${A} -H --objRenyi1 1 2 3 --shots ${shots} --onlyobj | tee -a data/measure.dat
 
-    done
-done
+    #done
+#done
 
 # File showing the different confidence levels
 #echo "file & confidence" | tee -a data/measure.dat
@@ -119,9 +119,9 @@ done
 #done
 
 # Automatically commit once done
-git add .
-git commit -m "automatic data commit"
-git push
+#git add .
+#git commit -m "automatic data commit"
+#git push
 
 
 

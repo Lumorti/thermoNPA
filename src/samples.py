@@ -170,32 +170,37 @@ print("}")
 
 # Which things to plot
 allowed = {
-    "energy": [
-        "sdp",
-        "sdp+all2, 99.7%",
-        "sdp+first100, 99.7%",
-        "sdp+onlyobj, 99.7%",
-    ], 
-    "heat": [
-        "sdp",
-        "first100-z, 99.7%",
-        "sdp+first100-z, 99.7%",
-    ], 
-    "large": [
+    # "energy": [
+        # "sdp",
+        # "sdp+all2, 99.7%",
+        # "sdp+first100, 99.7%",
+        # "sdp+onlyobj, 99.7%",
+    # ], 
+    # "heat": [
+        # "sdp",
+        # "first100-z, 99.7%",
+        # "sdp+first100-z, 99.7%",
+    # ], 
+    # "large": [
+        # "sdp",
+        # "onlyobj, 99.7%",
+        # "sdp+onlyobj, 99.7%",
+    # ], 
+    # "purity": [
+        # "sdp",
+        # "all2, 99.7%",
+        # "sdp+all2, 99.7%",
+    # ], 
+    "renyi1": [
         "sdp",
         "onlyobj, 99.7%",
         "sdp+onlyobj, 99.7%",
     ], 
-    "purity": [
-        "sdp",
-        "all2, 99.7%",
-        "sdp+all2, 99.7%",
-    ], 
-    "confidence": [
-        "sdp+all2, 68%",
-        "sdp+all2, 95%",
-        "sdp+all2, 99.7%",
-    ],
+    # "confidence": [
+        # "sdp+all2, 68%",
+        # "sdp+all2, 95%",
+        # "sdp+all2, 99.7%",
+    # ],
 }
 
 # Plot the data
@@ -218,6 +223,8 @@ for filename in filenames:
     plt.xlabel("Number of Shots")
     if filename == "purity" or filename == "confidence":
         plt.ylabel("Purity Lower Bound")
+    elif "renyi1" in filename:
+        plt.ylabel("Renyi Entropy Upper Bound")
     elif "mag" in filename:
         plt.ylabel("Magnetization Bounds")
     elif "large" in filename:
@@ -336,7 +343,7 @@ for filename in filenames:
                 plt.axhline(y=yLineLower, linestyle=':', color=color, linewidth=linewidth, zorder=1000)
 
         # If we need an upper bound too
-        if filename != "purity" and filename != "energy" and filename != "large":
+        if filename != "purity" and filename != "energy" and filename != "large" and filename != "renyi1":
             if yErrorUpper is not None:
                 line = plt.errorbar(x, yUpper, yerr=yErrorUpper, color=color, capsize=3, linewidth=linewidth)
             else:

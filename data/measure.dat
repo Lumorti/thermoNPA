@@ -4535,2004 +4535,1003 @@ auto (151x151) & auto (2100) & None & None & auto (-1) & [0.0028912125, 0.002891
 None & None  & None & None & auto (-1) & [-0.0082758475, 0.0047078729] (63.16\%) & 2.31s & first100-z, 99.7% \\ \hline
 auto (151x151) & auto (2100) & None & None & auto (-1) & [0.0028912125, 0.0028912125] (0.0\%) & 44.29s & sdp+first100-z, 99.7% \\ \hline
 file & renyi1
-auto (151x151) & None  & None & None & [-1.1324556795, 1.1324556795] (67.95\%) & 1m12s & sdp \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6533595574, 10000000.0] (999999934.66\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6533595604, 10000000.0] (999999934.66\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6392885628, 10000000.0] (999999936.07\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6392885535, 10000000.0] (999999936.07\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6059126414, 10000000.0] (999999939.41\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6059126715, 10000000.0] (999999939.41\%) & 2.90s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6611547143, 10000000.0] (999999933.88\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6611546940, 10000000.0] (999999933.88\%) & 2.86s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
-None & None  & None & None & onlyobj (10000) & [0.6384985247, 10000000.0] (999999936.15\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6384985249, 10000000.0] (999999936.15\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6227533848, 10000000.0] (999999937.72\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6227533671, 10000000.0] (999999937.72\%) & 2.73s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6271524760, 10000000.0] (999999937.28\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6271524752, 10000000.0] (999999937.28\%) & 2.86s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6387768551, 10000000.0] (999999936.12\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6384384170, 10000000.0] (999999936.16\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6547872611, 10000000.0] (999999934.52\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6547872245, 10000000.0] (999999934.52\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6438808003, 10000000.0] (999999935.61\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6438808002, 10000000.0] (999999935.61\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6061902127, 10000000.0] (999999939.38\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6050572309, 10000000.0] (999999939.49\%) & 2.86s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6376369657, 10000000.0] (999999936.24\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6376369761, 10000000.0] (999999936.24\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6615849010, 10000000.0] (999999933.84\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6615848935, 10000000.0] (999999933.84\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6162962329, 10000000.0] (999999938.37\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6162962295, 10000000.0] (999999938.37\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6286196316, 10000000.0] (999999937.14\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6286196344, 10000000.0] (999999937.14\%) & 2.69s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6094580816, 10000000.0] (999999939.05\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6094580907, 10000000.0] (999999939.05\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6435378801, 10000000.0] (999999935.65\%) & 2.07s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6435378775, 10000000.0] (999999935.65\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6360941522, 10000000.0] (999999936.39\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6338658619, 10000000.0] (999999936.61\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6390673503, 10000000.0] (999999936.09\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6390673504, 10000000.0] (999999936.09\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6198544566, 10000000.0] (999999938.01\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6198544550, 10000000.0] (999999938.01\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6178953119, 10000000.0] (999999938.21\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6178837577, 10000000.0] (999999938.21\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6271436617, 10000000.0] (999999937.29\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6271436545, 10000000.0] (999999937.29\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6401187558, 10000000.0] (999999935.99\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6401187606, 10000000.0] (999999935.99\%) & 2.73s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6202413167, 10000000.0] (999999937.98\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6202338716, 10000000.0] (999999937.98\%) & 3.14s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6237616957, 10000000.0] (999999937.62\%) & 2.08s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6236281119, 10000000.0] (999999937.64\%) & 2.72s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6318618531, 10000000.0] (999999936.81\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6318618380, 10000000.0] (999999936.81\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6678664134, 10000000.0] (999999933.21\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6678664161, 10000000.0] (999999933.21\%) & 2.95s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6235257253, 10000000.0] (999999937.65\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6235257102, 10000000.0] (999999937.65\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6189227211, 10000000.0] (999999938.11\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6189226936, 10000000.0] (999999938.11\%) & 2.88s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6372853584, 10000000.0] (999999936.27\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6366458562, 10000000.0] (999999936.34\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6293563814, 10000000.0] (999999937.06\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6196414639, 10000000.0] (999999938.04\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6371001567, 10000000.0] (999999936.29\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6371001594, 10000000.0] (999999936.29\%) & 2.87s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6336658348, 10000000.0] (999999936.63\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6336658234, 10000000.0] (999999936.63\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6318279959, 10000000.0] (999999936.82\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6318279556, 10000000.0] (999999936.82\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6199672378, 10000000.0] (999999938.0\%) & 2.09s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6199672554, 10000000.0] (999999938.0\%) & 2.88s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6225087576, 10000000.0] (999999937.75\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6225080824, 10000000.0] (999999937.75\%) & 2.89s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6338616030, 10000000.0] (999999936.61\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6338616464, 10000000.0] (999999936.61\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6322449083, 10000000.0] (999999936.78\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6322449261, 10000000.0] (999999936.78\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6534757484, 10000000.0] (999999934.65\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6534757485, 10000000.0] (999999934.65\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6113713134, 10000000.0] (999999938.86\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6113713231, 10000000.0] (999999938.86\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6437752288, 10000000.0] (999999935.62\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6437752156, 10000000.0] (999999935.62\%) & 2.93s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6223323011, 10000000.0] (999999937.77\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6223323092, 10000000.0] (999999937.77\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6350250765, 10000000.0] (999999936.50\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6350250789, 10000000.0] (999999936.50\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6384917505, 10000000.0] (999999936.15\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6384917474, 10000000.0] (999999936.15\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6300354688, 10000000.0] (999999937.0\%) & 2.11s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6269094658, 10000000.0] (999999937.31\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6439293466, 10000000.0] (999999935.61\%) & 2.08s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6439293604, 10000000.0] (999999935.61\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6231669595, 10000000.0] (999999937.68\%) & 2.12s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6231669595, 10000000.0] (999999937.68\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6120057880, 10000000.0] (999999938.80\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6120057811, 10000000.0] (999999938.80\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6548011408, 10000000.0] (999999934.52\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6548011303, 10000000.0] (999999934.52\%) & 2.72s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 None & None  & None & None & onlyobj (10000) & [0.6292426339, 10000000.0] (999999937.08\%) & 2.07s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9945
 auto (151x151) & None  & None & None & onlyobj (10000) & [0.6292426598, 10000000.0] (999999937.08\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4427117614, 10000000.0] (999999955.73\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4420148036, 10000000.0] (999999955.80\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4304330576, 10000000.0] (999999956.96\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4285955175, 10000000.0] (999999957.14\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4187181619, 10000000.0] (999999958.13\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4184217642, 10000000.0] (999999958.16\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4145854628, 10000000.0] (999999958.54\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4142211626, 10000000.0] (999999958.58\%) & 2.86s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4293495150, 10000000.0] (999999957.07\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4293426079, 10000000.0] (999999957.07\%) & 2.87s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4351618738, 10000000.0] (999999956.48\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4329856431, 10000000.0] (999999956.70\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4363055763, 10000000.0] (999999956.37\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4361376031, 10000000.0] (999999956.39\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4373618773, 10000000.0] (999999956.26\%) & 2.09s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4373618606, 10000000.0] (999999956.26\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4431024973, 10000000.0] (999999955.69\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4425490280, 10000000.0] (999999955.75\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4435334967, 10000000.0] (999999955.65\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4427761437, 10000000.0] (999999955.72\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4212990174, 10000000.0] (999999957.87\%) & 2.07s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4194009410, 10000000.0] (999999958.06\%) & 2.85s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4276387879, 10000000.0] (999999957.24\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4261828521, 10000000.0] (999999957.38\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4248750618, 10000000.0] (999999957.51\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4248478332, 10000000.0] (999999957.52\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4487867379, 10000000.0] (999999955.12\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4486193292, 10000000.0] (999999955.14\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4303492295, 10000000.0] (999999956.97\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4302156617, 10000000.0] (999999956.98\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4219607246, 10000000.0] (999999957.80\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4205081536, 10000000.0] (999999957.95\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4328853575, 10000000.0] (999999956.71\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4297422638, 10000000.0] (999999957.03\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4317824536, 10000000.0] (999999956.82\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4301434504, 10000000.0] (999999956.99\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4391277473, 10000000.0] (999999956.09\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4338278981, 10000000.0] (999999956.62\%) & 2.85s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4482484437, 10000000.0] (999999955.18\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4474327511, 10000000.0] (999999955.26\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4492271292, 10000000.0] (999999955.08\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4492270240, 10000000.0] (999999955.08\%) & 2.91s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4322405602, 10000000.0] (999999956.78\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4287298705, 10000000.0] (999999957.13\%) & 2.88s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4370876145, 10000000.0] (999999956.29\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4356124743, 10000000.0] (999999956.44\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4376567543, 10000000.0] (999999956.23\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4352088146, 10000000.0] (999999956.48\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4269557409, 10000000.0] (999999957.30\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4251667166, 10000000.0] (999999957.48\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4357460669, 10000000.0] (999999956.43\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4352103563, 10000000.0] (999999956.48\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4333813419, 10000000.0] (999999956.66\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4325625046, 10000000.0] (999999956.74\%) & 2.91s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4255045979, 10000000.0] (999999957.45\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4250978886, 10000000.0] (999999957.49\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4376722935, 10000000.0] (999999956.23\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4355098909, 10000000.0] (999999956.45\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4365712371, 10000000.0] (999999956.34\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4231339810, 10000000.0] (999999957.69\%) & 2.71s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4281931021, 10000000.0] (999999957.18\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4267060819, 10000000.0] (999999957.33\%) & 2.94s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4225651163, 10000000.0] (999999957.74\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4222528025, 10000000.0] (999999957.77\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4268746854, 10000000.0] (999999957.31\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4246331790, 10000000.0] (999999957.54\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4214344398, 10000000.0] (999999957.86\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4210070889, 10000000.0] (999999957.90\%) & 2.85s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4354500659, 10000000.0] (999999956.45\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4354497941, 10000000.0] (999999956.46\%) & 2.87s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4301388437, 10000000.0] (999999956.99\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4283541781, 10000000.0] (999999957.16\%) & 2.96s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4262073277, 10000000.0] (999999957.38\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4239461943, 10000000.0] (999999957.61\%) & 2.87s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4297963708, 10000000.0] (999999957.02\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4237653220, 10000000.0] (999999957.62\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4531381428, 10000000.0] (999999954.69\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4482972673, 10000000.0] (999999955.17\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4464361139, 10000000.0] (999999955.36\%) & 2.10s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4464361264, 10000000.0] (999999955.36\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4402426706, 10000000.0] (999999955.98\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4401198402, 10000000.0] (999999955.99\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4318974769, 10000000.0] (999999956.81\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4311060465, 10000000.0] (999999956.89\%) & 2.89s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4326643722, 10000000.0] (999999956.73\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4326643839, 10000000.0] (999999956.73\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4355690179, 10000000.0] (999999956.44\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4303910743, 10000000.0] (999999956.96\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4254205003, 10000000.0] (999999957.46\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4251781219, 10000000.0] (999999957.48\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4385089358, 10000000.0] (999999956.15\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4385089354, 10000000.0] (999999956.15\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4326366306, 10000000.0] (999999956.74\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4321199862, 10000000.0] (999999956.79\%) & 2.85s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4363753300, 10000000.0] (999999956.36\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4363753124, 10000000.0] (999999956.36\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4468481476, 10000000.0] (999999955.32\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4465787029, 10000000.0] (999999955.34\%) & 2.85s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 None & None  & None & None & onlyobj (50000) & [0.4293268121, 10000000.0] (999999957.07\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49959
 auto (151x151) & None  & None & None & onlyobj (50000) & [0.4282760768, 10000000.0] (999999957.17\%) & 2.86s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3898296058, 10000000.0] (999999961.02\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3877960594, 10000000.0] (999999961.22\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3795519561, 10000000.0] (999999962.04\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3792304450, 10000000.0] (999999962.08\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3581297993, 10000000.0] (999999964.19\%) & 2.07s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3541297000, 10000000.0] (999999964.59\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3737286390, 10000000.0] (999999962.63\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3675794079, 10000000.0] (999999963.24\%) & 2.89s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3668633633, 10000000.0] (999999963.31\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3667646678, 10000000.0] (999999963.32\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3688173227, 10000000.0] (999999963.12\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3641567598, 10000000.0] (999999963.58\%) & 2.98s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3698699938, 10000000.0] (999999963.01\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3698699930, 10000000.0] (999999963.01\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3701756090, 10000000.0] (999999962.98\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3688256686, 10000000.0] (999999963.12\%) & 2.73s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3681870727, 10000000.0] (999999963.18\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3675359874, 10000000.0] (999999963.25\%) & 2.70s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3725656902, 10000000.0] (999999962.74\%) & 2.11s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3718823075, 10000000.0] (999999962.81\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3706416095, 10000000.0] (999999962.94\%) & 2.08s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3681257732, 10000000.0] (999999963.19\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3708949511, 10000000.0] (999999962.91\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3707592937, 10000000.0] (999999962.92\%) & 2.86s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3749775747, 10000000.0] (999999962.50\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3747683593, 10000000.0] (999999962.52\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3737646723, 10000000.0] (999999962.62\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3736065246, 10000000.0] (999999962.64\%) & 2.69s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3808335687, 10000000.0] (999999961.92\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3803901670, 10000000.0] (999999961.96\%) & 2.85s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3630879313, 10000000.0] (999999963.69\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3601568357, 10000000.0] (999999963.98\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3635756379, 10000000.0] (999999963.64\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3607724922, 10000000.0] (999999963.92\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3713463601, 10000000.0] (999999962.87\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3664808268, 10000000.0] (999999963.35\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3743657478, 10000000.0] (999999962.56\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3741075036, 10000000.0] (999999962.59\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3786858266, 10000000.0] (999999962.13\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3738838387, 10000000.0] (999999962.61\%) & 2.89s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3829920212, 10000000.0] (999999961.70\%) & 2.07s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3821240776, 10000000.0] (999999961.79\%) & 2.89s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3677538556, 10000000.0] (999999963.22\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3662461740, 10000000.0] (999999963.38\%) & 2.88s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3693509467, 10000000.0] (999999963.06\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3673648914, 10000000.0] (999999963.26\%) & 2.87s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3616104266, 10000000.0] (999999963.84\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3591458365, 10000000.0] (999999964.09\%) & 2.85s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3756338531, 10000000.0] (999999962.44\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3692561048, 10000000.0] (999999963.07\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3745894352, 10000000.0] (999999962.54\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3745628071, 10000000.0] (999999962.54\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3731519706, 10000000.0] (999999962.68\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3731518988, 10000000.0] (999999962.68\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3772880625, 10000000.0] (999999962.27\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3772850455, 10000000.0] (999999962.27\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3855369347, 10000000.0] (999999961.45\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3851163002, 10000000.0] (999999961.49\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3728678864, 10000000.0] (999999962.71\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3728456362, 10000000.0] (999999962.72\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3651798257, 10000000.0] (999999963.48\%) & 2.07s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3644452495, 10000000.0] (999999963.56\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3723910159, 10000000.0] (999999962.76\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3708891874, 10000000.0] (999999962.91\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3742816016, 10000000.0] (999999962.57\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3715982281, 10000000.0] (999999962.84\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3631650126, 10000000.0] (999999963.68\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3607347380, 10000000.0] (999999963.93\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3647486800, 10000000.0] (999999963.53\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3641346340, 10000000.0] (999999963.59\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3635300544, 10000000.0] (999999963.65\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3631239898, 10000000.0] (999999963.69\%) & 2.73s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3658604308, 10000000.0] (999999963.41\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3655163061, 10000000.0] (999999963.45\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3823530485, 10000000.0] (999999961.76\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3816548461, 10000000.0] (999999961.83\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3762050928, 10000000.0] (999999962.38\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3714402877, 10000000.0] (999999962.86\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3716505665, 10000000.0] (999999962.83\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3700480284, 10000000.0] (999999963.0\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3761075414, 10000000.0] (999999962.39\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3761074042, 10000000.0] (999999962.39\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3740345810, 10000000.0] (999999962.60\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3722432968, 10000000.0] (999999962.78\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3735856781, 10000000.0] (999999962.64\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3732404355, 10000000.0] (999999962.68\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3707394090, 10000000.0] (999999962.93\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3705058974, 10000000.0] (999999962.95\%) & 2.93s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3704937440, 10000000.0] (999999962.95\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3668057797, 10000000.0] (999999963.32\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3793073414, 10000000.0] (999999962.07\%) & 2.07s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3789129413, 10000000.0] (999999962.11\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3747923956, 10000000.0] (999999962.52\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3704991955, 10000000.0] (999999962.95\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3769245929, 10000000.0] (999999962.31\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3766395258, 10000000.0] (999999962.34\%) & 2.85s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3755760545, 10000000.0] (999999962.44\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3674164542, 10000000.0] (999999963.26\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 None & None  & None & None & onlyobj (100000) & [0.3617870815, 10000000.0] (999999963.82\%) & 2.01s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99963
 auto (151x151) & None  & None & None & onlyobj (100000) & [0.3615787600, 10000000.0] (999999963.84\%) & 2.92s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2755882410, 10000000.0] (999999972.44\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2707489233, 10000000.0] (999999972.93\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2778293425, 10000000.0] (999999972.22\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2753527990, 10000000.0] (999999972.46\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2714715253, 10000000.0] (999999972.85\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2691847783, 10000000.0] (999999973.08\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2747536472, 10000000.0] (999999972.52\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2747323362, 10000000.0] (999999972.53\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2706169513, 10000000.0] (999999972.94\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2688123058, 10000000.0] (999999973.12\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2757999841, 10000000.0] (999999972.42\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2757627149, 10000000.0] (999999972.42\%) & 2.72s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2767686392, 10000000.0] (999999972.32\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2749033240, 10000000.0] (999999972.51\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2719803403, 10000000.0] (999999972.80\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2709815930, 10000000.0] (999999972.90\%) & 2.85s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2691400011, 10000000.0] (999999973.09\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2673604715, 10000000.0] (999999973.26\%) & 2.90s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2732504935, 10000000.0] (999999972.67\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2727136413, 10000000.0] (999999972.73\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2656272632, 10000000.0] (999999973.44\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2656272283, 10000000.0] (999999973.44\%) & 2.88s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2748129241, 10000000.0] (999999972.52\%) & 2.07s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2714496310, 10000000.0] (999999972.86\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2701443657, 10000000.0] (999999972.99\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2692264717, 10000000.0] (999999973.08\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2785845187, 10000000.0] (999999972.14\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2779526773, 10000000.0] (999999972.20\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2731628197, 10000000.0] (999999972.68\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2697075635, 10000000.0] (999999973.03\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2663392328, 10000000.0] (999999973.37\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2646098413, 10000000.0] (999999973.54\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2720558241, 10000000.0] (999999972.79\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2707099406, 10000000.0] (999999972.93\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2685177045, 10000000.0] (999999973.15\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2671902995, 10000000.0] (999999973.28\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2785393966, 10000000.0] (999999972.15\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2775632615, 10000000.0] (999999972.24\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2698555722, 10000000.0] (999999973.01\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2698555624, 10000000.0] (999999973.01\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2713592359, 10000000.0] (999999972.86\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2707668060, 10000000.0] (999999972.92\%) & 2.73s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2695975393, 10000000.0] (999999973.04\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2693478407, 10000000.0] (999999973.07\%) & 2.85s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2795160645, 10000000.0] (999999972.05\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2780127890, 10000000.0] (999999972.20\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2746333759, 10000000.0] (999999972.54\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2721298819, 10000000.0] (999999972.79\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2654191388, 10000000.0] (999999973.46\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2622328564, 10000000.0] (999999973.78\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2813702967, 10000000.0] (999999971.86\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2805792511, 10000000.0] (999999971.94\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2739242333, 10000000.0] (999999972.61\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2717976247, 10000000.0] (999999972.82\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2760025154, 10000000.0] (999999972.40\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2684663530, 10000000.0] (999999973.15\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2723240014, 10000000.0] (999999972.77\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2717626762, 10000000.0] (999999972.82\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2732701188, 10000000.0] (999999972.67\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2693435777, 10000000.0] (999999973.07\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2766002631, 10000000.0] (999999972.34\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2750176539, 10000000.0] (999999972.50\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2740068262, 10000000.0] (999999972.60\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2732134359, 10000000.0] (999999972.68\%) & 2.94s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2699656241, 10000000.0] (999999973.0\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2667334417, 10000000.0] (999999973.33\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2679755656, 10000000.0] (999999973.20\%) & 2.07s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2647752821, 10000000.0] (999999973.52\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2757266931, 10000000.0] (999999972.43\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2752224226, 10000000.0] (999999972.48\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2675593250, 10000000.0] (999999973.24\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2666160019, 10000000.0] (999999973.34\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2695863188, 10000000.0] (999999973.04\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2671855539, 10000000.0] (999999973.28\%) & 2.87s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2796172458, 10000000.0] (999999972.04\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2793295810, 10000000.0] (999999972.07\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2719851566, 10000000.0] (999999972.80\%) & 2.08s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2716057298, 10000000.0] (999999972.84\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2764249410, 10000000.0] (999999972.36\%) & 2.08s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2764249301, 10000000.0] (999999972.36\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2711197722, 10000000.0] (999999972.89\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2705372654, 10000000.0] (999999972.95\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2737680428, 10000000.0] (999999972.62\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2685159036, 10000000.0] (999999973.15\%) & 2.85s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2749094363, 10000000.0] (999999972.51\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2748305236, 10000000.0] (999999972.52\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2727538409, 10000000.0] (999999972.72\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2695940237, 10000000.0] (999999973.04\%) & 2.71s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2705003180, 10000000.0] (999999972.95\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2704427139, 10000000.0] (999999972.96\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2691060707, 10000000.0] (999999973.09\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2665940787, 10000000.0] (999999973.34\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2696170269, 10000000.0] (999999973.04\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2667699981, 10000000.0] (999999973.32\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2688052384, 10000000.0] (999999973.12\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2653579596, 10000000.0] (999999973.46\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2680968450, 10000000.0] (999999973.19\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2668413440, 10000000.0] (999999973.32\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 None & None  & None & None & onlyobj (500000) & [0.2745411442, 10000000.0] (999999972.55\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 499941
 auto (151x151) & None  & None & None & onlyobj (500000) & [0.2745214291, 10000000.0] (999999972.55\%) & 2.90s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2452760820, 10000000.0] (999999975.47\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2434533850, 10000000.0] (999999975.65\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2456217319, 10000000.0] (999999975.44\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2431136018, 10000000.0] (999999975.69\%) & 2.85s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2489705542, 10000000.0] (999999975.10\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2472499798, 10000000.0] (999999975.28\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2474884283, 10000000.0] (999999975.25\%) & 2.08s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2447655347, 10000000.0] (999999975.52\%) & 2.90s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2457941082, 10000000.0] (999999975.42\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2449597052, 10000000.0] (999999975.50\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2452954028, 10000000.0] (999999975.47\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2430771902, 10000000.0] (999999975.69\%) & 2.73s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2499235817, 10000000.0] (999999975.01\%) & 2.0s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2497723546, 10000000.0] (999999975.02\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2456546128, 10000000.0] (999999975.43\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2453229907, 10000000.0] (999999975.47\%) & 2.71s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2441238636, 10000000.0] (999999975.59\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2415161034, 10000000.0] (999999975.85\%) & 2.88s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2496974285, 10000000.0] (999999975.03\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2492364386, 10000000.0] (999999975.08\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2407880586, 10000000.0] (999999975.92\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2407880904, 10000000.0] (999999975.92\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2479375714, 10000000.0] (999999975.21\%) & 2.12s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2469031955, 10000000.0] (999999975.31\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2462181785, 10000000.0] (999999975.38\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2449970160, 10000000.0] (999999975.50\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2481009801, 10000000.0] (999999975.19\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2477817659, 10000000.0] (999999975.22\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2446785984, 10000000.0] (999999975.53\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2438131654, 10000000.0] (999999975.62\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2442682637, 10000000.0] (999999975.57\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2425390413, 10000000.0] (999999975.75\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2474671799, 10000000.0] (999999975.25\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2468138338, 10000000.0] (999999975.32\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2451030823, 10000000.0] (999999975.49\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2436768133, 10000000.0] (999999975.63\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2505826113, 10000000.0] (999999974.94\%) & 2.08s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2496838081, 10000000.0] (999999975.03\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2459101417, 10000000.0] (999999975.41\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2454583031, 10000000.0] (999999975.45\%) & 2.85s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2459701922, 10000000.0] (999999975.40\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2428363364, 10000000.0] (999999975.72\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2423425376, 10000000.0] (999999975.77\%) & 2.10s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2420333159, 10000000.0] (999999975.80\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2464518796, 10000000.0] (999999975.35\%) & 2.11s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2464519273, 10000000.0] (999999975.35\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2452516146, 10000000.0] (999999975.47\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2431265783, 10000000.0] (999999975.69\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2413561010, 10000000.0] (999999975.86\%) & 2.09s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2404347137, 10000000.0] (999999975.96\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2472686407, 10000000.0] (999999975.27\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2472687963, 10000000.0] (999999975.27\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2450768540, 10000000.0] (999999975.49\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2431906850, 10000000.0] (999999975.68\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2461809767, 10000000.0] (999999975.38\%) & 2.07s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2453566692, 10000000.0] (999999975.46\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2450592826, 10000000.0] (999999975.49\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2446660630, 10000000.0] (999999975.53\%) & 2.71s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2494346918, 10000000.0] (999999975.06\%) & 2.09s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2463825629, 10000000.0] (999999975.36\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2490551009, 10000000.0] (999999975.09\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2478618634, 10000000.0] (999999975.21\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2428788711, 10000000.0] (999999975.71\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2428720005, 10000000.0] (999999975.71\%) & 2.69s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2472765229, 10000000.0] (999999975.27\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2452065662, 10000000.0] (999999975.48\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2459790155, 10000000.0] (999999975.40\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2401159416, 10000000.0] (999999975.99\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2463326930, 10000000.0] (999999975.37\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2456559393, 10000000.0] (999999975.43\%) & 2.87s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2443093888, 10000000.0] (999999975.57\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2433564887, 10000000.0] (999999975.66\%) & 2.86s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2452480712, 10000000.0] (999999975.48\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2438643468, 10000000.0] (999999975.61\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2463185643, 10000000.0] (999999975.37\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2453053858, 10000000.0] (999999975.47\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2491400872, 10000000.0] (999999975.09\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2466918045, 10000000.0] (999999975.33\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2431993856, 10000000.0] (999999975.68\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2417394116, 10000000.0] (999999975.83\%) & 2.87s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2454943693, 10000000.0] (999999975.45\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2433868807, 10000000.0] (999999975.66\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2451087996, 10000000.0] (999999975.49\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2429503457, 10000000.0] (999999975.70\%) & 3.03s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2457497864, 10000000.0] (999999975.43\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2457495611, 10000000.0] (999999975.43\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2453912764, 10000000.0] (999999975.46\%) & 2.08s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2436930376, 10000000.0] (999999975.63\%) & 2.73s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2505067092, 10000000.0] (999999974.95\%) & 2.01s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2471395794, 10000000.0] (999999975.29\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2443630665, 10000000.0] (999999975.56\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2442960694, 10000000.0] (999999975.57\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2442519923, 10000000.0] (999999975.57\%) & 2.07s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2435779866, 10000000.0] (999999975.64\%) & 2.70s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2400162794, 10000000.0] (999999976.0\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2368168079, 10000000.0] (999999976.32\%) & 2.92s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2487537201, 10000000.0] (999999975.12\%) & 2.09s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2479525961, 10000000.0] (999999975.20\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 None & None  & None & None & onlyobj (1000000) & [0.2495694616, 10000000.0] (999999975.04\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 999999
 auto (151x151) & None  & None & None & onlyobj (1000000) & [0.2486719731, 10000000.0] (999999975.13\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2085706280, 10000000.0] (999999979.14\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2074471492, 10000000.0] (999999979.26\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2063647363, 10000000.0] (999999979.36\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2059152164, 10000000.0] (999999979.41\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2068468919, 10000000.0] (999999979.32\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2066226052, 10000000.0] (999999979.34\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2084313061, 10000000.0] (999999979.16\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2073810521, 10000000.0] (999999979.26\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2083499677, 10000000.0] (999999979.17\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2078865361, 10000000.0] (999999979.21\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2089223243, 10000000.0] (999999979.11\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2078743508, 10000000.0] (999999979.21\%) & 2.88s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2091294554, 10000000.0] (999999979.09\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2088499634, 10000000.0] (999999979.12\%) & 2.73s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2081459127, 10000000.0] (999999979.19\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2079772592, 10000000.0] (999999979.20\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2071466434, 10000000.0] (999999979.29\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2064406508, 10000000.0] (999999979.36\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2082426211, 10000000.0] (999999979.18\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2082386394, 10000000.0] (999999979.18\%) & 2.71s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2069977461, 10000000.0] (999999979.30\%) & 2.07s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2069765357, 10000000.0] (999999979.30\%) & 2.73s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2077794707, 10000000.0] (999999979.22\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2057697425, 10000000.0] (999999979.42\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2084695961, 10000000.0] (999999979.15\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2075219519, 10000000.0] (999999979.25\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2095483543, 10000000.0] (999999979.05\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2092878616, 10000000.0] (999999979.07\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2078670863, 10000000.0] (999999979.21\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2074054653, 10000000.0] (999999979.26\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2067005604, 10000000.0] (999999979.33\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2054568358, 10000000.0] (999999979.45\%) & 2.71s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2085644614, 10000000.0] (999999979.14\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2085644718, 10000000.0] (999999979.14\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2064199051, 10000000.0] (999999979.36\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2064197908, 10000000.0] (999999979.36\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2064073826, 10000000.0] (999999979.36\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2063040653, 10000000.0] (999999979.37\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2071531155, 10000000.0] (999999979.28\%) & 2.01s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2071531219, 10000000.0] (999999979.28\%) & 3.13s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2077546169, 10000000.0] (999999979.22\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2069925248, 10000000.0] (999999979.30\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2060878962, 10000000.0] (999999979.39\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2059663662, 10000000.0] (999999979.40\%) & 3.0s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2080744880, 10000000.0] (999999979.19\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2075729380, 10000000.0] (999999979.24\%) & 2.73s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2086150635, 10000000.0] (999999979.14\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2084095923, 10000000.0] (999999979.16\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2056971474, 10000000.0] (999999979.43\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2054004218, 10000000.0] (999999979.46\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2080167530, 10000000.0] (999999979.20\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2075498163, 10000000.0] (999999979.25\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2065684470, 10000000.0] (999999979.34\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2062595592, 10000000.0] (999999979.37\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2073586232, 10000000.0] (999999979.26\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2063216138, 10000000.0] (999999979.37\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2064675046, 10000000.0] (999999979.35\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2061686439, 10000000.0] (999999979.38\%) & 2.70s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2066000145, 10000000.0] (999999979.34\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2060173941, 10000000.0] (999999979.40\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2088547461, 10000000.0] (999999979.11\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2082454265, 10000000.0] (999999979.18\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2081258510, 10000000.0] (999999979.19\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2079821124, 10000000.0] (999999979.20\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2080518034, 10000000.0] (999999979.19\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2077135329, 10000000.0] (999999979.23\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2093875282, 10000000.0] (999999979.06\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2081295259, 10000000.0] (999999979.19\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2085427761, 10000000.0] (999999979.15\%) & 2.07s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2084570949, 10000000.0] (999999979.15\%) & 2.85s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2063794670, 10000000.0] (999999979.36\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2063400687, 10000000.0] (999999979.37\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2071324551, 10000000.0] (999999979.29\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2070420798, 10000000.0] (999999979.30\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2094443648, 10000000.0] (999999979.06\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2088552970, 10000000.0] (999999979.11\%) & 2.71s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2079941821, 10000000.0] (999999979.20\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2069913955, 10000000.0] (999999979.30\%) & 2.72s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2055930143, 10000000.0] (999999979.44\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2052970459, 10000000.0] (999999979.47\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2047145241, 10000000.0] (999999979.53\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2041751784, 10000000.0] (999999979.58\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2066419214, 10000000.0] (999999979.34\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2065684256, 10000000.0] (999999979.34\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2062093095, 10000000.0] (999999979.38\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2061168632, 10000000.0] (999999979.39\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2079460628, 10000000.0] (999999979.21\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2070474668, 10000000.0] (999999979.30\%) & 2.89s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2064689827, 10000000.0] (999999979.35\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2062278625, 10000000.0] (999999979.38\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2061355297, 10000000.0] (999999979.39\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2055263389, 10000000.0] (999999979.45\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2075948369, 10000000.0] (999999979.24\%) & 2.01s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2073498398, 10000000.0] (999999979.27\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2055664819, 10000000.0] (999999979.44\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2047383742, 10000000.0] (999999979.53\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2065631434, 10000000.0] (999999979.34\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2047706598, 10000000.0] (999999979.52\%) & 2.68s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 None & None  & None & None & onlyobj (5000000) & [0.2074062644, 10000000.0] (999999979.26\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 4999995
 auto (151x151) & None  & None & None & onlyobj (5000000) & [0.2073329609, 10000000.0] (999999979.27\%) & 2.73s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1992329839, 10000000.0] (999999980.08\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1987792919, 10000000.0] (999999980.12\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1970464888, 10000000.0] (999999980.30\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1968239802, 10000000.0] (999999980.32\%) & 2.71s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1977307326, 10000000.0] (999999980.23\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1975502556, 10000000.0] (999999980.24\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1986341485, 10000000.0] (999999980.14\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1984714001, 10000000.0] (999999980.15\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1972814728, 10000000.0] (999999980.27\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1972814710, 10000000.0] (999999980.27\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1986564076, 10000000.0] (999999980.13\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1983540064, 10000000.0] (999999980.16\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1985956503, 10000000.0] (999999980.14\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1983726356, 10000000.0] (999999980.16\%) & 2.71s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1986235305, 10000000.0] (999999980.14\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1984866270, 10000000.0] (999999980.15\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1979608666, 10000000.0] (999999980.20\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1974701211, 10000000.0] (999999980.25\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1985420907, 10000000.0] (999999980.15\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1984655317, 10000000.0] (999999980.15\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1978569842, 10000000.0] (999999980.21\%) & 2.11s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1978568132, 10000000.0] (999999980.21\%) & 2.73s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1980271533, 10000000.0] (999999980.20\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1968661015, 10000000.0] (999999980.31\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1982734870, 10000000.0] (999999980.17\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1978913939, 10000000.0] (999999980.21\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1997115266, 10000000.0] (999999980.03\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1995905527, 10000000.0] (999999980.04\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1988844167, 10000000.0] (999999980.11\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1985612221, 10000000.0] (999999980.14\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1969698358, 10000000.0] (999999980.30\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1966148934, 10000000.0] (999999980.34\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1986371834, 10000000.0] (999999980.14\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1979859650, 10000000.0] (999999980.20\%) & 2.85s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1977089292, 10000000.0] (999999980.23\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1976942850, 10000000.0] (999999980.23\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1983099424, 10000000.0] (999999980.17\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1983098279, 10000000.0] (999999980.17\%) & 2.73s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1992608830, 10000000.0] (999999980.07\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1989054291, 10000000.0] (999999980.11\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1998678038, 10000000.0] (999999980.01\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1996490495, 10000000.0] (999999980.04\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1972452457, 10000000.0] (999999980.28\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1969239441, 10000000.0] (999999980.31\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1984614364, 10000000.0] (999999980.15\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1984614208, 10000000.0] (999999980.15\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1984236170, 10000000.0] (999999980.16\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1974856983, 10000000.0] (999999980.25\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1978686019, 10000000.0] (999999980.21\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1978685167, 10000000.0] (999999980.21\%) & 2.73s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1988126075, 10000000.0] (999999980.12\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1985686238, 10000000.0] (999999980.14\%) & 2.87s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1979503580, 10000000.0] (999999980.20\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1974704867, 10000000.0] (999999980.25\%) & 2.73s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1974204656, 10000000.0] (999999980.26\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1972413409, 10000000.0] (999999980.28\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1983319245, 10000000.0] (999999980.17\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1981950247, 10000000.0] (999999980.18\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1992059969, 10000000.0] (999999980.08\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1989316341, 10000000.0] (999999980.11\%) & 2.85s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1995225268, 10000000.0] (999999980.05\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1988427260, 10000000.0] (999999980.12\%) & 2.87s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1983584303, 10000000.0] (999999980.16\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1982372706, 10000000.0] (999999980.18\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1992515205, 10000000.0] (999999980.07\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1992347867, 10000000.0] (999999980.08\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1983736619, 10000000.0] (999999980.16\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1974692837, 10000000.0] (999999980.25\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1986723043, 10000000.0] (999999980.13\%) & 2.0s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1986722917, 10000000.0] (999999980.13\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1977546382, 10000000.0] (999999980.22\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1977498213, 10000000.0] (999999980.23\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1982269490, 10000000.0] (999999980.18\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1979109231, 10000000.0] (999999980.21\%) & 2.69s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1985451298, 10000000.0] (999999980.15\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1981214553, 10000000.0] (999999980.19\%) & 2.72s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1974138118, 10000000.0] (999999980.26\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1973509931, 10000000.0] (999999980.26\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1980407169, 10000000.0] (999999980.20\%) & 2.08s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1980406742, 10000000.0] (999999980.20\%) & 2.73s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1983112923, 10000000.0] (999999980.17\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1981687478, 10000000.0] (999999980.18\%) & 2.95s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1998805665, 10000000.0] (999999980.01\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1990130636, 10000000.0] (999999980.10\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1975928409, 10000000.0] (999999980.24\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1974427496, 10000000.0] (999999980.26\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1981337453, 10000000.0] (999999980.19\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1973739860, 10000000.0] (999999980.26\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1979157961, 10000000.0] (999999980.21\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1977497562, 10000000.0] (999999980.23\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1973804372, 10000000.0] (999999980.26\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1971686464, 10000000.0] (999999980.28\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1969391768, 10000000.0] (999999980.31\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1965173913, 10000000.0] (999999980.35\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1969642427, 10000000.0] (999999980.30\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1961674621, 10000000.0] (999999980.38\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1986734950, 10000000.0] (999999980.13\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1981282347, 10000000.0] (999999980.19\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 None & None  & None & None & onlyobj (10000000) & [0.1986322693, 10000000.0] (999999980.14\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 9999990
 auto (151x151) & None  & None & None & onlyobj (10000000) & [0.1986322916, 10000000.0] (999999980.14\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1858831670, 10000000.0] (999999981.41\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1856308524, 10000000.0] (999999981.44\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1848204619, 10000000.0] (999999981.52\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1848126704, 10000000.0] (999999981.52\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1853194890, 10000000.0] (999999981.47\%) & 2.09s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1852717377, 10000000.0] (999999981.47\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1855474779, 10000000.0] (999999981.45\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1854786613, 10000000.0] (999999981.45\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1853183088, 10000000.0] (999999981.47\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1853182295, 10000000.0] (999999981.47\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1860237383, 10000000.0] (999999981.40\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1860233111, 10000000.0] (999999981.40\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1851421007, 10000000.0] (999999981.49\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1851273132, 10000000.0] (999999981.49\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1857147286, 10000000.0] (999999981.43\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1856812731, 10000000.0] (999999981.43\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1854184855, 10000000.0] (999999981.46\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1853049999, 10000000.0] (999999981.47\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1853908438, 10000000.0] (999999981.46\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1853056832, 10000000.0] (999999981.47\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1848522856, 10000000.0] (999999981.51\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1848521976, 10000000.0] (999999981.51\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1855238709, 10000000.0] (999999981.45\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1849401121, 10000000.0] (999999981.51\%) & 2.73s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1858099315, 10000000.0] (999999981.42\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1856202603, 10000000.0] (999999981.44\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1857273473, 10000000.0] (999999981.43\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1857271911, 10000000.0] (999999981.43\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1857934511, 10000000.0] (999999981.42\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1856508874, 10000000.0] (999999981.43\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1850645586, 10000000.0] (999999981.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1848710584, 10000000.0] (999999981.51\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1855689320, 10000000.0] (999999981.44\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1852080724, 10000000.0] (999999981.48\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1850243652, 10000000.0] (999999981.50\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1848932212, 10000000.0] (999999981.51\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1851101824, 10000000.0] (999999981.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1851100426, 10000000.0] (999999981.49\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1859599413, 10000000.0] (999999981.40\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1858719658, 10000000.0] (999999981.41\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1857952347, 10000000.0] (999999981.42\%) & 2.01s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1857775840, 10000000.0] (999999981.42\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1855325931, 10000000.0] (999999981.45\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1852982457, 10000000.0] (999999981.47\%) & 2.86s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1850103698, 10000000.0] (999999981.50\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1847695734, 10000000.0] (999999981.52\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1856180795, 10000000.0] (999999981.44\%) & 2.01s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1851977231, 10000000.0] (999999981.48\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1855664134, 10000000.0] (999999981.44\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1855663608, 10000000.0] (999999981.44\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1858635330, 10000000.0] (999999981.41\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1857967005, 10000000.0] (999999981.42\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1850322328, 10000000.0] (999999981.50\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1849096547, 10000000.0] (999999981.51\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1855856189, 10000000.0] (999999981.44\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1852319750, 10000000.0] (999999981.48\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1853280808, 10000000.0] (999999981.47\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1853098482, 10000000.0] (999999981.47\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1862440974, 10000000.0] (999999981.38\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1858852500, 10000000.0] (999999981.41\%) & 2.85s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1851571331, 10000000.0] (999999981.48\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1851570424, 10000000.0] (999999981.48\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1858169470, 10000000.0] (999999981.42\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1858169483, 10000000.0] (999999981.42\%) & 2.72s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1853936581, 10000000.0] (999999981.46\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1853377765, 10000000.0] (999999981.47\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1858295068, 10000000.0] (999999981.42\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1852583873, 10000000.0] (999999981.47\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1858887393, 10000000.0] (999999981.41\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1856757016, 10000000.0] (999999981.43\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1852083393, 10000000.0] (999999981.48\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1852084486, 10000000.0] (999999981.48\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1854416577, 10000000.0] (999999981.46\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1854228983, 10000000.0] (999999981.46\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1852966508, 10000000.0] (999999981.47\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1852848404, 10000000.0] (999999981.47\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1851867561, 10000000.0] (999999981.48\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1848913907, 10000000.0] (999999981.51\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1852783006, 10000000.0] (999999981.47\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1849584995, 10000000.0] (999999981.50\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1858901664, 10000000.0] (999999981.41\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1856441248, 10000000.0] (999999981.44\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1862278282, 10000000.0] (999999981.38\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1858854179, 10000000.0] (999999981.41\%) & 2.72s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1856844770, 10000000.0] (999999981.43\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1856845033, 10000000.0] (999999981.43\%) & 2.89s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1850106694, 10000000.0] (999999981.50\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1849675955, 10000000.0] (999999981.50\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1854591038, 10000000.0] (999999981.45\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1854590331, 10000000.0] (999999981.45\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1850683043, 10000000.0] (999999981.49\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1847645873, 10000000.0] (999999981.52\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1853660684, 10000000.0] (999999981.46\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1851162666, 10000000.0] (999999981.49\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1851839277, 10000000.0] (999999981.48\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1843912906, 10000000.0] (999999981.56\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1847356327, 10000000.0] (999999981.53\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1847355553, 10000000.0] (999999981.53\%) & 2.78s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 None & None  & None & None & onlyobj (50000000) & [0.1855125133, 10000000.0] (999999981.45\%) & 2.07s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 49999950
 auto (151x151) & None  & None & None & onlyobj (50000000) & [0.1854249516, 10000000.0] (999999981.46\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1829982306, 10000000.0] (999999981.70\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1828687525, 10000000.0] (999999981.71\%) & 2.88s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1822841660, 10000000.0] (999999981.77\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1821872259, 10000000.0] (999999981.78\%) & 3.04s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1824704016, 10000000.0] (999999981.75\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1824703841, 10000000.0] (999999981.75\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1821196208, 10000000.0] (999999981.79\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1821196083, 10000000.0] (999999981.79\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1822098617, 10000000.0] (999999981.78\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1821677253, 10000000.0] (999999981.78\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1825550394, 10000000.0] (999999981.74\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1824613697, 10000000.0] (999999981.75\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1819223180, 10000000.0] (999999981.81\%) & 2.01s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1819113820, 10000000.0] (999999981.81\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1826236785, 10000000.0] (999999981.74\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1824848532, 10000000.0] (999999981.75\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1825394174, 10000000.0] (999999981.75\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1823213270, 10000000.0] (999999981.77\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1824907392, 10000000.0] (999999981.75\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1824907051, 10000000.0] (999999981.75\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1826018068, 10000000.0] (999999981.74\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1826016841, 10000000.0] (999999981.74\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1822492418, 10000000.0] (999999981.78\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1820622352, 10000000.0] (999999981.79\%) & 2.73s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1821663131, 10000000.0] (999999981.78\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1821663129, 10000000.0] (999999981.78\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1828320461, 10000000.0] (999999981.72\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1827385396, 10000000.0] (999999981.73\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1822814276, 10000000.0] (999999981.77\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1822813599, 10000000.0] (999999981.77\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1817555888, 10000000.0] (999999981.82\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1816801769, 10000000.0] (999999981.83\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1825479453, 10000000.0] (999999981.75\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1825086760, 10000000.0] (999999981.75\%) & 2.71s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1820849168, 10000000.0] (999999981.79\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1820755444, 10000000.0] (999999981.79\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1827410944, 10000000.0] (999999981.73\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1827405353, 10000000.0] (999999981.73\%) & 2.72s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1824619883, 10000000.0] (999999981.75\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1823908442, 10000000.0] (999999981.76\%) & 2.89s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1827793124, 10000000.0] (999999981.72\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1826155434, 10000000.0] (999999981.74\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1821555222, 10000000.0] (999999981.78\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1820662347, 10000000.0] (999999981.79\%) & 2.91s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1822105885, 10000000.0] (999999981.78\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1820310591, 10000000.0] (999999981.80\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1827373146, 10000000.0] (999999981.73\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1825161729, 10000000.0] (999999981.75\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1822484441, 10000000.0] (999999981.78\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1818440098, 10000000.0] (999999981.82\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1825997361, 10000000.0] (999999981.74\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1825996325, 10000000.0] (999999981.74\%) & 2.75s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1820220204, 10000000.0] (999999981.80\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1818969178, 10000000.0] (999999981.81\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1824386060, 10000000.0] (999999981.76\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1823526126, 10000000.0] (999999981.76\%) & 2.85s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1827269630, 10000000.0] (999999981.73\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1826552977, 10000000.0] (999999981.73\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1827459230, 10000000.0] (999999981.73\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1826703201, 10000000.0] (999999981.73\%) & 2.76s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1822265340, 10000000.0] (999999981.78\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1821205893, 10000000.0] (999999981.79\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1825012090, 10000000.0] (999999981.75\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1824436278, 10000000.0] (999999981.76\%) & 2.85s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1824977748, 10000000.0] (999999981.75\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1824974913, 10000000.0] (999999981.75\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1821994964, 10000000.0] (999999981.78\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1819801117, 10000000.0] (999999981.80\%) & 3.02s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1826735031, 10000000.0] (999999981.73\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1826733554, 10000000.0] (999999981.73\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1822438113, 10000000.0] (999999981.78\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1822413148, 10000000.0] (999999981.78\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1821799822, 10000000.0] (999999981.78\%) & 2.01s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1821135402, 10000000.0] (999999981.79\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1824828475, 10000000.0] (999999981.75\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1823087288, 10000000.0] (999999981.77\%) & 2.77s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1819983419, 10000000.0] (999999981.80\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1819983243, 10000000.0] (999999981.80\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1823684233, 10000000.0] (999999981.76\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1823528579, 10000000.0] (999999981.76\%) & 2.74s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1828028933, 10000000.0] (999999981.72\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1824098803, 10000000.0] (999999981.76\%) & 2.81s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1825478882, 10000000.0] (999999981.75\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1824751057, 10000000.0] (999999981.75\%) & 2.82s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1824924094, 10000000.0] (999999981.75\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1824836023, 10000000.0] (999999981.75\%) & 3.0s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1826687644, 10000000.0] (999999981.73\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1826117572, 10000000.0] (999999981.74\%) & 2.80s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1828769187, 10000000.0] (999999981.71\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1827187889, 10000000.0] (999999981.73\%) & 2.90s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1829860704, 10000000.0] (999999981.70\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1827975418, 10000000.0] (999999981.72\%) & 2.83s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1824185732, 10000000.0] (999999981.76\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1824184455, 10000000.0] (999999981.76\%) & 2.79s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1819128413, 10000000.0] (999999981.81\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1814972490, 10000000.0] (999999981.85\%) & 2.84s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1824252144, 10000000.0] (999999981.76\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1824250633, 10000000.0] (999999981.76\%) & 2.85s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 None & None  & None & None & onlyobj (100000000) & [0.1824986054, 10000000.0] (999999981.75\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 99999945
 auto (151x151) & None  & None & None & onlyobj (100000000) & [0.1824976834, 10000000.0] (999999981.75\%) & 2.92s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.37s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.37s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.38s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.38s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.35s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.38s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.37s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.36s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.36s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.36s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.38s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.36s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.35s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.35s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.36s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.05s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.37s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.36s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.35s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.37s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.36s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.37s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.36s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.36s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.38s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.06s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.37s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.37s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.35s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.36s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.35s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.38s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.37s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.36s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.37s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.02s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.36s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.37s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.36s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.36s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.37s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.36s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.03s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.39s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.37s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.38s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.38s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.01s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.36s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.37s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.35s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.38s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.38s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.37s & sdp+onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 None & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.04s & onlyobj, 99.7% \\ \hline
-Total measurements are scaling: 45
 auto (151x151) & None  & None & None & onlyobj (-1) & [0.1750941030, 10000000.0] (999999982.49\%) & 2.37s & sdp+onlyobj, 99.7% \\ \hline
+auto (151x151) & None  & None & None & [0.8750000000, 10000000.0] (999999912.50\%) & 0.43s & sdp \\ \hline
