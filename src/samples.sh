@@ -9,10 +9,10 @@ filename="data/2d_3x3.dat"
 filenameEnergy="data/2d_3x3_H.dat"
 
 # Pre-compute both the steady state and the ground state
+> data/precomputes.log
+./run --2dtfi ${systemSize} --precompute ${filename} | tee -a data/precomputes.log
+./run --2dtfi ${systemSize} --precompute ${filenameEnergy} -H | tee -a data/precomputes.log
 #> data/measure.dat
-#> data/precomputes.log
-#./run --2dtfi ${systemSize} --precompute ${filename} | tee -a data/precomputes.log
-#./run --2dtfi ${systemSize} --precompute ${filenameEnergy} -H | tee -a data/precomputes.log
 
 # Heat current without something vs number of measurements
 #echo "file & heat" | tee -a data/measure.dat
@@ -71,7 +71,7 @@ filenameEnergy="data/2d_3x3_H.dat"
 
 # Renyi-1 entropy vs number of measurements
 #echo "file & renyi1" | tee -a data/measure.dat
-./run -B -N "sdp" -s M --2dtfi ${systemSize} -A ${A} -H --objRenyi1 1 2 3 | tee -a data/measure.dat
+#./run -B -N "sdp" -s M --2dtfi ${systemSize} -A ${A} -H --objRenyi1 1 2 3 | tee -a data/measure.dat
 #for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
 #do
     #for ind in $(seq 1 $numRepeats)

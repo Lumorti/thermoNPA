@@ -146,6 +146,7 @@ int main(int argc, char* argv[]) {
 
     // Define the scenario
     std::string note = "";
+    int numCores = -1;
     bool allTimeInMillis = false;
     bool usingHeatCurrent = false;
     bool benchmark = false;
@@ -226,9 +227,6 @@ int main(int argc, char* argv[]) {
 
     // Set the precision
     std::cout << std::setprecision(precision);
-
-    // The max physical cores
-    int numCores = omp_get_max_threads();
 
     // Process command-line args
     for (int i=1; i<argc; i++) {
@@ -2209,6 +2207,14 @@ int main(int argc, char* argv[]) {
             std::cout << "Unknown argument: " << argAsString << std::endl;
             return 1;
 
+        }
+    }
+
+    // The max physical cores
+    if (numCores == -1) { 
+        numCores = omp_get_max_threads();
+        if (verbosity > 0) {
+            std::cout << "Using up to " << numCores << " threads" << std::endl;
         }
     }
 
@@ -4590,8 +4596,31 @@ int main(int argc, char* argv[]) {
         std::swap(lowerBound, upperBound);
     } else if (specialObjective == "renyi1") {
         lowerBound = 1 - lowerBound / std::pow(2, subsystemInds.size());
+        upperBound = 0.0;
+        for (const auto& val : results) {
+            bool containsOnlySubsystem = true;
+            for (auto [letter, index] : val.first) {
+                if (subsystemInds.count(index) == 0) {
+                    containsOnlySubsystem = false;
+                    break;
+                }
+            }
+            if (containsOnlySubsystem && !val.first.contains('T')) {
+                upperBound += std::norm(val.second);
+            }
+        }
+        upperBound /= std::pow(2, subsystemInds.size());
+        upperBound = 1 - upperBound;
     } else if (specialObjective == "renyi2") {
         lowerBound = 1 - lowerBound / std::pow(2, numQubits);
+        upperBound = 0.0;
+        for (const auto& val : results) {
+            if (!val.first.contains('T')) {
+                upperBound += std::pow(std::norm(val.second), 2);
+            }
+        }
+        upperBound /= std::pow(2, numQubits);
+        upperBound = 1 - upperBound;
     }
     double diff = std::abs(upperBound - lowerBound);
     double error = (diff / std::abs(trivialMax - trivialMin)) * 100;
@@ -4878,7 +4907,9 @@ int main(int argc, char* argv[]) {
             double renyi1 = 1;
             for (auto& [monom, value] : subsystemResults) {
                 renyi1 += std::norm(value);
-                std::cout << "Adding " << monom << " with value " << value << " to Renyi-1 calculation" << std::endl;
+                if (verbosity >= 2) {
+                    std::cout << "Adding " << monom << " with value " << value << " to Renyi-1 calculation" << std::endl;
+                }
             }
             std::cout << "Sum of squares for Renyi-1: " << renyi1 << std::endl;
             renyi1 = 1 - renyi1 / std::pow(2, subsystemInds.size());
