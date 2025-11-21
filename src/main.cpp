@@ -154,6 +154,9 @@ int main(int argc, char* argv[]) {
     bool symSample = false;
     bool useKnown = false;
     bool allSymmetries = false;
+    bool useEnergyShell = false;
+    double energyShellEnergy = 0.0;
+    double energyShellEpsilon = 0.0;
     bool variableSampling = true;
     std::vector<Poly> zeroConsForSampling;
     std::string stateFile = "state.dat";
@@ -283,8 +286,8 @@ int main(int argc, char* argv[]) {
             solver = "mosek";
             
         // Renyi entropy 1 TODO
-        } else if (argAsString == "--objRenyi1") {
-            specialObjective = "renyi1";
+        } else if (argAsString == "--objLocalPurity") {
+            specialObjective = "localpurity";
             solver = "mosek";
             subsystemInds.clear();
             for (int j = i + 1; j < argc; j++) {
@@ -2058,6 +2061,7 @@ int main(int argc, char* argv[]) {
 
         // If considering as a H min problem
         } else if (argAsString == "-H") {
+            findMinimal = false;
             groundStateProblem = true;
 
         // If sampling from the symmetries
@@ -2067,6 +2071,13 @@ int main(int argc, char* argv[]) {
         // If sampling using the known ground-state
         } else if (argAsString == "--known") {
             useKnown = true;
+
+        // If using an energy shell
+        } else if (argAsString == "--shell") {
+            useEnergyShell = true;
+            energyShellEnergy = std::stod(argv[i+1]);
+            energyShellEpsilon = std::stod(argv[i+2]);
+            i+=2;
 
         // Output the help
         } else if (argAsString == "-h" || argAsString == "--help") {
@@ -2117,6 +2128,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  -A <int>            Generate a moment matrix from the most common moments" << std::endl;
             std::cout << "  -F <int>            Generate a moment matrix from the first occuring moments" << std::endl;
             std::cout << "  -r <int>            Insist that the reconstructed density matrix be positive" << std::endl;
+            std::cout << "  --shell <dbl> <dbl> Add an energy shell constraint with a given epsilon" << std::endl;
             std::cout << "  -R                  Try removing random constraints" << std::endl;
             std::cout << "  -y <ints>           Add a symetry between two groups e.g. -y 1,2 3,4" << std::endl;
             std::cout << "  -Y                  Use all known symmetries (use before the Lindbladian flag)" << std::endl;
@@ -2219,7 +2231,7 @@ int main(int argc, char* argv[]) {
     }
 
     // If it's a special problem, use a generic objective for now
-    if (specialObjective == "renyi1") {
+    if (specialObjective == "localpurity") {
         objective = Poly();
         int subsystemSize = subsystemInds.size();
         for (int ind : subsystemInds) {
@@ -2241,7 +2253,6 @@ int main(int argc, char* argv[]) {
         if (specialObjective == "") {
             specialObjective = "energy";
         }
-        findMinimal = false;
 
         // Get the Hamiltonian
         Poly H = Poly();
@@ -2802,6 +2813,26 @@ int main(int argc, char* argv[]) {
 
         }
 
+    }
+
+    // Add energy shell constraints TODO
+    if (useEnergyShell) {
+        Poly H = Poly();
+        for (int i=0; i<numQubits; i++) {
+            for (int j=i; j<numQubits; j++) {
+                H += hamiltonianInter[i][j];
+            }
+        }
+        H.reduce();
+        double upperEnergy = energyShellEnergy + energyShellEpsilon;
+        double lowerEnergy = energyShellEnergy - energyShellEpsilon;
+        constraintsPositive.push_back(H - Poly(lowerEnergy));
+        constraintsPositive.push_back(Poly(upperEnergy) - H);
+        if (verbosity >= 2) {
+            std::cout << "Adding energy shell constraints:" << std::endl;
+            std::cout << constraintsPositive[constraintsPositive.size()-1] << std::endl;
+            std::cout << constraintsPositive[constraintsPositive.size()-2] << std::endl;
+        }
     }
 
     // Generate the moment matrix from the monomsUsed
@@ -3670,7 +3701,7 @@ int main(int argc, char* argv[]) {
                     if (!(iss >> row >> col >> real >> imag)) {break;}
                     groundTruth.insert(row, col) = std::complex<double>(real, imag);
                 }
-                if (specialObjective == "purity" || specialObjective == "renyi1" || specialObjective == "renyi2") {
+                if (specialObjective == "purity" || specialObjective == "localpurity" || specialObjective == "renyi2") {
                     double purity = 0;
                     for (int k=0; k<matSize; k++) {
                         for (int l=0; l<matSize; l++) {
@@ -3748,6 +3779,12 @@ int main(int argc, char* argv[]) {
                             bestInd = i;
                         }
                     }
+                    std::complex<double> smallestEigenvalue2 = 100000;
+                    for (int i = 0; i < eigenValues.size(); i++) {
+                        if (i != bestInd && eigenValues[i].real() < smallestEigenvalue2.real()) {
+                            smallestEigenvalue2 = eigenValues[i];
+                        }
+                    }
                     Eigen::VectorXcd groundTruthVec = eigenVectors.col(bestInd);
                     groundTruth = Eigen::SparseMatrix<std::complex<double>>(matSize, matSize);
                     for (int i = 0; i < matSize; i++) {
@@ -3758,6 +3795,7 @@ int main(int argc, char* argv[]) {
                     groundTruth.makeCompressed();
                     if (verbosity >= 1) {
                         std::cout << "Smallest eigenvalue: " << smallestEigenvalue << std::endl;
+                        std::cout << "Second smallest eigenvalue: " << smallestEigenvalue2 << std::endl;
                     }
                     if (verbosity >= 3) {
                         std::cout << "Ground truth matrix:" << std::endl;
@@ -4084,7 +4122,7 @@ int main(int argc, char* argv[]) {
 
             // Just sample from the objective TODO
             } else if (sampleChoice == "onlyobj") {
-                if (specialObjective == "renyi1") {
+                if (specialObjective == "localpurity") {
                     int subsystemSize = subsystemInds.size();
                     std::vector<Mon> subsystemVars = {};
                     for (int ind : subsystemInds) {
@@ -4403,7 +4441,7 @@ int main(int argc, char* argv[]) {
     }
 
     // If using Renyi-1 as the objective TODO
-    if (specialObjective == "renyi1") {
+    if (specialObjective == "localpurity") {
 
         // Add all the Pauli strings in variableSet
         std::vector<Mon> quadCone;
@@ -4551,7 +4589,7 @@ int main(int argc, char* argv[]) {
             }
         }
     }
-    if (specialObjective == "purity" || specialObjective == "renyi1" || specialObjective == "renyi2") {
+    if (specialObjective == "purity" || specialObjective == "localpurity" || specialObjective == "renyi2") {
         trivialMin = 0.0;
         trivialMax = 1.0;
     }
@@ -4594,8 +4632,8 @@ int main(int argc, char* argv[]) {
             std::cout << "T = " << results[Mon("<T1>")] << std::endl;
         }
         std::swap(lowerBound, upperBound);
-    } else if (specialObjective == "renyi1") {
-        lowerBound = 1 - lowerBound / std::pow(2, subsystemInds.size());
+    } else if (specialObjective == "localpurity") {
+        lowerBound = lowerBound / std::pow(2, subsystemInds.size());
         upperBound = 0.0;
         for (const auto& val : results) {
             bool containsOnlySubsystem = true;
@@ -4610,7 +4648,6 @@ int main(int argc, char* argv[]) {
             }
         }
         upperBound /= std::pow(2, subsystemInds.size());
-        upperBound = 1 - upperBound;
     } else if (specialObjective == "renyi2") {
         lowerBound = 1 - lowerBound / std::pow(2, numQubits);
         upperBound = 0.0;
@@ -4911,8 +4948,8 @@ int main(int argc, char* argv[]) {
                     std::cout << "Adding " << monom << " with value " << value << " to Renyi-1 calculation" << std::endl;
                 }
             }
-            std::cout << "Sum of squares for Renyi-1: " << renyi1 << std::endl;
-            renyi1 = 1 - renyi1 / std::pow(2, subsystemInds.size());
+            std::cout << "Sum of squares for local purity: " << renyi1 << std::endl;
+            renyi1 = renyi1 / std::pow(2, subsystemInds.size());
             if (verbosity >= 1) {
                 std::string subsysStr = "{";
                 for (auto ind : subsystemInds) {
@@ -4920,7 +4957,7 @@ int main(int argc, char* argv[]) {
                 }
                 subsysStr.pop_back();
                 subsysStr += "}";
-                std::cout << "Renyi-1 entropy (subsystem " << subsysStr << "): " << renyi1 << std::endl;
+                std::cout << "Local purity (subsystem " << subsysStr << "): " << renyi1 << std::endl;
             }
 
         }

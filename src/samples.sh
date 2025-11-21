@@ -4,9 +4,11 @@
 systemSize="3 3"
 A=150
 M=2000
+r=4
 numRepeats=50
 filename="data/2d_3x3.dat"
 filenameEnergy="data/2d_3x3_H.dat"
+shellCon=" --shell -9.897068167 0.09897068167 "
 
 # Pre-compute both the steady state and the ground state
 > data/precomputes.log
@@ -33,21 +35,21 @@ filenameEnergy="data/2d_3x3_H.dat"
 #done
 
 # Purity versus number of measurements
-#echo "file & purity" | tee -a data/measure.dat
-#./run -B -N "sdp" -s M --2dtfi ${systemSize} -A ${A} --objPurity | tee -a data/measure.dat
-#for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
-#do
-    #for ind in $(seq 1 $numRepeats)
-    #do
+echo "file & purity" | tee -a data/measure.dat
+./run -B -N "sdp" -s M --2dtfi ${systemSize} -r ${r} --objPurity ${shellCon} | tee -a data/measure.dat
+for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
+do
+    for ind in $(seq 1 $numRepeats)
+    do
 
-        ## Only level 2 shots
-        #./run -B -N "first100, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} --millis -S ${ind} --objPurity --shots ${shots} --all 2 | tee -a data/measure.dat
+        # Only level 1 shots
+        ./run -B -N "all1, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} --millis -S ${ind} --objPurity --shots ${shots} --all 1 ${shellCon} | tee -a data/measure.dat
 
-        ## SDP plus level 2 shots
-        #./run -B -N "sdp+first100, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} --millis -S ${ind} -A ${A} --objPurity --shots ${shots} --all 2 | tee -a data/measure.dat
+        # SDP plus level 1 shots
+        ./run -B -N "sdp+all1, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} --millis -S ${ind} -r ${r} --objPurity --shots ${shots} --all 1 ${shellCon} | tee -a data/measure.dat
 
-    #done
-#done
+    done
+done
 
 # Ground state energy vs number of measurements
 #echo "file & energy" | tee -a data/measure.dat
@@ -69,22 +71,22 @@ filenameEnergy="data/2d_3x3_H.dat"
     #done
 #done
 
-# Renyi-1 entropy vs number of measurements
-#echo "file & renyi1" | tee -a data/measure.dat
-#./run -B -N "sdp" -s M --2dtfi ${systemSize} -A ${A} -H --objRenyi1 1 2 3 | tee -a data/measure.dat
-#for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
-#do
-    #for ind in $(seq 1 $numRepeats)
-    #do
+# Local purity vs number of measurements
+echo "file & localpurity" | tee -a data/measure.dat
+./run -B -N "sdp" -s M --2dtfi ${systemSize} -r ${r} -H --objLocalPurity 1 2 3 ${shellCon} | tee -a data/measure.dat
+for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
+do
+    for ind in $(seq 1 $numRepeats)
+    do
 
-        ## Just measure the objective
-        #./run -B -N "onlyobj, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S ${ind} -H --objRenyi1 1 2 3 --shots ${shots} --onlyobj | tee -a data/measure.dat
+        # Just measure the objective
+        ./run -B -N "onlyobj, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S ${ind} -H --objLocalPurity 1 2 3 --shots ${shots} --onlyobj ${shellCon} | tee -a data/measure.dat
 
-        ## SDP plus measure the objective
-        #./run -B -N "sdp+onlyobj, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S ${ind} -A ${A} -H --objRenyi1 1 2 3 --shots ${shots} --onlyobj | tee -a data/measure.dat
+        # SDP plus measure the objective
+        ./run -B -N "sdp+onlyobj, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S ${ind} -r ${r} -H --objLocalPurity 1 2 3 --shots ${shots} --onlyobj ${shellCon} | tee -a data/measure.dat
 
-    #done
-#done
+    done
+done
 
 # File showing the different confidence levels
 #echo "file & confidence" | tee -a data/measure.dat
@@ -119,9 +121,9 @@ filenameEnergy="data/2d_3x3_H.dat"
 #done
 
 # Automatically commit once done
-#git add .
-#git commit -m "automatic data commit"
-#git push
+git add .
+git commit -m "automatic data commit"
+git push
 
 
 
