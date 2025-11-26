@@ -11,9 +11,9 @@ filenameEnergy="data/2d_3x3_H.dat"
 shellCon=" --shell -9.897068167 0.09897068167 "
 
 # Pre-compute both the steady state and the ground state
-> data/precomputes.log
-./run --2dtfi ${systemSize} --precompute ${filename} | tee -a data/precomputes.log
-./run --2dtfi ${systemSize} --precompute ${filenameEnergy} -H | tee -a data/precomputes.log
+#> data/precomputes.log
+#./run --2dtfi ${systemSize} --precompute ${filename} | tee -a data/precomputes.log
+#./run --2dtfi ${systemSize} --precompute ${filenameEnergy} -H | tee -a data/precomputes.log
 #> data/measure.dat
 
 # Heat current without something vs number of measurements
@@ -43,10 +43,10 @@ do
     do
 
         # Only level 1 shots
-        ./run -B -N "all1, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} --millis -S ${ind} --objPurity --shots ${shots} --all 1 ${shellCon} | tee -a data/measure.dat
+        ./run -B -N "all2, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} --millis -S ${ind} --objPurity --shots ${shots} --all 2 ${shellCon} | tee -a data/measure.dat
 
         # SDP plus level 1 shots
-        ./run -B -N "sdp+all1, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} --millis -S ${ind} -r ${r} --objPurity --shots ${shots} --all 1 ${shellCon} | tee -a data/measure.dat
+        ./run -B -N "sdp+all2, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} --millis -S ${ind} -r ${r} --objPurity --shots ${shots} --all 2 ${shellCon} | tee -a data/measure.dat
 
     done
 done

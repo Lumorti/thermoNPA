@@ -137,8 +137,8 @@ for identifier in pointsDict:
         point["sdLowerVal"] = 0
         point["sdUpperVal"] = 0
     else:
-        point["sdLowerVal"] = math.sqrt((point["diffLowerValSumSquared"] / count) - (point["diffLowerVal"] ** 2))
-        point["sdUpperVal"] = math.sqrt((point["diffUpperValSumSquared"] / count) - (point["diffUpperVal"] ** 2))
+        point["sdLowerVal"] = math.sqrt(abs((point["diffLowerValSumSquared"] / count) - (point["diffLowerVal"] ** 2)))
+        point["sdUpperVal"] = math.sqrt(abs((point["diffUpperValSumSquared"] / count) - (point["diffUpperVal"] ** 2)))
     print(identifier, count, point["diffLowerVal"], point["sdLowerVal"], point["diffUpperVal"], point["sdUpperVal"])
     points.append(point)
 
@@ -186,12 +186,12 @@ allowed = {
         # "onlyobj, 99.7%",
         # "sdp+onlyobj, 99.7%",
     # ], 
-    # "purity": [
-        # "sdp",
-        # "all2, 99.7%",
-        # "sdp+all2, 99.7%",
-    # ], 
-    "renyi1": [
+    "purity": [
+        "sdp",
+        "all1, 99.7%",
+        "sdp+all1, 99.7%",
+    ], 
+    "localpurity": [
         "sdp",
         "onlyobj, 99.7%",
         "sdp+onlyobj, 99.7%",
@@ -223,6 +223,8 @@ for filename in filenames:
     plt.xlabel("Number of Shots")
     if filename == "purity" or filename == "confidence":
         plt.ylabel("Purity Lower Bound")
+    elif filename == "localpurity":
+        plt.ylabel("Local Purity Lower Bound")
     elif "renyi1" in filename:
         plt.ylabel("Renyi Entropy Upper Bound")
     elif "mag" in filename:
