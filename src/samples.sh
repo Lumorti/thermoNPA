@@ -120,6 +120,32 @@ do
     done
 done
 
+# Ground state energy for the J1-J2 chain
+echo "file & large2" | tee -a data/measure.dat
+systemSize2="50"
+J2="0.35"
+chiMPS=128
+A=200
+filenameMPS="data/j1j2_${systemSize2}_${J2}.mps"
+
+# Pre-compute the ground state with DMRG
+python3 src/dmrg.py -n ${systemSize2} --j2 ${J2} --chi ${chiMPS} -o ${filenameMPS} | tee -a data/precomputes.log
+
+./run -B -N "sdp" -s M --j1j2 ${systemSize2} ${J2} -A ${A} -H | tee -a data/measure.dat
+for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
+do
+    for ind in $(seq 1 $numRepeats)
+    do
+
+        # Only the objective
+        ./run -B -S ${ind} -N "onlyobj, 99.7%" -p 99.7 -s M --j1j2 ${systemSize2} ${J2} --mps ${filenameMPS} -H --shots ${shots} --onlyobj | tee -a data/measure.dat
+
+        # SDP plus only the objective
+        ./run -B -S ${ind} -N "sdp+onlyobj, 99.7%" -p 99.7 -s M --j1j2 ${systemSize2} ${J2} --mps ${filenameMPS} -A ${A} -H --shots ${shots} --onlyobj | tee -a data/measure.dat
+
+    done
+done
+
 # Automatically commit once done
 git add .
 git commit -m "automatic data commit"
