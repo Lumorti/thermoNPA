@@ -8,3 +8,5 @@ callgrind*
 temp*
 data/monoms_*
 tensor/*
+data/*.mps
+src/__pycache__/

@@ -9,6 +9,7 @@
 #include <map>
 #include <fstream>
 #include <random>
+#include <cctype>
 
 // Import OpenMP
 #include <omp.h>
@@ -20,6 +21,9 @@
 
 // PolyNC
 #include "../../PolyNC/src/polync.h"
+
+// MPS ground truth for large systems
+#include "mps.h"
  
 // Pauli definitions
 Eigen::SparseMatrix<std::complex<double>> pauliI(2,2);
@@ -153,6 +157,8 @@ int main(int argc, char* argv[]) {
     bool checkObj = false;
     bool symSample = false;
     bool useKnown = false;
+    bool useMPS = false;
+    std::string mpsFile = "";
     bool allSymmetries = false;
     bool useEnergyShell = false;
     double energyShellEnergy = 0.0;
@@ -669,6 +675,64 @@ int main(int argc, char* argv[]) {
             lindbladian.cycleToAndRemove('R', 1);
             lindbladian += lindbladianHot;
             lindbladian += lindbladianCold;
+            lindbladian.convertToPaulis();
+            lindbladian.reduce();
+
+        // J1-J2 Heisenberg chain, open boundaries
+        } else if (argAsString == "--j1j2") {
+            modelName = argAsString;
+
+            // Defining quantities
+            double J1 = 1.0;
+            double J2 = 0.5;
+
+            // We should be given the number of qubits, and optionally J2
+            numQubits = std::stoi(argv[i+1]);
+            i++;
+            if (i+1 < argc && (argv[i+1][0] != '-' || std::isdigit(argv[i+1][1]))) {
+                J2 = std::stod(argv[i+1]);
+                i++;
+            }
+
+            // Nearest and next-nearest neighbour Heisenberg terms
+            hamiltonianInter = std::vector<std::vector<Poly>>(numQubits, std::vector<Poly>(numQubits, Poly()));
+            for (int offset=1; offset<=2; offset++) {
+                double coupling = (offset == 1) ? J1 : J2;
+                if (coupling == 0.0) {
+                    continue;
+                }
+                for (int ind1=0; ind1+offset<numQubits; ind1++) {
+                    int ind2 = ind1 + offset;
+                    hamiltonianInter[ind1][ind2] += Poly(coupling/4.0, "<X" + std::to_string(ind1+1) + "X" + std::to_string(ind2+1) + ">")
+                                                 + Poly(coupling/4.0, "<Y" + std::to_string(ind1+1) + "Y" + std::to_string(ind2+1) + ">")
+                                                 + Poly(coupling/4.0, "<Z" + std::to_string(ind1+1) + "Z" + std::to_string(ind2+1) + ">");
+                    hamiltonianInter[ind2][ind1] = hamiltonianInter[ind1][ind2];
+                }
+            }
+
+            // Full Hamiltonian
+            Poly H = Poly();
+            for (int i=0; i<numQubits; i++) {
+                for (int j=i; j<numQubits; j++) {
+                    H += hamiltonianInter[i][j];
+                }
+            }
+            H.reduce();
+
+            // This is an energy only model
+            objective = H / double(numQubits);
+            specialObjective = "energy";
+            groundStateProblem = true;
+
+            // No baths
+            lindbladianHot = Poly();
+            lindbladianCold = Poly();
+
+            // Lindbladian = -i[H, rho]
+            Poly rho("<R1>");
+            lindbladian = -imag*H.commutator(rho);
+            lindbladian = Poly("<A0>") * lindbladian;
+            lindbladian.cycleToAndRemove('R', 1);
             lindbladian.convertToPaulis();
             lindbladian.reduce();
 
@@ -2072,6 +2136,16 @@ int main(int argc, char* argv[]) {
         } else if (argAsString == "--known") {
             useKnown = true;
 
+        // If sampling from a precomputed MPS, rather than a full density matrix
+        } else if (argAsString == "--mps") {
+            if (i+1 >= argc || argv[i+1][0] == '-') {
+                std::cerr << "Error - --mps requires a filename" << std::endl;
+                return 1;
+            }
+            mpsFile = std::string(argv[i+1]);
+            i++;
+            useMPS = true;
+
         // If using an energy shell
         } else if (argAsString == "--shell") {
             useEnergyShell = true;
@@ -2099,6 +2173,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  --millis            Output all times in milliseconds (i.e. don't auto convert)" << std::endl;
             std::cout << "  --precompute  <str> Solve the system exactly, saving the state to a file" << std::endl;
             std::cout << "  --precomputed <str> Load the known optimum state from a file" << std::endl;
+            std::cout << "  --mps <str>         Load the ground truth as an MPS (see src/dmrg.py)" << std::endl;
             std::cout << "Sampling options:" << std::endl;
             std::cout << "  --samples <int>     Solve exactly, take this many samples per Pauli string" << std::endl;
             std::cout << "  --shots   <int>     Same as above, but limit the total number of measurements" << std::endl;
@@ -2162,6 +2237,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  --2dtfi <int> <int>" << std::endl;
             std::cout << "  --2dtfiperiodic <int> <int>" << std::endl;
             std::cout << "  --mg <int>" << std::endl;
+            std::cout << "  --j1j2 <int> [dbl]  (n.b. num spins then J2, J1 = 1, J2 = 0.5 is Majumdar-Ghosh)" << std::endl;
             std::cout << "  --pauli <dbl> <dbl> <dbl>" << std::endl;
             std::cout << "  --second <int> <dbl>" << std::endl;
             std::cout << "  --two" << std::endl;
@@ -3627,7 +3703,9 @@ int main(int argc, char* argv[]) {
         } else {
 
             // Pauli matrices
-            int matSize = 1 << numQubits;
+            // The MPS and analytic paths never build dense operators, and
+            // 1 << numQubits would overflow for the sizes they are used at
+            int matSize = (useKnown || useMPS) ? 1 : (1 << numQubits);
             Eigen::SparseMatrix<std::complex<double>> X(2, 2);
             Eigen::SparseMatrix<std::complex<double>> Y(2, 2);
             Eigen::SparseMatrix<std::complex<double>> Z(2, 2);
@@ -3655,7 +3733,7 @@ int main(int argc, char* argv[]) {
             std::vector<Eigen::SparseMatrix<std::complex<double>>> Zs(numQubits);
 
             // Only create these if we need to
-            if (!useKnown) {
+            if (!useKnown && !useMPS) {
 
                 // The state we want to find
                 groundTruth = Eigen::SparseMatrix<std::complex<double>>(matSize, matSize);
@@ -3680,6 +3758,56 @@ int main(int argc, char* argv[]) {
                     Xs[i].makeCompressed();
                     Ys[i].makeCompressed();
                     Zs[i].makeCompressed();
+                }
+            }
+
+            // If using an MPS, load it as the ground truth
+            MPS mps;
+            if (useMPS) {
+                if (precomputed) {
+                    std::cerr << "Error - --mps and --precomputed are mutually exclusive" << std::endl;
+                    return 1;
+                }
+                mps.load(mpsFile, verbosity);
+                if (mps.numSites != numQubits) {
+                    std::cerr << "Error - MPS has " << mps.numSites << " sites but the model has "
+                              << numQubits << " qubits" << std::endl;
+                    return 1;
+                }
+                if (mps.canonicalError() > 1e-6) {
+                    std::cerr << "Warning - MPS is not left-canonical (deviation "
+                              << mps.canonicalError() << "), expectations may be wrong" << std::endl;
+                }
+                // The DMRG energy is the reference value for an energy objective
+                if (specialObjective == "energy") {
+                    knownIdeal = mps.energy / double(numQubits);
+                    idealIsKnown = true;
+                    if (verbosity >= 1) {
+                        std::cout << "Known ideal from MPS: " << knownIdeal << std::endl;
+                    }
+
+                    // Evaluate our own objective on the MPS and check it
+                    double fromMPS = 0;
+                    for (auto& term : objective) {
+                        if (term.first.size() == 0) {
+                            fromMPS += std::real(term.second);
+                        } else {
+                            fromMPS += std::real(term.second) * mps.expectation(term.first.monomial);
+                        }
+                    }
+                    double energyDiff = std::abs(fromMPS - std::real(knownIdeal));
+                    if (verbosity >= 1) {
+                        std::cout << "Objective evaluated on the MPS: " << fromMPS
+                                  << " (differs from the stored energy by " << energyDiff << ")" << std::endl;
+                    }
+                    if (energyDiff > 1e-6) {
+                        std::cerr << "Error - the MPS does not match this Hamiltonian: the objective"
+                                  << " evaluates to " << fromMPS << " but the file records "
+                                  << std::real(knownIdeal) << "." << std::endl;
+                        std::cerr << "        Check that the model parameters match those used to"
+                                  << " generate the MPS." << std::endl;
+                        return 1;
+                    }
                 }
             }
 
@@ -3721,7 +3849,7 @@ int main(int argc, char* argv[]) {
                 inFile.close();
 
             // Otherwise we need to solve for the ground truth
-            } else if (!useKnown) {
+            } else if (!useKnown && !useMPS) {
 
                 // If it's an energy problem
                 if (groundStateProblem) {
@@ -4294,6 +4422,10 @@ int main(int argc, char* argv[]) {
                     if (allNonZero) {
                         trueExpectation = std::pow(-1, mon.size() / 2);
                     }
+
+                // If we have the state as an MPS
+                } else if (useMPS) {
+                    trueExpectation = mps.expectation(mon.monomial);
 
                 // If we don't
                 } else {
