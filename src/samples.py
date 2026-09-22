@@ -171,35 +171,40 @@ print("}")
 # Which things to plot
 allowed = {
     # "energy": [
-        # "sdp",
-        # "sdp+all2, 99.7%",
-        # "sdp+first100, 99.7%",
-        # "sdp+onlyobj, 99.7%",
+    #     "sdp",
+    #     "sdp+all2, 99.7%",
+    #     "sdp+first100, 99.7%",
+    #     "sdp+onlyobj, 99.7%",
     # ], 
     # "heat": [
-        # "sdp",
-        # "first100-z, 99.7%",
-        # "sdp+first100-z, 99.7%",
+    #     "sdp",
+    #     "first100-z, 99.7%",
+    #     "sdp+first100-z, 99.7%",
     # ], 
     # "large": [
-        # "sdp",
-        # "onlyobj, 99.7%",
-        # "sdp+onlyobj, 99.7%",
+    #     "sdp",
+    #     "onlyobj, 99.7%",
+    #     "sdp+onlyobj, 99.7%",
     # ], 
-    "purity": [
-        "sdp",
-        "all1, 99.7%",
-        "sdp+all1, 99.7%",
-    ], 
-    "localpurity": [
+    "large2": [
         "sdp",
         "onlyobj, 99.7%",
         "sdp+onlyobj, 99.7%",
     ], 
+    # "purity": [
+    #     "sdp",
+    #     "all1, 99.7%",
+    #     "sdp+all1, 99.7%",
+    # ], 
+    # "localpurity": [
+    #     "sdp",
+    #     "onlyobj, 99.7%",
+    #     "sdp+onlyobj, 99.7%",
+    # ], 
     # "confidence": [
-        # "sdp+all2, 68%",
-        # "sdp+all2, 95%",
-        # "sdp+all2, 99.7%",
+    #     "sdp+all2, 68%",
+    #     "sdp+all2, 95%",
+    #     "sdp+all2, 99.7%",
     # ],
 }
 

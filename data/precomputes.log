@@ -169,3 +169,21 @@ Local purity (subsystem {1,2,3}): 0.824905897
 Renyi-2 entropy: 0.999479772
 Saving the optimum state to file...
 Optimum state saved to: data/2d_3x3_H.dat
+Running DMRG: N=50, J1=1.0, J2=0.35, chi<=128
+  Ground state energy       = -19.266160318694148
+  Energy per site           = -0.38532320637388295
+  Max bond dimension used   = 128
+  Max entanglement entropy  = 0.831188
+  Left-canonical deviation  = 1.332e-15
+  Validation vs TeNPy       = 1.025e-12
+  Energy rebuilt from MPS   = -19.266160318694084  (diff 6.395e-14)
+Wrote data/j1j2_50_0.35.mps
+Running DMRG: N=50, J1=1.0, J2=0.35, chi<=128
+  Ground state energy       = -19.266160318694148
+  Energy per site           = -0.38532320637388295
+  Max bond dimension used   = 128
+  Max entanglement entropy  = 0.831188
+  Left-canonical deviation  = 1.332e-15
+  Validation vs TeNPy       = 1.025e-12
+  Energy rebuilt from MPS   = -19.266160318694084  (diff 6.395e-14)
+Wrote data/j1j2_50_0.35.mps
