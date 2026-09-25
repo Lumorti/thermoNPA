@@ -193,8 +193,8 @@ allowed = {
     ], 
     "secondlaw": [
         "sdp",
-        "onlyobj, 99.7%",
-        "sdp+onlyobj, 99.7%",
+        "first100-z, 99.7%",
+        "sdp+first100-z, 99.7%",
     ], 
     # "purity": [
     #     "sdp",
@@ -365,11 +365,6 @@ for filename in filenames:
                     plt.axhline(y=yLineUpper, color=color, linewidth=linewidth)
                 else:
                     plt.axhline(y=yLineUpper, linestyle=':', color=color, linewidth=linewidth, zorder=1000)
-
-    # For the second law the certification is the whole interval lying below
-    # zero, so mark zero to make that readable
-    if filename == "secondlaw":
-        plt.axhline(y=0, color='grey', linestyle='--', linewidth=1.5, zorder=0)
 
     # Finish the plot
     plt.xscale('log')

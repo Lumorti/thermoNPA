@@ -152,19 +152,23 @@ systemSize3="9"
 A=150
 M=2000
 numRepeatsSecondLaw=1
+lkArgs="${systemSize3} 0.5 -0.99 0.05 0.05"
 filenameLK="data/lkchain_${systemSize3}.dat"
-./run --lkchain ${systemSize3} --precompute ${filenameLK} | tee -a data/precomputes.log
-./run -B -N "sdp" -s M --lkchain ${systemSize3} -M ${M} -A ${A} --objHC H | tee -a data/measure.dat
-for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
+./run --lkchain ${lkArgs} --precompute ${filenameLK} | tee -a data/precomputes.log
+./run -B -N "sdp" -s M --lkchain ${lkArgs} -M ${M} -A ${A} --objHC H | tee -a data/measure.dat
+letter=z
+# This observable needs about a decade more data than the other sections before
+# the SDP-plus-measurement bound drops below zero, so the range runs to 1e10
+for shots in 10000 100000 1000000 10000000 100000000 500000000 1000000000 5000000000 10000000000 -1
 do
     for ind in $(seq 1 $numRepeatsSecondLaw)
     do
 
-        # Only the objective
-        ./run -B -N "onlyobj, 99.7%" -p 99.7 -s M --lkchain ${systemSize3} --precomputed ${filenameLK} -S ${ind} --objHC H --shots ${shots} --onlyobj | tee -a data/measure.dat
+        # Only 100 first
+        ./run -B -N "first100-${letter}, 99.7%" -p 99.7 -s M --lkchain ${lkArgs} --precomputed ${filenameLK} -S ${ind} --objHC H --no${letter} --shots ${shots} --first 100 | tee -a data/measure.dat
 
-        # SDP plus the objective
-        ./run -B -N "sdp+onlyobj, 99.7%" -p 99.7 -s M --lkchain ${systemSize3} --precomputed ${filenameLK} -S ${ind} -M ${M} -A ${A} --objHC H --shots ${shots} --onlyobj | tee -a data/measure.dat
+        # SDP plus 100 first
+        ./run -B -N "sdp+first100-${letter}, 99.7%" -p 99.7 -s M --lkchain ${lkArgs} --precomputed ${filenameLK} -S ${ind} -M ${M} -A ${A} --objHC H --no${letter} --shots ${shots} --first 100 | tee -a data/measure.dat
 
     done
 done

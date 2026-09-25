@@ -629,7 +629,10 @@ int main(int argc, char* argv[]) {
             double delta = -0.99;
             double epsilon_h = 1.0;
 
-            // We need the number of spins, then optionally T_h, delta and g
+            // A ZZ interaction, which makes the chain interacting
+            double V = 0.0;
+
+            // We need the number of spins, then optionally T_h, delta, g and V
             numQubits = std::stoi(argv[i+1]);
             i++;
             if (i+1 < argc && (argv[i+1][0] != '-' || std::isdigit(argv[i+1][1]))) {
@@ -642,6 +645,10 @@ int main(int argc, char* argv[]) {
             }
             if (i+1 < argc && (argv[i+1][0] != '-' || std::isdigit(argv[i+1][1]))) {
                 g = std::stod(argv[i+1]);
+                i++;
+            }
+            if (i+1 < argc && (argv[i+1][0] != '-' || std::isdigit(argv[i+1][1]))) {
+                V = std::stod(argv[i+1]);
                 i++;
             }
             if (numQubits < 2) {
@@ -675,6 +682,9 @@ int main(int argc, char* argv[]) {
             for (int j=1; j<numQubits; j++) {
                 hamiltonianInter[j-1][j] = Poly(g, "<P" + std::to_string(j) + "M" + std::to_string(j+1) + ">")
                                          + Poly(g, "<M" + std::to_string(j) + "P" + std::to_string(j+1) + ">");
+                if (V != 0.0) {
+                    hamiltonianInter[j-1][j] += Poly(V, "<Z" + std::to_string(j) + "Z" + std::to_string(j+1) + ">");
+                }
                 hamiltonianInter[j][j-1] = hamiltonianInter[j-1][j];
             }
             for (int j=0; j<numQubits; j++) {
@@ -2345,7 +2355,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  --2dtwo <int> <int>" << std::endl;
             std::cout << "  --2dtfi <int> <int>" << std::endl;
             std::cout << "  --2dtfiperiodic <int> <int>" << std::endl;
-            std::cout << "  --lkchain <int> [dbl] [dbl] [dbl]  (n.b. spins, then T_h, delta, g)" << std::endl;
+            std::cout << "  --lkchain <int> [dbl] [dbl] [dbl]" << std::endl;
             std::cout << "  --mg <int>" << std::endl;
             std::cout << "  --j1j2 <int> [dbl]  (n.b. num spins then J2, J1 = 1, J2 = 0.5 is Majumdar-Ghosh)" << std::endl;
             std::cout << "  --pauli <dbl> <dbl> <dbl>" << std::endl;
