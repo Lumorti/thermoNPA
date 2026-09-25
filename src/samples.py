@@ -234,9 +234,7 @@ for filename in filenames:
         plt.ylabel("Renyi Entropy Upper Bound")
     elif "mag" in filename:
         plt.ylabel("Magnetization Bounds")
-    elif "large" in filename:
-        plt.ylabel("Ground-state Energy Lower Bound")
-    elif "energy" in filename:
+    elif "large" in filename or "energy" in filename:
         plt.ylabel("Ground-state Energy Lower Bound")
     elif "heat" in filename:
         plt.ylabel("Heat Current Bounds")
@@ -350,7 +348,7 @@ for filename in filenames:
                 plt.axhline(y=yLineLower, linestyle=':', color=color, linewidth=linewidth, zorder=1000)
 
         # If we need an upper bound too
-        if filename != "purity" and filename != "energy" and filename != "large" and filename != "renyi1":
+        if filename != "purity" and filename != "energy" and filename != "renyi1" and "large" not in filename:
             if yErrorUpper is not None:
                 line = plt.errorbar(x, yUpper, yerr=yErrorUpper, color=color, capsize=3, linewidth=linewidth)
             else:
