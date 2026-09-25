@@ -123,25 +123,48 @@ shellCon=" --shell -9.897068167 0.09897068167 "
 # done
 
 # Ground state energy for the J1-J2 chain
-numRepeats=1
-echo "file & large2" | tee -a data/measure.dat
-systemSize2="50"
-J2="0.35"
-chiMPS=128
-A=200
-filenameMPS="data/j1j2_${systemSize2}_${J2}.mps"
-python3 src/dmrg.py -n ${systemSize2} --j2 ${J2} --chi ${chiMPS} -o ${filenameMPS} | tee -a data/precomputes.log
-./run -B -N "sdp" -s M --j1j2 ${systemSize2} ${J2} -A ${A} -H | tee -a data/measure.dat
+# numRepeats=1
+# echo "file & large2" | tee -a data/measure.dat
+# systemSize2="50"
+# J2="0.35"
+# chiMPS=128
+# A=200
+# filenameMPS="data/j1j2_${systemSize2}_${J2}.mps"
+# python3 src/dmrg.py -n ${systemSize2} --j2 ${J2} --chi ${chiMPS} -o ${filenameMPS} | tee -a data/precomputes.log
+# ./run -B -N "sdp" -s M --j1j2 ${systemSize2} ${J2} -A ${A} -H | tee -a data/measure.dat
+# for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
+# do
+#     for ind in $(seq 1 $numRepeats)
+#     do
+
+#         # Only the objective
+#         ./run -B -S ${ind} -N "onlyobj, 99.7%" -p 99.7 -s M --j1j2 ${systemSize2} ${J2} --mps ${filenameMPS} -H --shots ${shots} --onlyobj | tee -a data/measure.dat
+
+#         # SDP plus only the objective
+#         ./run -B -S ${ind} -N "sdp+onlyobj, 99.7%" -p 99.7 -s M --j1j2 ${systemSize2} ${J2} --mps ${filenameMPS} -A ${A} -H --shots ${shots} --onlyobj | tee -a data/measure.dat
+
+#     done
+# done
+
+# Local violation of the second law for a 1D chain
+echo "file & secondlaw" | tee -a data/measure.dat
+systemSize3="9"
+A=150
+M=2000
+numRepeatsSecondLaw=1
+filenameLK="data/lkchain_${systemSize3}.dat"
+./run --lkchain ${systemSize3} --precompute ${filenameLK} | tee -a data/precomputes.log
+./run -B -N "sdp" -s M --lkchain ${systemSize3} -M ${M} -A ${A} --objHC H | tee -a data/measure.dat
 for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
 do
-    for ind in $(seq 1 $numRepeats)
+    for ind in $(seq 1 $numRepeatsSecondLaw)
     do
 
         # Only the objective
-        ./run -B -S ${ind} -N "onlyobj, 99.7%" -p 99.7 -s M --j1j2 ${systemSize2} ${J2} --mps ${filenameMPS} -H --shots ${shots} --onlyobj | tee -a data/measure.dat
+        ./run -B -N "onlyobj, 99.7%" -p 99.7 -s M --lkchain ${systemSize3} --precomputed ${filenameLK} -S ${ind} --objHC H --shots ${shots} --onlyobj | tee -a data/measure.dat
 
-        # SDP plus only the objective
-        ./run -B -S ${ind} -N "sdp+onlyobj, 99.7%" -p 99.7 -s M --j1j2 ${systemSize2} ${J2} --mps ${filenameMPS} -A ${A} -H --shots ${shots} --onlyobj | tee -a data/measure.dat
+        # SDP plus the objective
+        ./run -B -N "sdp+onlyobj, 99.7%" -p 99.7 -s M --lkchain ${systemSize3} --precomputed ${filenameLK} -S ${ind} -M ${M} -A ${A} --objHC H --shots ${shots} --onlyobj | tee -a data/measure.dat
 
     done
 done

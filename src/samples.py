@@ -191,6 +191,11 @@ allowed = {
         "onlyobj, 99.7%",
         "sdp+onlyobj, 99.7%",
     ], 
+    "secondlaw": [
+        "sdp",
+        "onlyobj, 99.7%",
+        "sdp+onlyobj, 99.7%",
+    ], 
     # "purity": [
     #     "sdp",
     #     "all1, 99.7%",
@@ -236,6 +241,8 @@ for filename in filenames:
         plt.ylabel("Magnetization Bounds")
     elif "large" in filename or "energy" in filename:
         plt.ylabel("Ground-state Energy Lower Bound")
+    elif "secondlaw" in filename:
+        plt.ylabel("Heat Current from the Hot Bath")
     elif "heat" in filename:
         plt.ylabel("Heat Current Bounds")
     plt.grid(True)
@@ -358,6 +365,11 @@ for filename in filenames:
                     plt.axhline(y=yLineUpper, color=color, linewidth=linewidth)
                 else:
                     plt.axhline(y=yLineUpper, linestyle=':', color=color, linewidth=linewidth, zorder=1000)
+
+    # For the second law the certification is the whole interval lying below
+    # zero, so mark zero to make that readable
+    if filename == "secondlaw":
+        plt.axhline(y=0, color='grey', linestyle='--', linewidth=1.5, zorder=0)
 
     # Finish the plot
     plt.xscale('log')

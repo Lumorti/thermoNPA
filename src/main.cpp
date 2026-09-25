@@ -616,6 +616,115 @@ int main(int argc, char* argv[]) {
             lindbladianCold += Poly(-0.5*gamma_c_minus, "<P2M2A0>");
             lindbladianCold.convertToPaulis();
 
+        // Levy-Kosloff chain, a 1D chain described by a local master equation
+        } else if (argAsString == "--lkchain") {
+            modelName = argAsString;
+
+            // Defaults chosen to give a violation that survives finite sampling
+            double gamma_c = 1.1e-2;
+            double gamma_h = 1e-3;
+            double g = 0.05;
+            double T_h = 0.5;
+            double T_c = 0.1;
+            double delta = -0.99;
+            double epsilon_h = 1.0;
+
+            // We need the number of spins, then optionally T_h, delta and g
+            numQubits = std::stoi(argv[i+1]);
+            i++;
+            if (i+1 < argc && (argv[i+1][0] != '-' || std::isdigit(argv[i+1][1]))) {
+                T_h = std::stod(argv[i+1]);
+                i++;
+            }
+            if (i+1 < argc && (argv[i+1][0] != '-' || std::isdigit(argv[i+1][1]))) {
+                delta = std::stod(argv[i+1]);
+                i++;
+            }
+            if (i+1 < argc && (argv[i+1][0] != '-' || std::isdigit(argv[i+1][1]))) {
+                g = std::stod(argv[i+1]);
+                i++;
+            }
+            if (numQubits < 2) {
+                std::cerr << "Error - --lkchain needs at least two spins" << std::endl;
+                return 1;
+            }
+
+            // Calculated quantities
+            double epsilon_c = epsilon_h + delta;
+            if (epsilon_c <= 0) {
+                std::cerr << "Error - --lkchain needs delta > -1 so that the cold site has positive energy" << std::endl;
+                return 1;
+            }
+            double n_h = 1.0 / (std::exp(epsilon_h / T_h) - 1.0);
+            double n_c = 1.0 / (std::exp(epsilon_c / T_c) - 1.0);
+            double gamma_h_plus = gamma_h * n_h;
+            double gamma_h_minus = gamma_h * (n_h + 1.0);
+            double gamma_c_plus = gamma_c * n_c;
+            double gamma_c_minus = gamma_c * (n_c + 1.0);
+
+            // Every site is resonant with the hot end apart from the cold end,
+            // which maximises the size of the anomalous current
+            std::vector<double> epsilons(numQubits, epsilon_h);
+            epsilons[numQubits-1] = epsilon_c;
+
+            // The Hamiltonian, an XY chain in plus/minus form
+            hamiltonianInter = std::vector<std::vector<Poly>>(numQubits, std::vector<Poly>(numQubits, Poly()));
+            for (int j=1; j<=numQubits; j++) {
+                hamiltonianInter[j-1][j-1] = Poly(epsilons[j-1], "<P" + std::to_string(j) + "M" + std::to_string(j) + ">");
+            }
+            for (int j=1; j<numQubits; j++) {
+                hamiltonianInter[j-1][j] = Poly(g, "<P" + std::to_string(j) + "M" + std::to_string(j+1) + ">")
+                                         + Poly(g, "<M" + std::to_string(j) + "P" + std::to_string(j+1) + ">");
+                hamiltonianInter[j][j-1] = hamiltonianInter[j-1][j];
+            }
+            for (int j=0; j<numQubits; j++) {
+                for (int k=0; k<numQubits; k++) {
+                    hamiltonianInter[j][k].convertToPaulis();
+                }
+            }
+            Poly H = Poly();
+            for (int j=0; j<numQubits; j++) {
+                for (int k=j; k<numQubits; k++) {
+                    H += hamiltonianInter[j][k];
+                }
+            }
+
+            // The hot bath sits on the first spin, the cold bath on the last
+            std::string first = std::to_string(1);
+            std::string last = std::to_string(numQubits);
+            lindbladianHot = Poly();
+            lindbladianHot += Poly(gamma_h_plus, "<M" + first + "A0P" + first + ">");
+            lindbladianHot += Poly(-0.5*gamma_h_plus, "<A0M" + first + "P" + first + ">");
+            lindbladianHot += Poly(-0.5*gamma_h_plus, "<M" + first + "P" + first + "A0>");
+            lindbladianHot += Poly(gamma_h_minus, "<P" + first + "A0M" + first + ">");
+            lindbladianHot += Poly(-0.5*gamma_h_minus, "<A0P" + first + "M" + first + ">");
+            lindbladianHot += Poly(-0.5*gamma_h_minus, "<P" + first + "M" + first + "A0>");
+            lindbladianHot.convertToPaulis();
+            lindbladianCold = Poly();
+            lindbladianCold += Poly(gamma_c_plus, "<M" + last + "A0P" + last + ">");
+            lindbladianCold += Poly(-0.5*gamma_c_plus, "<A0M" + last + "P" + last + ">");
+            lindbladianCold += Poly(-0.5*gamma_c_plus, "<M" + last + "P" + last + "A0>");
+            lindbladianCold += Poly(gamma_c_minus, "<P" + last + "A0M" + last + ">");
+            lindbladianCold += Poly(-0.5*gamma_c_minus, "<A0P" + last + "M" + last + ">");
+            lindbladianCold += Poly(-0.5*gamma_c_minus, "<P" + last + "M" + last + "A0>");
+            lindbladianCold.convertToPaulis();
+
+            // Default objective is the average magnetization, normally overridden by --objHC
+            objective = Poly();
+            for (int j=1; j<=numQubits; j++) {
+                objective += Poly(1.0/numQubits, "<Z" + std::to_string(j) + ">");
+            }
+
+            // The full Lindbladian
+            Poly rho("<R1>");
+            lindbladian = -imag*H.commutator(rho);
+            lindbladian = Poly("<A0>") * lindbladian;
+            lindbladian.cycleToAndRemove('R', 1);
+            lindbladian += lindbladianHot;
+            lindbladian += lindbladianCold;
+            lindbladian.convertToPaulis();
+            lindbladian.reduce();
+
         // Majumdar-Ghosh model
         } else if (argAsString == "--mg") {
             modelName = argAsString;
@@ -2236,6 +2345,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  --2dtwo <int> <int>" << std::endl;
             std::cout << "  --2dtfi <int> <int>" << std::endl;
             std::cout << "  --2dtfiperiodic <int> <int>" << std::endl;
+            std::cout << "  --lkchain <int> [dbl] [dbl] [dbl]  (n.b. spins, then T_h, delta, g)" << std::endl;
             std::cout << "  --mg <int>" << std::endl;
             std::cout << "  --j1j2 <int> [dbl]  (n.b. num spins then J2, J1 = 1, J2 = 0.5 is Majumdar-Ghosh)" << std::endl;
             std::cout << "  --pauli <dbl> <dbl> <dbl>" << std::endl;
