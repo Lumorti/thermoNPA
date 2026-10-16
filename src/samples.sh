@@ -153,7 +153,7 @@ M=2000
 numRepeatsSecondLaw=50
 lkArgs="${systemSize3} 0.5 -0.99 0.05 0.05"
 filenameLK="data/lkchain_${systemSize3}.dat"
-./run --lkchain ${lkArgs} --precompute ${filenameLK} | tee -a data/precomputes.log
+[ -f ${filenameLK} ] || ./run --lkchain ${lkArgs} --precompute ${filenameLK} | tee -a data/precomputes.log
 ./run -B -N "sdp" -s M --lkchain ${lkArgs} -M ${M} -A ${A} --objHC H | tee -a data/measure.dat
 letter=z
 for shots in 10000 100000 1000000 10000000 100000000 500000000 1000000000 5000000000 10000000000 -1
