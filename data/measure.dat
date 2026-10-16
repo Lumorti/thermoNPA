@@ -1529,7 +1529,7 @@ auto (151x151) & None  & None & None & all order-2 (100000000) & [0.0940289375, 
 auto (151x151) & None  & None & None & all order-2 (100000000) & [0.0935397843, 0.0935397849] (0.0\%) & 34073ms & sdp+all2, 95% \\ \hline
 auto (151x151) & None  & None & None & all order-2 (100000000) & [0.0928952689, 0.0928952699] (0.0\%) & 32542ms & sdp+all2, 99.7% \\ \hline
 file & large
-auto (71x71) & None  & None & None & [-0.9482108853, 0.9455134224] (84.17\%) & 1.71s & sdp \\ \hline
+auto (201x201) & None  & None & None & [-0.6204485144, 0.6192778054] (55.10\%) & 3m59s & sdp \\ \hline
 None & None  & None & None & onlyobj (10000) & [-1.0002536760, 0.5828598330] (70.36\%) & 0.05s & onlyobj, 99.7% \\ \hline
 auto (201x201) & None  & None & None & onlyobj (10000) & [-0.5778488453, 0.2782100683] (38.05\%) & 3m3s & sdp+onlyobj, 99.7% \\ \hline
 None & None  & None & None & onlyobj (10000) & [-1.0118622961, 0.5680920194] (70.22\%) & 0.05s & onlyobj, 99.7% \\ \hline

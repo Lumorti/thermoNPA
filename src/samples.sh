@@ -4,7 +4,6 @@
 systemSize="3 3"
 A=150
 M=2000
-r=4
 numRepeats=50
 filename="data/2d_3x3.dat"
 filenameEnergy="data/2d_3x3_H.dat"
@@ -38,17 +37,17 @@ shellCon=" --shell -9.897068167 0.09897068167 "
 
 # Purity versus number of measurements
 # echo "file & purity" | tee -a data/measure.dat
-# ./run -B -N "sdp" -s M --2dtfi ${systemSize} -r ${r} --objPurity ${shellCon} | tee -a data/measure.dat
+# ./run -B -N "sdp" -s M --2dtfi ${systemSize} -A ${A} --objPurity | tee -a data/measure.dat
 # for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
 # do
 #     for ind in $(seq 1 $numRepeats)
 #     do
 
-#         # Only level 1 shots
-#         ./run -B -N "all2, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} --millis -S ${ind} --objPurity --shots ${shots} --all 2 ${shellCon} | tee -a data/measure.dat
+#         # Only second-order shots
+#         ./run -B -N "all2, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} --millis -S ${ind} --objPurity --shots ${shots} --all 2 | tee -a data/measure.dat
 
-#         # SDP plus level 1 shots
-#         ./run -B -N "sdp+all2, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} --millis -S ${ind} -r ${r} --objPurity --shots ${shots} --all 2 ${shellCon} | tee -a data/measure.dat
+#         # SDP plus second-order shots
+#         ./run -B -N "sdp+all2, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} --millis -S ${ind} -A ${A} --objPurity --shots ${shots} --all 2 | tee -a data/measure.dat
 
 #     done
 # done
@@ -61,8 +60,8 @@ shellCon=" --shell -9.897068167 0.09897068167 "
 #     for ind in $(seq 1 $numRepeats)
 #     do
 
-#         # SDP plus first 100
-#         ./run -B -N "sdp+first100, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S ${ind} -A ${A} -H --shots ${shots} --first 100 | tee -a data/measure.dat
+#         # SDP plus the 100 most common
+#         ./run -B -N "sdp+auto100, 99.7%" -s M -p 99.7 --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S ${ind} -A ${A} -H --shots ${shots} --auto 100 | tee -a data/measure.dat
 
 #         # SDP plus measure the objective
 #         ./run -B -N "sdp+onlyobj, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S ${ind} -A ${A} -H --shots ${shots} --onlyobj | tee -a data/measure.dat
@@ -75,7 +74,7 @@ shellCon=" --shell -9.897068167 0.09897068167 "
 
 # Local purity vs number of measurements
 # echo "file & localpurity" | tee -a data/measure.dat
-# ./run -B -N "sdp" -s M --2dtfi ${systemSize} -r ${r} -H --objLocalPurity 1 2 3 ${shellCon} | tee -a data/measure.dat
+# ./run -B -N "sdp" -s M --2dtfi ${systemSize} -A ${A} -H --objLocalPurity 1 2 3 ${shellCon} | tee -a data/measure.dat
 # for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
 # do
 #     for ind in $(seq 1 $numRepeats)
@@ -85,7 +84,7 @@ shellCon=" --shell -9.897068167 0.09897068167 "
 #         ./run -B -N "onlyobj, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S ${ind} -H --objLocalPurity 1 2 3 --shots ${shots} --onlyobj ${shellCon} | tee -a data/measure.dat
 
 #         # SDP plus measure the objective
-#         ./run -B -N "sdp+onlyobj, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S ${ind} -r ${r} -H --objLocalPurity 1 2 3 --shots ${shots} --onlyobj ${shellCon} | tee -a data/measure.dat
+#         ./run -B -N "sdp+onlyobj, 99.7%" -p 99.7 -s M --2dtfi ${systemSize} --precomputed ${filenameEnergy} -S ${ind} -A ${A} -H --objLocalPurity 1 2 3 --shots ${shots} --onlyobj ${shellCon} | tee -a data/measure.dat
 
 #     done
 # done
@@ -105,25 +104,25 @@ shellCon=" --shell -9.897068167 0.09897068167 "
 
 # Ground state energy for large systems
 # echo "file & large" | tee -a data/measure.dat
-# systemSize="50"
+# systemSizeLarge="50"
 # A=200
-# ./run -B -S ${ind} -N "sdp" -s M --mg ${systemSize} -A ${A} -H | tee -a data/measure.dat
+# ./run -B -N "sdp" -s M --mg ${systemSizeLarge} -A ${A} -H | tee -a data/measure.dat
 # for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
 # do
 #     for ind in $(seq 1 $numRepeats)
 #     do
 
 #         # Only the objective
-#         ./run -B -S ${ind} -N "onlyobj, 99.7%" -p 99.7 -s M --mg ${systemSize} --known -H --shots ${shots} --onlyobj | tee -a data/measure.dat
+#         ./run -B -S ${ind} -N "onlyobj, 99.7%" -p 99.7 -s M --mg ${systemSizeLarge} --known -H --shots ${shots} --onlyobj | tee -a data/measure.dat
 
 #         # SDP plus only the objective
-#         ./run -B -S ${ind} -N "sdp+onlyobj, 99.7%" -p 99.7 -s M --mg ${systemSize} --known -A ${A} -H --shots ${shots} --onlyobj | tee -a data/measure.dat
+#         ./run -B -S ${ind} -N "sdp+onlyobj, 99.7%" -p 99.7 -s M --mg ${systemSizeLarge} --known -A ${A} -H --shots ${shots} --onlyobj | tee -a data/measure.dat
 
 #     done
 # done
 
 # Ground state energy for the J1-J2 chain
-# numRepeats=1
+# numRepeatsLarge2=1
 # echo "file & large2" | tee -a data/measure.dat
 # systemSize2="50"
 # J2="0.35"
@@ -134,7 +133,7 @@ shellCon=" --shell -9.897068167 0.09897068167 "
 # ./run -B -N "sdp" -s M --j1j2 ${systemSize2} ${J2} -A ${A} -H | tee -a data/measure.dat
 # for shots in 10000 50000 100000 500000 1000000 5000000 10000000 50000000 100000000 -1
 # do
-#     for ind in $(seq 1 $numRepeats)
+#     for ind in $(seq 1 $numRepeatsLarge2)
 #     do
 
 #         # Only the objective
@@ -151,14 +150,12 @@ echo "file & secondlaw" | tee -a data/measure.dat
 systemSize3="9"
 A=150
 M=2000
-numRepeatsSecondLaw=1
+numRepeatsSecondLaw=50
 lkArgs="${systemSize3} 0.5 -0.99 0.05 0.05"
 filenameLK="data/lkchain_${systemSize3}.dat"
 ./run --lkchain ${lkArgs} --precompute ${filenameLK} | tee -a data/precomputes.log
 ./run -B -N "sdp" -s M --lkchain ${lkArgs} -M ${M} -A ${A} --objHC H | tee -a data/measure.dat
 letter=z
-# This observable needs about a decade more data than the other sections before
-# the SDP-plus-measurement bound drops below zero, so the range runs to 1e10
 for shots in 10000 100000 1000000 10000000 100000000 500000000 1000000000 5000000000 10000000000 -1
 do
     for ind in $(seq 1 $numRepeatsSecondLaw)
